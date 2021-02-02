@@ -1,6 +1,6 @@
 .idea
 *.iml
-
+*.stl
 target/
 pom.xml.tag
 pom.xml.releaseBackup
