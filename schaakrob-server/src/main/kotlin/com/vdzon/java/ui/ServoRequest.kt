@@ -1,8 +1,7 @@
-package com.vdzon.java.ui;
+package com.vdzon.java.ui
 
-public class ServoRequest {
-  public int startPos = 0;
-  public int eindPos = 0;
-  public long time = 0;
-
+class ServoRequest {
+    var startPos = 0
+    var eindPos = 0
+    var time: Long = 0
 }

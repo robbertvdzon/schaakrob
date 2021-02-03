@@ -1,163 +1,133 @@
-package com.vdzon.java.robotclient;
+package com.vdzon.java.robotclient
 
-import com.vdzon.java.robitapi.RobotAansturing;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import com.vdzon.java.robitapi.RobotAansturing
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.util.EntityUtils
 
+class RobotAansturingClient(host: String) : RobotAansturing {
+    private val httpClient = HttpClients.createDefault()
+    private var host = ""
+    override fun movetoVlak(vlak: String) {
+        post("$host/api/movevlak", vlak)
+    }
 
-public class RobotAansturingClient implements RobotAansturing {
+    override fun moveto(x: Int, y: Int) {
+        post("$host/api/move", "$x,$y")
+    }
 
-  private final CloseableHttpClient httpClient = HttpClients.createDefault();
-  private String host = "";
+    override fun homeVert() {
+        get("$host/api/home_vert")
+    }
 
-  public RobotAansturingClient(String host) {
-    this.host = host;
-  }
+    override fun homeHor() {
+        get("$host/api/home_hor")
+    }
 
-  @Override
-  public void movetoVlak(String vlak) {
-    post(host+"/api/movevlak",vlak);
-  }
+    override fun sleep() {
+        get("$host/api/sleep")
+    }
 
-  @Override
-  public void moveto(int x, int y) {
-    post(host+"/api/move",x+","+y);
-  }
+    override fun clamp() {
+        get("$host/api/clamp")
+    }
 
-  @Override
-  public void homeVert() {
-    get(host+"/api/home_vert");
-  }
+    override fun release() {
+        get("$host/api/release")
+    }
 
-  @Override
-  public void homeHor() {
-    get(host+"/api/home_hor");
-  }
+    override fun rebuild() {
+        get("$host/api/rebuild")
+    }
 
-  @Override
-  public void sleep() {
-    get(host+"/api/sleep");
-  }
+    override fun restart() {
+        get("$host/api/restart")
+    }
 
-  @Override
-  public void clamp() {
-    get(host+"/api/clamp");
-  }
+    override fun getA8(): String? {
+        return get("$host/api/a8")
+    }
 
-  @Override
-  public void release() {
-    get(host+"/api/release");
-  }
+    override fun setA8(pos: String) {
+        post("$host/api/a8", pos)
+    }
 
-  @Override
-  public void rebuild() {
-    get(host+"/api/rebuild");
-  }
+    override fun getH1(): String? {
+        return get("$host/api/h1")
+    }
 
-  @Override
-  public void restart() {
-    get(host+"/api/restart");
-  }
+    override fun setH1(pos: String) {
+        post("$host/api/h1", pos)
+    }
 
-  @Override
-  public String getA8() {
-    return  get(host+"/api/a8");
-  }
+    override fun getDemoString(): String? {
+        return get("$host/api/demo")
+    }
 
-  @Override
-  public void setA8(String pos) {
-    post(host+"/api/a8", pos);
-  }
+    override fun setDemoString(demoString: String) {
+        post("$host/api/demo", demoString)
+    }
 
-  @Override
-  public String getH1() {
-    return  get(host+"/api/h1");
-  }
+    override fun runDemoOnce() {
+        get("$host/api/startdemoonce")
+    }
 
-  @Override
-  public void setH1(String pos) {
-    post(host+"/api/h1", pos);
-  }
+    override fun runDemoLoop() {
+        get("$host/api/startdemoloop")
+    }
 
-  @Override
-  public String getDemoString() {
-    return  get(host+"/api/demo");
-  }
+    override fun stopDemo() {
+        get("$host/api/stopdemo")
+    }
 
-  @Override
-  public void setDemoString(String demoString) {
-    post(host+"/api/demo", demoString);
-  }
-
-  @Override
-  public void runDemoOnce() {
-    get(host+"/api/startdemoonce");
-  }
-
-  @Override
-  public void runDemoLoop() {
-    get(host+"/api/startdemoloop");
-  }
-
-  @Override
-  public void stopDemo() {
-    get(host+"/api/stopdemo");
-  }
-
-
-  private String get(String url) {
-    try {
-      System.out.println("call:"+url);
-      HttpGet request = new HttpGet(url);
-      try (CloseableHttpResponse response = httpClient.execute(request)) {
-        System.out.println(response.getStatusLine().toString());
-        HttpEntity entity = response.getEntity();
-//        Header headers = entity.getContentType();
+    private operator fun get(url: String): String? {
+        try {
+            println("call:$url")
+            val request = HttpGet(url)
+            httpClient.execute(request).use { response ->
+                println(response.statusLine.toString())
+                val entity = response.entity
+                //        Header headers = entity.getContentType();
 //        System.out.println(headers);
 //
-
-        if (entity != null) {
-          // return it as a String
-          String result = EntityUtils.toString(entity);
-          System.out.println("Body:"+result);
-          return result;
+                if (entity != null) {
+                    // return it as a String
+                    val result = EntityUtils.toString(entity)
+                    println("Body:$result")
+                    return result
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+        return null // Dit mooi oplossen!
     }
-    return null; // Dit mooi oplossen!
-  }
 
-  private String post(String url, String body) {
-    try {
-      System.out.println("call post:"+url);
-      HttpPost request = new HttpPost(url);
-      request.setEntity(new StringEntity(body));
-      try (CloseableHttpResponse response = httpClient.execute(request)) {
-        System.out.println(response.getStatusLine().toString());
-        HttpEntity entity = response.getEntity();
-//        Header headers = entity.getContentType();
+    private fun post(url: String, body: String): String? {
+        try {
+            println("call post:$url")
+            val request = HttpPost(url)
+            request.entity = StringEntity(body)
+            httpClient.execute(request).use { response ->
+                println(response.statusLine.toString())
+                val entity = response.entity
+                //        Header headers = entity.getContentType();
 //        System.out.println(headers);
 //
-        if (entity != null) {
-          // return it as a String
-          return EntityUtils.toString(entity);
+                if (entity != null) {
+                    // return it as a String
+                    return EntityUtils.toString(entity)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+        return null // Dit mooi oplossen!
     }
-    return null; // Dit mooi oplossen!
-  }
 
-
+    init {
+        this.host = host
+    }
 }

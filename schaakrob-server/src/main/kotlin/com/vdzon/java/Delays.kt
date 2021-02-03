@@ -1,8 +1,8 @@
-package com.vdzon.java;
+package com.vdzon.java
 
-public class Delays {
-  public double delay1;
-  public double delay2;
-  public double delay3;
-  public long totalTime;
+class Delays {
+    var delay1 = 0.0
+    var delay2 = 0.0
+    var delay3 = 0.0
+    var totalTime: Long = 0
 }

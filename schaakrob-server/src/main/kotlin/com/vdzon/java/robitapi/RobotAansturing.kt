@@ -1,42 +1,22 @@
-package com.vdzon.java.robitapi;
+package com.vdzon.java.robitapi
 
-
-public interface RobotAansturing {
-
-  void movetoVlak(String vlak);
-
-  void moveto(int x, int y);
-
-  void homeVert();
-
-  void homeHor();
-
-  void sleep();
-
-  void clamp();
-
-  void release();
-
-  void rebuild();
-
-  void restart();
-
-  String getA8();
-
-  void setA8(String pos);
-
-  String getH1();
-
-  void setH1(String pos);
-
-  String getDemoString();
-
-  void setDemoString(String demoString);
-
-  void runDemoLoop();
-
-  void runDemoOnce();
-
-  void stopDemo();
-
+interface RobotAansturing {
+    fun movetoVlak(vlak: String)
+    fun moveto(x: Int, y: Int)
+    fun homeVert()
+    fun homeHor()
+    fun sleep()
+    fun clamp()
+    fun release()
+    fun rebuild()
+    fun restart()
+    fun getA8(): String?
+    fun setA8(pos: String)
+    fun getH1(): String?
+    fun setH1(pos: String)
+    fun getDemoString(): String?
+    fun setDemoString(demoString: String)
+    fun runDemoLoop()
+    fun runDemoOnce()
+    fun stopDemo()
 }

@@ -1,16 +1,16 @@
-package com.vdzon.java;
+package com.vdzon.java
 
-import com.vdzon.java.ui.MainUI;
-import com.vdzon.java.ui.MainWeb;
+import com.vdzon.java.ui.MainUI
+import com.vdzon.java.ui.MainWeb
 
-public class Main {
-  public static void main(String[] args) {
-    String OS = System.getProperty("os.name").toLowerCase();
-    boolean schaakbord = !OS.contains("mac");
-
-    if (schaakbord) {
-      MainUI.main(args);
+object Main {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val OS = System.getProperty("os.name").toLowerCase()
+        val schaakbord = !OS.contains("mac")
+        if (schaakbord) {
+            MainUI.main(args)
+        }
+        MainWeb().start(schaakbord)
     }
-    new MainWeb().start(schaakbord);
-  }
 }
