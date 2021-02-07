@@ -80,6 +80,11 @@ Vue.component("manual", {
       .then(text => this.h1pos=text)
       .catch(() => alert("Error"));
 
+      fetch(`/api/snelheid`)
+      .then(res => res.text())
+      .then(text => this.snelheid=text)
+      .catch(() => alert("Error"));
+
     },
     home_vert: function (event) {
       fetch(`/api/home_vert`)
