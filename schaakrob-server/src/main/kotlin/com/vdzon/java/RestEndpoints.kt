@@ -21,6 +21,8 @@ class RestEndpoints {
         app.post("/api/a8") { ctx: Context -> robotAansturing.setA8(ctx.body()) }
         app["/api/h1", { ctx: Context -> ctx.result(robotAansturing.getH1()!!) }]
         app.post("/api/h1") { ctx: Context -> robotAansturing.setH1(ctx.body()) }
+        app["/api/snelheid", { ctx: Context -> ctx.result(robotAansturing.getSnelheid()!!) }]
+        app.post("/api/snelheid") { ctx: Context -> robotAansturing.setSnelheid(ctx.body()) }
         app["/api/demo", { ctx: Context -> ctx.result(robotAansturing.getDemoString()!!) }]
         app.post("/api/demo") { ctx: Context -> robotAansturing.setDemoString(ctx.body()) }
         app["/api/startdemoonce", { ctx: Context? -> robotAansturing.runDemoOnce() }]

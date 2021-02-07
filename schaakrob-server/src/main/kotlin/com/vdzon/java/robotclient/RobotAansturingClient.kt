@@ -62,6 +62,14 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         post("$host/api/h1", pos)
     }
 
+    override fun getSnelheid(): String? {
+        return get("$host/api/snelheid")
+    }
+
+    override fun setSnelheid(snelheid: String) {
+        post("$host/api/snelheid", snelheid)
+    }
+
     override fun getDemoString(): String? {
         return get("$host/api/demo")
     }

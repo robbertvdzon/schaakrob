@@ -179,6 +179,14 @@ class RobotAansturingImpl : RobotAansturing {
         saveToFile("/home/pi/h1.data", pos)
     }
 
+    override fun getSnelheid(): String? {
+        return loadFile("/home/pi/snelheid.data")
+    }
+
+    override fun setSnelheid(snelheid: String) {
+        saveToFile("/home/pi/snelheid.data", snelheid)
+    }
+
     override fun getDemoString(): String? {
         return loadFile("/home/pi/loop.data")
     }
@@ -225,11 +233,13 @@ class RobotAansturingImpl : RobotAansturing {
         if (delayFactor2 > 9999) delayFactor2 = 9999.0
 
         // speedup 2x
+        val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
+        print("snelheid:"+snelheid)
 
 //    delayFactor1 = delayFactor1/2;
 //    delayFactor2 = delayFactor2/2;
-        delayFactor1 = delayFactor1 * 2
-        delayFactor2 = delayFactor2 * 2
+        delayFactor1 = delayFactor1 * snelheid
+        delayFactor2 = delayFactor2 * snelheid
         //    delayFactor1 = delayFactor1*3;
 //    delayFactor2 = delayFactor2*3;
         println("delayFactor1a=$delayFactor1")

@@ -14,6 +14,8 @@ interface RobotAansturing {
     fun setA8(pos: String)
     fun getH1(): String?
     fun setH1(pos: String)
+    fun getSnelheid(): String?
+    fun setSnelheid(snelheid: String)
     fun getDemoString(): String?
     fun setDemoString(demoString: String)
     fun runDemoLoop()
