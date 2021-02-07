@@ -437,13 +437,13 @@ class MyPanel : JPanel() {
     init {
         println("Starting")
         initPanel()
-        mainFrame = JFrame("Schaakrobot v1.6")
+        mainFrame = JFrame("Schaakrob v1.6")
         mainFrame!!.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
         mainFrame!!.contentPane.add(this)
         mainFrame!!.contentPane.background = Color.WHITE
         mainFrame!!.pack()
         mainFrame!!.isLocationByPlatform = true
-        val b = JButton("Restart & Update")
+        val b = JButton("Restart & Update..")
         b.setBounds(65, 20, 200, 40)
         b.addActionListener { e: ActionEvent? -> updateAndRestart() }
         mainFrame!!.add(b)

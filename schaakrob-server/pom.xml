@@ -178,7 +178,7 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.vdzon.schaakrob.Main</mainClass>
+                                    <mainClass>com.vdzon.java.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
