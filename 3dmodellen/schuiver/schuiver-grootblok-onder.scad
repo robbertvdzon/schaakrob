@@ -6,10 +6,19 @@ difference(){
         translate([0,0,0]){
             rotate([180,90,0]){
                 translate([-13,-7.5,-7+7.5]){
-                    cube([26,15,35-7.5-5], center=false);
+                    cube([26,15,35-7.5-7.5], center=false);
                 }         
             }
         }  
+
+
+        translate([0,-7.5,22]){
+            cube([13,15,6], center=false);
+        }         
+
+        translate([0,-7.5,-18]){
+            cube([14,15,8], center=false);§
+        }         
 
 
 
@@ -18,12 +27,12 @@ difference(){
                 cylinder(h=59, r=7.5, $fn=100, center=false);
             }
         }
-        translate([0,-10,-13]){
+        translate([10,-10,-13-5]){
             rotate([0,0,90]){
                 cylinder(h=5, r=5, $fn=100, center=false);
             }
         }
-        translate([0,0,25]){
+        translate([10,0,25]){
             rotate([90,0,0]){
                 cylinder(h=10, r=3, $fn=100, center=false);
             }
@@ -60,14 +69,14 @@ difference(){
 //
   
         
-        translate([0,0,25]){
+        translate([10,20,25]){
             rotate([90,0,0]){
-                cylinder(h=12, r=1.2, $fn=100, center=false);
+                cylinder(h=102, r=1.2, $fn=100, center=false);
             }
         }
 
 
-        translate([0,-10,-30]){
+        translate([10,-10,-30]){
             rotate([0,0,90]){
                 cylinder(h=50, r=2.5, $fn=100, center=false);
             }

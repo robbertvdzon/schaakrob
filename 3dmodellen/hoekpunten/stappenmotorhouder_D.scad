@@ -9,8 +9,12 @@ difference(){
         }
         
         
+        translate([-4,-13,52]){
+           cube([4.25+8,45+13,5], center=false);
+        }
+
         translate([-4,-13,-23+25]){
-           cube([61,45+13,5], center=false);
+           cube([61+8,45+13,5], center=false);
         }
         translate([0-4,-13,-18-5]){
            cube([4.25,83,80], center=false);
@@ -110,29 +114,29 @@ difference(){
             }
         }
 
-        translate([57/2,32/2,-47+25]){
+        translate([57/2+8,32/2,-47+25]){
             rotate([0,0,90]){
                 cylinder(h=60, r=22, $fn=100, center=true);
             }
         }
         
 //
-        translate([57/2-47/2,32/2-47/2,4]){
+        translate([57/2-47/2+8,32/2-47/2,4]){
             rotate([0,0,90]){
                 cylinder(h=100, r=2.5, $fn=100, center=true);
             }
         }
-        translate([57/2-47/2,32/2+47/2,4]){
+        translate([57/2-47/2+8,32/2+47/2,4]){
             rotate([0,0,90]){
                 cylinder(h=100, r=2.5, $fn=100, center=true);
             }
         }
-        translate([57/2+47/2,32/2-47/2,4]){
+        translate([57/2+47/2+8,32/2-47/2,4]){
             rotate([0,0,90]){
                 cylinder(h=100, r=2.5, $fn=100, center=true);
             }
         }
-        translate([57/2+47/2,32/2+47/2,44]){
+        translate([57/2+47/2+8,32/2+47/2,44]){
             rotate([0,0,90]){
                 cylinder(h=100, r=2.5, $fn=100, center=true);
             }

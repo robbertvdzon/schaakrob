@@ -2,28 +2,13 @@
 difference(){
 	union(){
         
-        translate([0,0,7]){
-            rotate([150,90,0]){
-                translate([-13,-7,-7+7.5]){
-                    cube([26,14,35-7.5], center=false);
-                }         
-            }
-        }  
-
-        translate([-9.5-9,-7.5,25.5+5]){
-           cube([15+9+18-6,15,4], center=false);
-        }
-
-        translate([-9.5-9-7+7,-7.5,25.5-20]){
-            cube([19,15,4], center=false);
-        }
-
-
-
-        translate([-9.5,-7.5,-33/2-3-10+11]){
-            cube([20,15,7], center=false);
-        }
-
+            translate([0,0.5,0]){
+                rotate([180,90,0]){
+                    translate([-20,-7,0.5]){
+                        cube([4,14,15], center=false);
+                    }         
+                }
+            }  
 
         translate([14-14,0,0+5.5+4-10]){
             rotate([0,90,0]){
@@ -37,15 +22,39 @@ difference(){
             }
         }
       
-        translate([0,0,-33/2+1-10+11]){
+        translate([0,0,-33/2+1-10+11-4]){
             rotate([0,0,90]){
-                cylinder(h=50-11+6, r=7.5, $fn=100, center=false);
+                cylinder(h=50-11+6+8, r=7.5, $fn=100, center=false);
             }
         }
+        
+        translate([0,-10,-3]){
+            rotate([0,0,90]){
+                cylinder(h=5, r=5, $fn=100, center=false);
+            }
+        }
+        translate([0,0,25]){
+            rotate([90,0,0]){
+                cylinder(h=10, r=3, $fn=100, center=false);
+            }
+        }
+        
 
 
 	}
 	union() {
+
+        translate([0,0,25]){
+            rotate([90,0,0]){
+                cylinder(h=12, r=1.2, $fn=100, center=false);
+            }
+        }
+        translate([0,-10,-30]){
+            rotate([0,0,90]){
+                cylinder(h=50, r=2.5, $fn=100, center=false);
+            }
+        }
+
 
         translate([-9.5,-7.5+15,-33/2-3-10]){
             cube([24,15,59], center=false);
@@ -58,20 +67,9 @@ difference(){
         }
 
 
-        translate([20-6,0,14]){
-            rotate([0,0,90]){
-                cylinder(h=30, r=1.5, $fn=100, center=false);
-            }
-        }
-        translate([-14,0,24]){
-            rotate([0,0,90]){
-                cylinder(h=20, r=1.5, $fn=100, center=false);
-            }
-        }
-
         translate([0,0,0+7]){
-            rotate([150,90,0]){
-                include <grafiethouder-reverse.scad>;                
+            rotate([180,90,0]){
+          //      include <grafiethouder-reverse.scad>;                
             }
         }  
 
@@ -104,18 +102,7 @@ difference(){
         
       
 
-        translate([7,20,-26+11]){
-            rotate([90,0,0]){
-                cylinder(h=100, r=1.5, $fn=100, center=false);
-            }
-        }
-        translate([-7,20,-26+11]){
-            rotate([90,0,0]){
-                cylinder(h=100, r=1.5, $fn=100, center=false);
-            }
-        }
-
-        translate([19,20,5.5+4-10]){
+        translate([19,20,-0.5]){
             rotate([90,0,0]){
                 cylinder(h=100, r=1.2, $fn=100, center=false);
             }

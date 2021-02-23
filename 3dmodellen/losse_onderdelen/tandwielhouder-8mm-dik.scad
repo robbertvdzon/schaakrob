@@ -32,9 +32,10 @@ difference(){
                 cylinder(h=10, r=4, $fn=100, center=false);
             }
         }
+
         translate([0,0,0]){
             rotate([0,0,90]){
-                cylinder(h=10+3, r=12/2, $fn=100, center=false);
+                cylinder(h=10+8, r=12/2, $fn=100, center=false);
             }
         }
    
@@ -42,7 +43,7 @@ difference(){
 	union() {
         translate([0,0,-1]){
             rotate([0,0,90]){
-                cylinder(h=100, r=6.35/2, $fn=100, center=false);
+                cylinder(h=100, r=8/2, $fn=100, center=false);
             }
         }
         translate([19.558/2,0,-1]){
