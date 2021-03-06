@@ -6,6 +6,7 @@ import com.pi4j.io.i2c.I2CFactory
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.robitapi.RobotAansturing
+import com.vdzon.java.ui.MyPanel
 import java.io.IOException
 import java.io.PrintWriter
 import java.nio.file.Files
@@ -214,6 +215,23 @@ class RobotAansturingImpl : RobotAansturing {
         stopLoop()
     }
 
+    private fun getStatusString(status: Int): String {
+        if (status == 0) return "Homing needed"
+        if (status == 1) return "Ready"
+        if (status == 2) return "Moving"
+        if (status == 3) return "Homing"
+        if (status == 4) return "Error"
+        if (status == 5) return "Going to sleep"
+        return if (status == 6) "Sleeping" else "??"
+    }
+
+    private fun getArm3StatusString(status: Int): String {
+        if (status == 1) return "Ready"
+        if (status == 2) return "Grabbing"
+        return if (status == 3) "Releasing" else "??"
+    }
+
+
     override fun startDisplayThread(){
 
             println("Strting up the MCP23017 based 16x2 LCD Example")
@@ -228,28 +246,56 @@ class RobotAansturingImpl : RobotAansturing {
             lcd.setCursorPosition(1, 0)
             lcd.write("weargenius.in")
             Thread.sleep(2000)
+
+
+            val inetAddress = MyPanel.localHostLANAddress()
+            val ipAdress = inetAddress.hostAddress
+            lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+            lcd.setCursorPosition(0, 0)
+            lcd.write(ipAdress)
+            lcd.setCursorPosition(1, 0)
+            lcd.write("Regel2")
+
             while (true) {
-                println("Write 1")
-                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
-                lcd.setCursorPosition(1, 0)
-                lcd.write("Embedded")
-                Thread.sleep(3000)
-                println("Write 2")
-                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
-                lcd.setCursorPosition(1, 0)
-                lcd.write("Home Automation")
-                Thread.sleep(3000)
-                println("Write 3")
-                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
-                lcd.setCursorPosition(1, 0)
-                lcd.write("IOT")
-                Thread.sleep(3000)
-                println("Write 4")
-                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
-                lcd.setCursorPosition(1, 0)
-                lcd.write("Programming")
-                Thread.sleep(3000)
+                println("status")
+                try {
+                    val arm1Status = arm1!!.read()
+                    val arm2Status = arm2!!.read()
+                    val arm3Status = arm3!!.read()
+                    allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
+                    val status = getStatusString(arm1Status)+"/"+getStatusString(arm2Status)+"/"+getArm3StatusString(arm3Status)
+                    lcd.setCursorPosition(1, 0)
+                    lcd.write(status)
+                    println("status:"+status)
+                    Thread.sleep(300)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
+
+//
+//            while (true) {
+//                println("Write 1")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("Embedded")
+//                Thread.sleep(3000)
+//                println("Write 2")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("Home Automation")
+//                Thread.sleep(3000)
+//                println("Write 3")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("IOT")
+//                Thread.sleep(3000)
+//                println("Write 4")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("Programming")
+//                Thread.sleep(3000)
+//            }
         }
 //
 //        while (true) {
