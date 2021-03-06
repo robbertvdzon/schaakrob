@@ -17,7 +17,7 @@ difference(){
         }         
 
         translate([0,-7.5,-18]){
-            cube([14,15,8], center=false);§
+            cube([14,15,8], center=false);
         }         
 
 
@@ -117,12 +117,12 @@ difference(){
                 cylinder(h=100, r=4, $fn=100, center=false);
             }
         }
-        translate([6,0,0-5.5-4]){
+        translate([6,0,0-9.5]){
             rotate([0,90,0]){
                 cylinder(h=200, r=4.4, $fn=100, center=false);
             }
         }
-        translate([6,0,0+5.5+4]){
+        translate([6,0,0-9.5+19]){
             rotate([0,90,0]){
                 cylinder(h=200, r=4.4, $fn=100, center=false);
             }
