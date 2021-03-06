@@ -1,12 +1,14 @@
 package com.vdzon.java.robotimpl
 
+import com.pi4j.component.lcd.impl.GpioLcdDisplay
+import com.pi4j.io.gpio.GpioFactory
+import com.pi4j.io.gpio.RaspiPin
 import com.pi4j.io.i2c.I2CBus
 import com.pi4j.io.i2c.I2CDevice
 import com.pi4j.io.i2c.I2CFactory
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.robitapi.RobotAansturing
-import com.vdzon.java.ui.MyPanel
 import java.io.IOException
 import java.io.PrintWriter
 import java.net.InetAddress
@@ -16,6 +18,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import java.util.function.Consumer
+
 
 class RobotAansturingImpl : RobotAansturing {
     var lastPos1 = 0
@@ -280,6 +283,139 @@ class RobotAansturingImpl : RobotAansturing {
             }
         }
 
+            println("16X2 LCD Example with Raspberry Pi using Pi4J and JAVA")
+
+            // create gpio controller
+
+            // create gpio controller
+            val gpio = GpioFactory.getInstance()
+
+            // initialize LCD
+
+            // initialize LCD
+            val lcd = GpioLcdDisplay(2,  // number of row supported by LCD
+                    16,  // number of columns supported by LCD
+                    RaspiPin.GPIO_09,  // LCD RS pin
+                    RaspiPin.GPIO_08,  // LCD strobe pin
+                    RaspiPin.GPIO_07,  // LCD data bit D4
+                    RaspiPin.GPIO_15,  // LCD data bit D5
+                    RaspiPin.GPIO_16,  // LCD data bit D6
+                    RaspiPin.GPIO_01) // LCD data bit D7
+        lcd.clear();
+        Thread.sleep(1000);
+
+        lcd.write(0, "WeArGenius");
+        lcd.write(1, "Regel2");
+
+        Thread.sleep(2000);
+
+
+            while (true) {
+                println("status")
+                try {
+                    val arm1Status = arm1!!.read()
+                    val arm2Status = arm2!!.read()
+                    val arm3Status = arm3!!.read()
+                    allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
+                    val status = getStatusString(arm1Status)+"/"+getStatusString(arm2Status)+"/"+getArm3StatusString(arm3Status)
+                    lcd.write(1,status)
+                    println("status:"+status)
+                    Thread.sleep(300)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+//
+//            while (true) {
+//                println("Write 1")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("Embedded")
+//                Thread.sleep(3000)
+//                println("Write 2")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("Home Automation")
+//                Thread.sleep(3000)
+//                println("Write 3")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("IOT")
+//                Thread.sleep(3000)
+//                println("Write 4")
+//                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+//                lcd.setCursorPosition(1, 0)
+//                lcd.write("Programming")
+//                Thread.sleep(3000)
+//            }
+        }
+//
+//        while (true) {
+//            println("status")
+//            try {
+//                val arm1Status = arm1!!.read()
+//                val arm2Status = arm2!!.read()
+//                val arm3Status = arm3!!.read()
+//                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
+////                status1Label.text = getStatusString(arm1Status)
+////                status2Label.text = getStatusString(arm2Status)
+////                status3Label.text = getArm3StatusString(arm3Status)
+////                status4Label.text = "ready:$allReady"
+//                Thread.sleep(300)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
+//    }
+
+    /*
+     fun startDisplayThreadOud(){
+        fun localHostLANAddress(): InetAddress {
+            try {
+                var candidateAddress: InetAddress? = null
+                // Iterate all NICs (network interface cards)...
+                val ifaces: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
+                while (ifaces.hasMoreElements()) {
+                    val iface = ifaces.nextElement() as NetworkInterface
+                    // Iterate all IP addresses assigned to each card...
+                    val inetAddrs: Enumeration<*> = iface.inetAddresses
+                    while (inetAddrs.hasMoreElements()) {
+                        val inetAddr = inetAddrs.nextElement() as InetAddress
+                        if (!inetAddr.isLoopbackAddress) {
+                            if (inetAddr.isSiteLocalAddress) {
+                                // Found non-loopback site-local address. Return it immediately...
+                                return inetAddr
+                            } else if (candidateAddress == null) {
+                                // Found non-loopback address, but not necessarily site-local.
+                                // Store it as a candidate to be returned if site-local address is not subsequently found...
+                                candidateAddress = inetAddr
+                                // Note that we don't repeatedly assign non-loopback non-site-local addresses as candidates,
+                                // only the first. For subsequent iterations, candidate will be non-null.
+                            }
+                        }
+                    }
+                }
+                if (candidateAddress != null) {
+                    // We did not find a site-local address, but we found some other non-loopback address.
+                    // Server might have a non-site-local address assigned to its NIC (or it might be running
+                    // IPv6 which deprecates the "site-local" concept).
+                    // Return this non-loopback candidate address...
+                    return candidateAddress
+                }
+                // At this point, we did not find a non-loopback address.
+                // Fall back to returning whatever InetAddress.getLocalHost() returns...
+                val jdkSuppliedAddress = InetAddress.getLocalHost()
+                        ?: throw UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.")
+                return jdkSuppliedAddress
+            } catch (e: Exception) {
+                val unknownHostException = UnknownHostException("Failed to determine LAN address: $e")
+                unknownHostException.initCause(e)
+                throw unknownHostException
+            }
+        }
+
+
             println("Strting up the MCP23017 based 16x2 LCD Example")
             val bus = I2CFactory.getInstance(I2CBus.BUS_1) //
             I2CLcdDisplay.dev = bus.getDevice(DISPLAY) //Address for MCp23017 change if A0,A1,A2 are connected to diff potenrial
@@ -361,7 +497,7 @@ class RobotAansturingImpl : RobotAansturing {
 //            }
 //        }
 //    }
-
+*/
     private fun home(arm: I2CDevice?) {
         try {
             arm?.write("^H0000000000600000".toByteArray())
