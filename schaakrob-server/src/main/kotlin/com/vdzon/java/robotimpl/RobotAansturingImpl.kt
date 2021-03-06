@@ -285,29 +285,7 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun startDisplayThread() {
-        println("startDisplay")
-        println("check if enable state file exists")
-        if (File("/tmp/state.txt").exists()){
-            println("state file found")
-        }
-        else{
-            println("no state file found")
-          return;
-        }
-
-
         println("16X2 LCD Example with Raspberry Pi using Pi4J and JAVA")
-
-        // create gpio controller
-
-        // create gpio controller
-        println("Display 1")
-//        val gpio = GpioFactory.getInstance()
-
-        // initialize LCD
-
-        // initialize LCD
-
         val lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
         println("Display 2")
         lcd.setCursorHome()
@@ -318,29 +296,27 @@ class RobotAansturingImpl : RobotAansturing {
         Thread.sleep(1000);
         println("Display 6")
 
-        lcd.write(0, "Regel1");
-        println("Display 7")
+        val inetAddress = localHostLANAddress()
+        val ipAdress = inetAddress.hostAddress
+
+        lcd.write(0, ipAdress);
         lcd.write(1, "Regel2");
-        println("Display 8")
-
         Thread.sleep(4000);
-
-
-//        while (true) {
-//            println("status")
-//            try {
-//                val arm1Status = arm1!!.read()
-//                val arm2Status = arm2!!.read()
-//                val arm3Status = arm3!!.read()
-//                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
-//                val status = getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
-//                lcd.write(1, status)
-//                println("status:" + status)
-//                Thread.sleep(300)
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//            }
-//        }
+        while (true) {
+            println("status")
+            try {
+                val arm1Status = arm1!!.read()
+                val arm2Status = arm2!!.read()
+                val arm3Status = arm3!!.read()
+                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
+                val status = getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
+                lcd.write(1, status)
+                println("status:" + status)
+                Thread.sleep(300)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun home(arm: I2CDevice?) {
