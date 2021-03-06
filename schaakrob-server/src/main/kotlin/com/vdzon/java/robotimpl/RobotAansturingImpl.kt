@@ -9,6 +9,9 @@ import com.vdzon.java.robitapi.RobotAansturing
 import com.vdzon.java.ui.MyPanel
 import java.io.IOException
 import java.io.PrintWriter
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.net.UnknownHostException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -216,23 +219,66 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     private fun getStatusString(status: Int): String {
-        if (status == 0) return "Homing needed"
-        if (status == 1) return "Ready"
-        if (status == 2) return "Moving"
-        if (status == 3) return "Homing"
-        if (status == 4) return "Error"
-        if (status == 5) return "Going to sleep"
-        return if (status == 6) "Sleeping" else "??"
+        if (status == 0) return "HN"
+        if (status == 1) return "RE"
+        if (status == 2) return "MO"
+        if (status == 3) return "HO"
+        if (status == 4) return "ER"
+        if (status == 5) return "GS"
+        return if (status == 6) "SL" else "??"
     }
 
     private fun getArm3StatusString(status: Int): String {
-        if (status == 1) return "Ready"
-        if (status == 2) return "Grabbing"
-        return if (status == 3) "Releasing" else "??"
+        if (status == 1) return "RE"
+        if (status == 2) return "GR"
+        return if (status == 3) "RE" else "??"
     }
 
 
     override fun startDisplayThread(){
+        fun localHostLANAddress(): InetAddress {
+            try {
+                var candidateAddress: InetAddress? = null
+                // Iterate all NICs (network interface cards)...
+                val ifaces: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
+                while (ifaces.hasMoreElements()) {
+                    val iface = ifaces.nextElement() as NetworkInterface
+                    // Iterate all IP addresses assigned to each card...
+                    val inetAddrs: Enumeration<*> = iface.inetAddresses
+                    while (inetAddrs.hasMoreElements()) {
+                        val inetAddr = inetAddrs.nextElement() as InetAddress
+                        if (!inetAddr.isLoopbackAddress) {
+                            if (inetAddr.isSiteLocalAddress) {
+                                // Found non-loopback site-local address. Return it immediately...
+                                return inetAddr
+                            } else if (candidateAddress == null) {
+                                // Found non-loopback address, but not necessarily site-local.
+                                // Store it as a candidate to be returned if site-local address is not subsequently found...
+                                candidateAddress = inetAddr
+                                // Note that we don't repeatedly assign non-loopback non-site-local addresses as candidates,
+                                // only the first. For subsequent iterations, candidate will be non-null.
+                            }
+                        }
+                    }
+                }
+                if (candidateAddress != null) {
+                    // We did not find a site-local address, but we found some other non-loopback address.
+                    // Server might have a non-site-local address assigned to its NIC (or it might be running
+                    // IPv6 which deprecates the "site-local" concept).
+                    // Return this non-loopback candidate address...
+                    return candidateAddress
+                }
+                // At this point, we did not find a non-loopback address.
+                // Fall back to returning whatever InetAddress.getLocalHost() returns...
+                val jdkSuppliedAddress = InetAddress.getLocalHost()
+                        ?: throw UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.")
+                return jdkSuppliedAddress
+            } catch (e: Exception) {
+                val unknownHostException = UnknownHostException("Failed to determine LAN address: $e")
+                unknownHostException.initCause(e)
+                throw unknownHostException
+            }
+        }
 
             println("Strting up the MCP23017 based 16x2 LCD Example")
             val bus = I2CFactory.getInstance(I2CBus.BUS_1) //
@@ -248,7 +294,7 @@ class RobotAansturingImpl : RobotAansturing {
             Thread.sleep(2000)
 
 
-            val inetAddress = MyPanel.localHostLANAddress()
+            val inetAddress = localHostLANAddress()
             val ipAdress = inetAddress.hostAddress
             lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
             lcd.setCursorPosition(0, 0)

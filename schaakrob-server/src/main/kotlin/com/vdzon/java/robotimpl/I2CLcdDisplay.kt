@@ -6,7 +6,7 @@ import java.util.*
 class I2CLcdDisplay {
     var rsFlag = false
     var eFlag = false
-    private val LCD_LINE_ADDRESS = intArrayOf(0x80, 0xC0) //Address for LCD Lines 0 and 1
+    private val LCD_LINE_ADDRESS = intArrayOf(0x40, 0x80) //Address for LCD Lines 0 and 1
     private val LCD_CHR = true //To decide sent data is data or command
     var RS_PIN = 0 //Pin of MCP23017 PORTB/A connected LCD RS pin
     var EN_PIN = 1 //Pin of MCP23017 PORTB/A connected LCD E pin
