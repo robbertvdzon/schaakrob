@@ -216,8 +216,6 @@ class RobotAansturingImpl : RobotAansturing {
 
     override fun startDisplayThread(){
 
-        @Throws(java.lang.Exception::class)
-        fun testDisplay() {
             println("Strting up the MCP23017 based 16x2 LCD Example")
             val bus = I2CFactory.getInstance(I2CBus.BUS_1) //
             I2CLcdDisplay.dev = bus.getDevice(DISPLAY) //Address for MCp23017 change if A0,A1,A2 are connected to diff potenrial
@@ -270,7 +268,7 @@ class RobotAansturingImpl : RobotAansturing {
 //                e.printStackTrace()
 //            }
 //        }
-    }
+//    }
 
     private fun home(arm: I2CDevice?) {
         try {
