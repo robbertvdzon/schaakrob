@@ -285,33 +285,25 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun startDisplayThread() {
-        println("16X2 LCD Example with Raspberry Pi using Pi4J and JAVA")
+        println("Start display thread")
         val lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
-        println("Display 2")
         lcd.setCursorHome()
-        lcd.write("Hallo!")
-        println("Display 3")
         lcd.clear();
-        println("Display 5")
         Thread.sleep(1000);
-        println("Display 6")
-
         val inetAddress = localHostLANAddress()
         val ipAdress = inetAddress.hostAddress
-
-        lcd.write(0, ipAdress);
-        lcd.write(1, "Regel2");
-        Thread.sleep(4000);
+        lcd.write(0, ipAdress)
+        var zandloperChar = "*"
         while (true) {
-            println("status")
             try {
+                zandloperChar = if (zandloperChar=="*") "o" else "*"
                 val arm1Status = arm1!!.read()
                 val arm2Status = arm2!!.read()
                 val arm3Status = arm3!!.read()
                 allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
-                val status = getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
+                val status = zandloperChar+" "+getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
+                lcd.write(0, ipAdress)
                 lcd.write(1, status)
-                println("status:" + status)
                 Thread.sleep(300)
             } catch (e: Exception) {
                 e.printStackTrace()
