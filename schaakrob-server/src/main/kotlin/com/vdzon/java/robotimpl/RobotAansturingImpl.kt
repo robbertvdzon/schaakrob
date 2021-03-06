@@ -49,6 +49,7 @@ class RobotAansturingImpl : RobotAansturing {
             println("ERROR IOException in init:" + e.message)
         }
 
+        println("startDisplayThread")
         val updateDisplayThread = Thread(Runnable { startDisplayThread() })
         updateDisplayThread.start()
 
@@ -239,51 +240,52 @@ class RobotAansturingImpl : RobotAansturing {
         return if (status == 3) "RE" else "??"
     }
 
-
-    override fun startDisplayThread() {
-        fun localHostLANAddress(): InetAddress {
-            try {
-                var candidateAddress: InetAddress? = null
-                // Iterate all NICs (network interface cards)...
-                val ifaces: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
-                while (ifaces.hasMoreElements()) {
-                    val iface = ifaces.nextElement() as NetworkInterface
-                    // Iterate all IP addresses assigned to each card...
-                    val inetAddrs: Enumeration<*> = iface.inetAddresses
-                    while (inetAddrs.hasMoreElements()) {
-                        val inetAddr = inetAddrs.nextElement() as InetAddress
-                        if (!inetAddr.isLoopbackAddress) {
-                            if (inetAddr.isSiteLocalAddress) {
-                                // Found non-loopback site-local address. Return it immediately...
-                                return inetAddr
-                            } else if (candidateAddress == null) {
-                                // Found non-loopback address, but not necessarily site-local.
-                                // Store it as a candidate to be returned if site-local address is not subsequently found...
-                                candidateAddress = inetAddr
-                                // Note that we don't repeatedly assign non-loopback non-site-local addresses as candidates,
-                                // only the first. For subsequent iterations, candidate will be non-null.
-                            }
+    fun localHostLANAddress(): InetAddress {
+        try {
+            var candidateAddress: InetAddress? = null
+            // Iterate all NICs (network interface cards)...
+            val ifaces: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
+            while (ifaces.hasMoreElements()) {
+                val iface = ifaces.nextElement() as NetworkInterface
+                // Iterate all IP addresses assigned to each card...
+                val inetAddrs: Enumeration<*> = iface.inetAddresses
+                while (inetAddrs.hasMoreElements()) {
+                    val inetAddr = inetAddrs.nextElement() as InetAddress
+                    if (!inetAddr.isLoopbackAddress) {
+                        if (inetAddr.isSiteLocalAddress) {
+                            // Found non-loopback site-local address. Return it immediately...
+                            return inetAddr
+                        } else if (candidateAddress == null) {
+                            // Found non-loopback address, but not necessarily site-local.
+                            // Store it as a candidate to be returned if site-local address is not subsequently found...
+                            candidateAddress = inetAddr
+                            // Note that we don't repeatedly assign non-loopback non-site-local addresses as candidates,
+                            // only the first. For subsequent iterations, candidate will be non-null.
                         }
                     }
                 }
-                if (candidateAddress != null) {
-                    // We did not find a site-local address, but we found some other non-loopback address.
-                    // Server might have a non-site-local address assigned to its NIC (or it might be running
-                    // IPv6 which deprecates the "site-local" concept).
-                    // Return this non-loopback candidate address...
-                    return candidateAddress
-                }
-                // At this point, we did not find a non-loopback address.
-                // Fall back to returning whatever InetAddress.getLocalHost() returns...
-                val jdkSuppliedAddress = InetAddress.getLocalHost()
-                        ?: throw UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.")
-                return jdkSuppliedAddress
-            } catch (e: Exception) {
-                val unknownHostException = UnknownHostException("Failed to determine LAN address: $e")
-                unknownHostException.initCause(e)
-                throw unknownHostException
             }
+            if (candidateAddress != null) {
+                // We did not find a site-local address, but we found some other non-loopback address.
+                // Server might have a non-site-local address assigned to its NIC (or it might be running
+                // IPv6 which deprecates the "site-local" concept).
+                // Return this non-loopback candidate address...
+                return candidateAddress
+            }
+            // At this point, we did not find a non-loopback address.
+            // Fall back to returning whatever InetAddress.getLocalHost() returns...
+            val jdkSuppliedAddress = InetAddress.getLocalHost()
+                    ?: throw UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.")
+            return jdkSuppliedAddress
+        } catch (e: Exception) {
+            val unknownHostException = UnknownHostException("Failed to determine LAN address: $e")
+            unknownHostException.initCause(e)
+            throw unknownHostException
         }
+    }
+
+    override fun startDisplayThread() {
+        println("startDisplay")
         println("check if enable state file exists")
         if (File("/tmp/state.txt").exists()){
             println("state file found")

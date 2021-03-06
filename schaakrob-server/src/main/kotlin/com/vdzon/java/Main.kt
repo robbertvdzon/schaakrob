@@ -1,6 +1,5 @@
 package com.vdzon.java
 
-import com.vdzon.java.ui.MainUI
 import com.vdzon.java.ui.MainWeb
 
 object Main {
