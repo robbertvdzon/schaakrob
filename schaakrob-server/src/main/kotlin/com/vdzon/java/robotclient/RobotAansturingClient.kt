@@ -89,6 +89,9 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     override fun stopDemo() {
         get("$host/api/stopdemo")
     }
+    override fun startDisplayThread() {
+     // disable for remote
+    }
 
     private operator fun get(url: String): String? {
         try {

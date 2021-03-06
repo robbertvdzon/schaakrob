@@ -21,4 +21,5 @@ interface RobotAansturing {
     fun runDemoLoop()
     fun runDemoOnce()
     fun stopDemo()
+    fun startDisplayThread()
 }

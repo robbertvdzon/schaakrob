@@ -22,6 +22,7 @@ class RobotAansturingImpl : RobotAansturing {
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
     private var arm3: I2CDevice? = null
+//    private var display: I2CDevice? = null
     private var currentLoopThread: Thread? = null
     fun init() {
         if (arm1 != null) {
@@ -32,11 +33,17 @@ class RobotAansturingImpl : RobotAansturing {
             arm1 = i2c.getDevice(ARM1)
             arm2 = i2c.getDevice(ARM2)
             arm3 = i2c.getDevice(ARM3)
+//            display = i2c.getDevice(DISPLAY)
         } catch (e: UnsupportedBusNumberException) {
             println("ERROR, UnsupportedBusNumberException in init")
         } catch (e: IOException) {
             println("ERROR IOException in init:" + e.message)
         }
+
+        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
+        updateDisplayThread.start()
+
+
     }
 
     override fun movetoVlak(vlak: String) {
@@ -207,6 +214,64 @@ class RobotAansturingImpl : RobotAansturing {
         stopLoop()
     }
 
+    override fun startDisplayThread(){
+
+        @Throws(java.lang.Exception::class)
+        fun testDisplay() {
+            println("Strting up the MCP23017 based 16x2 LCD Example")
+            val bus = I2CFactory.getInstance(I2CBus.BUS_1) //
+            I2CLcdDisplay.dev = bus.getDevice(DISPLAY) //Address for MCp23017 change if A0,A1,A2 are connected to diff potenrial
+            I2CLcdDisplay.dev.write(0x01, 0x00.toByte()) //Initialized PORT B of MCP23017 to use as ouput.
+            val lcd = I2CLcdDisplay()
+            lcd.initDisplay() //LCD Initialization Routine
+            lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear Command
+            lcd.lcd_byte(0x02, I2CLcdDisplay.LCD_CMD) //LCD Home Command
+            lcd.write("WeArGenius")
+            lcd.setCursorPosition(1, 0)
+            lcd.write("weargenius.in")
+            Thread.sleep(2000)
+            while (true) {
+                println("Write 1")
+                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+                lcd.setCursorPosition(1, 0)
+                lcd.write("Embedded")
+                Thread.sleep(3000)
+                println("Write 2")
+                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+                lcd.setCursorPosition(1, 0)
+                lcd.write("Home Automation")
+                Thread.sleep(3000)
+                println("Write 3")
+                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+                lcd.setCursorPosition(1, 0)
+                lcd.write("IOT")
+                Thread.sleep(3000)
+                println("Write 4")
+                lcd.lcd_byte(0x01, I2CLcdDisplay.LCD_CMD) //LCD Clear
+                lcd.setCursorPosition(1, 0)
+                lcd.write("Programming")
+                Thread.sleep(3000)
+            }
+        }
+//
+//        while (true) {
+//            println("status")
+//            try {
+//                val arm1Status = arm1!!.read()
+//                val arm2Status = arm2!!.read()
+//                val arm3Status = arm3!!.read()
+//                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
+////                status1Label.text = getStatusString(arm1Status)
+////                status2Label.text = getStatusString(arm2Status)
+////                status3Label.text = getArm3StatusString(arm3Status)
+////                status4Label.text = "ready:$allReady"
+//                Thread.sleep(300)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
+    }
+
     private fun home(arm: I2CDevice?) {
         try {
             arm?.write("^H0000000000600000".toByteArray())
@@ -342,6 +407,7 @@ class RobotAansturingImpl : RobotAansturing {
         )
     }
 
+
     private fun waitUntilReady(initialDelay: Int) {
         sleep(initialDelay)
         udateStatus()
@@ -360,9 +426,10 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     companion object {
-        private const val ARM1 = 0x8 //was 5
-        private const val ARM2 = 0x6 // was 7
-        private const val ARM3 = 0x5 // was 8
+        private const val ARM1 = 0x8
+        private const val ARM2 = 0x6
+        private const val ARM3 = 0x5
+        private const val DISPLAY = 0x38
     }
 
     init {
