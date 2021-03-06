@@ -8,9 +8,9 @@ object Main {
     fun main(args: Array<String>) {
         val OS = System.getProperty("os.name").toLowerCase()
         val schaakbord = !OS.contains("mac")
-        if (schaakbord) {
-            MainUI.main(args)
-        }
+//        if (schaakbord) {
+//            MainUI.main(args)
+//        }
         MainWeb().start(schaakbord)
     }
 }
