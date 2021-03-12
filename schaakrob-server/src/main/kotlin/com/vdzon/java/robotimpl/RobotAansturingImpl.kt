@@ -37,19 +37,26 @@ class RobotAansturingImpl : RobotAansturing {
         if (arm1 != null) {
             return
         }
-        try {
-            val i2c = I2CFactory.getInstance(I2CBus.BUS_1)
-            arm1 = i2c.getDevice(ARM1)
-            arm2 = i2c.getDevice(ARM2)
-            arm3 = i2c.getDevice(ARM3)
-//            display = i2c.getDevice(DISPLAY)
-        } catch (e: UnsupportedBusNumberException) {
-            println("ERROR, UnsupportedBusNumberException in init")
-        } catch (e: IOException) {
-            println("ERROR IOException in init:" + e.message)
+
+        var initialized = false
+        while (!initialized ) {
+            try {
+                println("Open devices")
+                val i2c = I2CFactory.getInstance(I2CBus.BUS_1)
+                arm1 = i2c.getDevice(ARM1)
+                arm2 = i2c.getDevice(ARM2)
+                arm3 = i2c.getDevice(ARM3)
+                initialized = true
+            } catch (e: UnsupportedBusNumberException) {
+                println("ERROR, UnsupportedBusNumberException in init")
+                Thread.sleep(2000)
+            } catch (e: IOException) {
+                println("ERROR IOException in init:" + e.message)
+                Thread.sleep(2000)
+            }
         }
 
-        println("startDisplayThread")
+        println("Devices found")
         val updateDisplayThread = Thread(Runnable { startDisplayThread() })
         updateDisplayThread.start()
 
@@ -286,7 +293,17 @@ class RobotAansturingImpl : RobotAansturing {
 
     override fun startDisplayThread() {
         println("Start display thread")
-        val lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
+        var lcd:I2CLcdDisplay? = null
+        while (lcd==null ) {
+            try{
+                lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
+            } catch (e: Exception) {
+                println(e.message)
+                Thread.sleep(3000)
+            }
+        }
+        println("Display found")
+
         lcd.setCursorHome()
         lcd.clear();
         Thread.sleep(1000);
