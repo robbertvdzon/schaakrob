@@ -46,6 +46,10 @@ class RobotAansturingImpl : RobotAansturing {
                 arm1 = i2c.getDevice(ARM1)
                 arm2 = i2c.getDevice(ARM2)
                 arm3 = i2c.getDevice(ARM3)
+                // test connectoe
+                arm1!!.read()
+                arm2!!.read()
+                arm3!!.read()
                 initialized = true
             } catch (e: UnsupportedBusNumberException) {
                 println("ERROR, UnsupportedBusNumberException in init")
@@ -297,8 +301,10 @@ class RobotAansturingImpl : RobotAansturing {
         while (lcd==null ) {
             try{
                 lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
+                lcd.setCursorHome()
+                lcd.clear();
             } catch (e: Exception) {
-                println(e.message)
+                println("Error loading display:"+e.message)
                 Thread.sleep(3000)
             }
         }
