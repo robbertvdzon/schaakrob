@@ -137,6 +137,8 @@ class RobotAansturingImpl : RobotAansturing {
             e.printStackTrace()
         }
         waitUntilReady(50)
+        lastPos2 = 0
+        lastPos1 = 0
     }
 
     fun gotoPos(arm: I2CDevice?, pos: Int, vertraging: String) {
