@@ -131,8 +131,8 @@ class RobotAansturingImpl : RobotAansturing {
             val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
             val delay = 100*snelheid;
             val formattedDelayFactor = String.format("%04d", delay.toInt())
-            arm1!!.write(("^X000000000000"+formattedDelayFactor).toByteArray())
-            arm2!!.write(("^X000000000000"+formattedDelayFactor).toByteArray())
+            arm1!!.write(("^X000000"+formattedDelayFactor).toByteArray())
+            arm2!!.write(("^X000000"+formattedDelayFactor).toByteArray())
         } catch (e: IOException) {
             e.printStackTrace()
         }
