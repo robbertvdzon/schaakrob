@@ -4,6 +4,7 @@ difference(){
         difference(){
             union(){ 
 
+                mirror([1,0,0])
                 translate([-27.5, -2,0]){
                     linear_extrude(height = 2.8-0.45+0.3, center = false, convexity = 10)
                     scale([1,1]) import(file = "svg/loper_dicht.svg", layer = "plate");
