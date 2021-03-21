@@ -236,14 +236,17 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun setA8(pos: String) {
+        println("save a8:"+pos)
         saveToFile("/home/pi/a8.data", pos)
     }
 
     override fun setA11(pos: String) {
+        println("save a11:"+pos)
         saveToFile("/home/pi/a11.data", pos)
     }
 
     override fun setA21(pos: String) {
+        println("save a21:"+pos)
         saveToFile("/home/pi/a21.data", pos)
     }
 
@@ -260,14 +263,17 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun setH1(pos: String) {
+        println("save h1:"+pos)
         saveToFile("/home/pi/h1.data", pos)
     }
 
     override fun setH10(pos: String) {
+        println("save h10:"+pos)
         saveToFile("/home/pi/h10.data", pos)
     }
 
     override fun setH20(pos: String) {
+        println("save h20:"+pos)
         saveToFile("/home/pi/h20.data", pos)
     }
 

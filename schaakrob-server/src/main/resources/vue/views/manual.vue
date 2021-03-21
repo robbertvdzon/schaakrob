@@ -47,20 +47,20 @@
       <button type="submit" v-on:click="saveH1">Save</button>
       <br>
       A11:
-      <input v-model="a8pos" >
-      <button type="submit" v-on:click="saveA8">Save</button>
+      <input v-model="a11pos" >
+      <button type="submit" v-on:click="saveA11">Save</button>
       <br>
       H10:
-      <input v-model="h1pos" >
-      <button type="submit" v-on:click="saveH1">Save</button>
+      <input v-model="h10pos" >
+      <button type="submit" v-on:click="saveH10">Save</button>
       <br>
       A21:
-      <input v-model="a8pos" >
-      <button type="submit" v-on:click="saveA8">Save</button>
+      <input v-model="a21pos" >
+      <button type="submit" v-on:click="saveA21">Save</button>
       <br>
       H20:
-      <input v-model="h1pos" >
-      <button type="submit" v-on:click="saveH1">Save</button>
+      <input v-model="h20pos" >
+      <button type="submit" v-on:click="saveH20">Save</button>
       <br>
       Snelheid:
       <input v-model="snelheid" >
@@ -77,7 +77,11 @@ Vue.component("manual", {
     manual: null,
     pos:"1000,1000",
     a8pos:"",
+    a21pos:"",
+    a11pos:"",
     h1pos:"",
+    h10pos:"",
+    h20pos:"",
     snelheid:"2.0",
     vlak:"A8"
   }),
@@ -91,9 +95,29 @@ Vue.component("manual", {
       .then(text => this.a8pos=text)
       .catch(() => alert("Error"));
 
+      fetch(`/api/a21`)
+      .then(res => res.text())
+      .then(text => this.a21pos=text)
+      .catch(() => alert("Error"));
+
+      fetch(`/api/a11`)
+      .then(res => res.text())
+      .then(text => this.a11pos=text)
+      .catch(() => alert("Error"));
+
       fetch(`/api/h1`)
       .then(res => res.text())
       .then(text => this.h1pos=text)
+      .catch(() => alert("Error"));
+
+      fetch(`/api/h10`)
+      .then(res => res.text())
+      .then(text => this.h10pos=text)
+      .catch(() => alert("Error"));
+
+      fetch(`/api/h20`)
+      .then(res => res.text())
+      .then(text => this.h20pos=text)
       .catch(() => alert("Error"));
 
       fetch(`/api/snelheid`)
@@ -146,8 +170,40 @@ Vue.component("manual", {
         alert("Error")
       })
     },
+    saveA11: function (event) {
+      axios.post(`/api/a11`, this.a8pos)
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
+    saveA21: function (event) {
+      axios.post(`/api/a21`, this.a8pos)
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
     saveH1: function (event) {
       axios.post(`/api/h1`, this.h1pos)
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
+    saveH10: function (event) {
+      axios.post(`/api/h10`, this.h1pos)
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
+    saveH20: function (event) {
+      axios.post(`/api/h20`, this.h1pos)
       .then(res => {
       })
       .catch(error => {
