@@ -46,6 +46,22 @@
       <input v-model="h1pos" >
       <button type="submit" v-on:click="saveH1">Save</button>
       <br>
+      A11:
+      <input v-model="a8pos" >
+      <button type="submit" v-on:click="saveA8">Save</button>
+      <br>
+      H10:
+      <input v-model="h1pos" >
+      <button type="submit" v-on:click="saveH1">Save</button>
+      <br>
+      A21:
+      <input v-model="a8pos" >
+      <button type="submit" v-on:click="saveA8">Save</button>
+      <br>
+      H20:
+      <input v-model="h1pos" >
+      <button type="submit" v-on:click="saveH1">Save</button>
+      <br>
       Snelheid:
       <input v-model="snelheid" >
       <button type="submit" v-on:click="saveSnelheid">Save</button>

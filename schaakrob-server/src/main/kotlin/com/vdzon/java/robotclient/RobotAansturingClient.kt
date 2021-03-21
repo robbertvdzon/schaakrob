@@ -11,6 +11,7 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     private val httpClient = HttpClients.createDefault()
     private var host = ""
     override fun movetoVlak(vlak: String) {
+        println("move to vlak: "+vlak)
         post("$host/api/movevlak", vlak)
     }
 
@@ -50,16 +51,48 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         return get("$host/api/a8")
     }
 
+    override fun getA11(): String? {
+        return get("$host/api/a11")
+    }
+
+    override fun getA21(): String? {
+        return get("$host/api/a21")
+    }
+
     override fun setA8(pos: String) {
         post("$host/api/a8", pos)
+    }
+
+    override fun setA11(pos: String) {
+        post("$host/api/a11", pos)
+    }
+
+    override fun setA21(pos: String) {
+        post("$host/api/a21", pos)
     }
 
     override fun getH1(): String? {
         return get("$host/api/h1")
     }
 
+    override fun getH10(): String? {
+        return get("$host/api/h10")
+    }
+
+    override fun getH20(): String? {
+        return get("$host/api/h20")
+    }
+
     override fun setH1(pos: String) {
         post("$host/api/h1", pos)
+    }
+
+    override fun setH10(pos: String) {
+        post("$host/api/h10", pos)
+    }
+
+    override fun setH20(pos: String) {
+        post("$host/api/h20", pos)
     }
 
     override fun getSnelheid(): String? {

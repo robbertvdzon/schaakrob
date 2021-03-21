@@ -52,6 +52,8 @@ Vue.component("status", {
   data: () => ({
     status: null,
     rows: [
+      { id:21 },
+      { id:20 },
       { id:8 },
       { id:7 },
       { id:6 },
@@ -59,7 +61,9 @@ Vue.component("status", {
       { id:4 },
       { id:3 },
       { id:2 },
-      { id:1 }
+      { id:1 },
+      { id:11 },
+      { id:10 }
     ],
 
     cols: [
@@ -70,7 +74,7 @@ Vue.component("status", {
       { id: 'E' },
       { id: 'F' },
       { id: 'G' },
-      { id: 'H' }
+      { id: 'H' },
     ]
   }),
   computed: {

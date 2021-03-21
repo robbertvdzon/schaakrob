@@ -1,16 +1,12 @@
 package com.vdzon.java.robotimpl
 
-import com.pi4j.component.lcd.impl.GpioLcdDisplay
 import com.pi4j.component.lcd.impl.I2CLcdDisplay
-import com.pi4j.io.gpio.RaspiPin
 import com.pi4j.io.i2c.I2CBus
 import com.pi4j.io.i2c.I2CDevice
 import com.pi4j.io.i2c.I2CFactory
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
-import com.pi4j.system.NetworkInfo
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.robitapi.RobotAansturing
-import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
 import java.net.InetAddress
@@ -70,7 +66,13 @@ class RobotAansturingImpl : RobotAansturing {
     override fun movetoVlak(vlak: String) {
         println("move to vlak $vlak")
         val posA8 = getA8()
+        val posA11 = getA11()
+        val posA21 = getA21()
         val posH1 = getH1()
+        val posH10 = getH10()
+        val posH20 = getH20()
+
+        // calc delta van main vlakken
         val xa = posA8!!.split(",".toRegex()).toTypedArray()[1].toInt()
         val xh = posH1!!.split(",".toRegex()).toTypedArray()[1].toInt()
         val y8 = posA8!!.split(",".toRegex()).toTypedArray()[0].toInt()
@@ -79,8 +81,32 @@ class RobotAansturingImpl : RobotAansturing {
         val yDelta = (y8 - y1) / 7
         println("xDelta=$xDelta")
         println("yDelta=$yDelta")
+
+        // calc delta van bovenste 2 rijen
+//        val qxa = posA21!!.split(",".toRegex()).toTypedArray()[1].toInt()
+//        val qxh = posH20!!.split(",".toRegex()).toTypedArray()[1].toInt()
+        val qy21 = posA21!!.split(",".toRegex()).toTypedArray()[0].toInt()
+        val qy20 = posH20!!.split(",".toRegex()).toTypedArray()[0].toInt()
+//        val qxDelta = (qxa - qxh) / 7
+//        val qyDelta = (qy21 - qy20) / 7
+//        println("qxDelta=$qxDelta")
+//        println("qyDelta=$qyDelta")
+//
+        // calc delta van onderste 2 rijen
+//        val rxa = posA11!!.split(",".toRegex()).toTypedArray()[1].toInt()
+//        val rxh = posH10!!.split(",".toRegex()).toTypedArray()[1].toInt()
+        val ry11 = posA11!!.split(",".toRegex()).toTypedArray()[0].toInt()
+        val ry10 = posH10!!.split(",".toRegex()).toTypedArray()[0].toInt()
+//        val rxDelta = (rxa - rxh) / 7
+//        val ryDelta = (ry11 - ry10) / 7
+//        println("rxDelta=$rxDelta")
+//        println("ryDelta=$ryDelta")
+
+
+
+
         val letter = vlak.toUpperCase()[0]
-        val cijfer = vlak.toUpperCase()[1]
+        val cijfer = vlak.substring(1)
         println("letter=$letter")
         println("cijfer=$cijfer")
         var x = xa
@@ -93,14 +119,18 @@ class RobotAansturingImpl : RobotAansturing {
         if (letter == 'G') x = xa - xDelta * 6
         if (letter == 'H') x = xh
         var y = y8
-        if (cijfer == '8') y = y8
-        if (cijfer == '7') y = y8 - yDelta * 1
-        if (cijfer == '6') y = y8 - yDelta * 2
-        if (cijfer == '5') y = y8 - yDelta * 3
-        if (cijfer == '4') y = y8 - yDelta * 4
-        if (cijfer == '3') y = y8 - yDelta * 5
-        if (cijfer == '2') y = y8 - yDelta * 6
-        if (cijfer == '1') y = y1
+        if (cijfer == "21") y = qy21
+        if (cijfer == "20") y = qy20
+        if (cijfer == "11") y = ry11
+        if (cijfer == "10") y = ry10
+        if (cijfer == "8") y = y8
+        if (cijfer == "7") y = y8 - yDelta * 1
+        if (cijfer == "6") y = y8 - yDelta * 2
+        if (cijfer == "5") y = y8 - yDelta * 3
+        if (cijfer == "4") y = y8 - yDelta * 4
+        if (cijfer == "3") y = y8 - yDelta * 5
+        if (cijfer == "2") y = y8 - yDelta * 6
+        if (cijfer == "1") y = y1
         if (y > 18500) y = 18500
         if (y < 100) y = 100
         if (x > 15000) x = 15000
@@ -167,8 +197,6 @@ class RobotAansturingImpl : RobotAansturing {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-//    waitUntilReady(100);
     }
 
     override fun release() {
@@ -179,7 +207,6 @@ class RobotAansturingImpl : RobotAansturing {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        //    waitUntilReady(100);
     }
 
     override fun rebuild() {
@@ -200,16 +227,48 @@ class RobotAansturingImpl : RobotAansturing {
         return loadFile("/home/pi/a8.data")
     }
 
+    override fun getA11(): String? {
+        return loadFile("/home/pi/a11.data")
+    }
+
+    override fun getA21(): String? {
+        return loadFile("/home/pi/a21.data")
+    }
+
     override fun setA8(pos: String) {
         saveToFile("/home/pi/a8.data", pos)
+    }
+
+    override fun setA11(pos: String) {
+        saveToFile("/home/pi/a11.data", pos)
+    }
+
+    override fun setA21(pos: String) {
+        saveToFile("/home/pi/a21.data", pos)
     }
 
     override fun getH1(): String? {
         return loadFile("/home/pi/h1.data")
     }
 
+    override fun getH10(): String? {
+        return loadFile("/home/pi/h10.data")
+    }
+
+    override fun getH20(): String? {
+        return loadFile("/home/pi/h20.data")
+    }
+
     override fun setH1(pos: String) {
         saveToFile("/home/pi/h1.data", pos)
+    }
+
+    override fun setH10(pos: String) {
+        saveToFile("/home/pi/h10.data", pos)
+    }
+
+    override fun setH20(pos: String) {
+        saveToFile("/home/pi/h20.data", pos)
     }
 
     override fun getSnelheid(): String? {
@@ -368,14 +427,8 @@ class RobotAansturingImpl : RobotAansturing {
         val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
         print("snelheid:"+snelheid)
 
-//    delayFactor1 = delayFactor1/2;
-//    delayFactor2 = delayFactor2/2;
         delayFactor1 = delayFactor1 * snelheid
         delayFactor2 = delayFactor2 * snelheid
-        //    delayFactor1 = delayFactor1*3;
-//    delayFactor2 = delayFactor2*3;
-        println("delayFactor1a=$delayFactor1")
-        println("delayFactor2a=$delayFactor2")
         formattedDelayFactor1 = String.format("%04d", delayFactor1.toInt())
         formattedDelayFactor2 = String.format("%04d", delayFactor2.toInt())
         return delays!!.totalTime
@@ -424,7 +477,8 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     private fun runOnceInThread(text: String?) {
-        Thread(Runnable { runOnce(text) }).start()
+        currentLoopThread = Thread(Runnable { runOnce(text) })
+        currentLoopThread!!.start()
     }
 
     private fun runInLoop(text: String?) {

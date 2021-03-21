@@ -25,7 +25,7 @@ class MainWeb {
         robotAansturing = if (schaakbord) {
             RobotAansturingImpl()
         } else {
-            RobotAansturingClient("http://192.168.178.42:8080")
+            RobotAansturingClient("http://192.168.178.48:8080")
         }
         RestEndpoints().initRestEndpoints(app, robotAansturing)
         println("Starting server")

@@ -18,9 +18,18 @@ class RestEndpoints {
         app["/api/clamp", { ctx: Context? -> robotAansturing.clamp() }]
         app["/api/release", { ctx: Context? -> robotAansturing.release() }]
         app["/api/a8", { ctx: Context -> ctx.result(robotAansturing.getA8()!!) }]
+        app["/api/a11", { ctx: Context -> ctx.result(robotAansturing.getA11()!!) }]
+        app["/api/a21", { ctx: Context -> ctx.result(robotAansturing.getA21()!!) }]
         app.post("/api/a8") { ctx: Context -> robotAansturing.setA8(ctx.body()) }
+        app.post("/api/a11") { ctx: Context -> robotAansturing.setA11(ctx.body()) }
+        app.post("/api/a21") { ctx: Context -> robotAansturing.setA21(ctx.body()) }
+
         app["/api/h1", { ctx: Context -> ctx.result(robotAansturing.getH1()!!) }]
+        app["/api/h10", { ctx: Context -> ctx.result(robotAansturing.getH10()!!) }]
+        app["/api/h20", { ctx: Context -> ctx.result(robotAansturing.getH20()!!) }]
         app.post("/api/h1") { ctx: Context -> robotAansturing.setH1(ctx.body()) }
+        app.post("/api/h10") { ctx: Context -> robotAansturing.setH10(ctx.body()) }
+        app.post("/api/h20") { ctx: Context -> robotAansturing.setH20(ctx.body()) }
         app["/api/snelheid", { ctx: Context -> ctx.result(robotAansturing.getSnelheid()!!) }]
         app.post("/api/snelheid") { ctx: Context -> robotAansturing.setSnelheid(ctx.body()) }
         app["/api/demo", { ctx: Context -> ctx.result(robotAansturing.getDemoString()!!) }]
