@@ -171,7 +171,7 @@ Vue.component("manual", {
       })
     },
     saveA11: function (event) {
-      axios.post(`/api/a11`, this.a8pos)
+      axios.post(`/api/a11`, this.a11pos)
       .then(res => {
       })
       .catch(error => {
@@ -179,7 +179,7 @@ Vue.component("manual", {
       })
     },
     saveA21: function (event) {
-      axios.post(`/api/a21`, this.a8pos)
+      axios.post(`/api/a21`, this.a21pos)
       .then(res => {
       })
       .catch(error => {
@@ -195,7 +195,7 @@ Vue.component("manual", {
       })
     },
     saveH10: function (event) {
-      axios.post(`/api/h10`, this.h1pos)
+      axios.post(`/api/h10`, this.h10pos)
       .then(res => {
       })
       .catch(error => {
@@ -203,7 +203,7 @@ Vue.component("manual", {
       })
     },
     saveH20: function (event) {
-      axios.post(`/api/h20`, this.h1pos)
+      axios.post(`/api/h20`, this.h20pos)
       .then(res => {
       })
       .catch(error => {

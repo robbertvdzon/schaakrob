@@ -131,10 +131,10 @@ class RobotAansturingImpl : RobotAansturing {
         if (cijfer == "3") y = y8 - yDelta * 5
         if (cijfer == "2") y = y8 - yDelta * 6
         if (cijfer == "1") y = y1
-        if (y > 18500) y = 18500
-        if (y < 100) y = 100
+        if (y > 20000) y = 20000
+        if (y < 10) y = 10
         if (x > 15000) x = 15000
-        if (x < 100) x = 100
+        if (x < 10) x = 10
         moveto(y, x)
     }
 
