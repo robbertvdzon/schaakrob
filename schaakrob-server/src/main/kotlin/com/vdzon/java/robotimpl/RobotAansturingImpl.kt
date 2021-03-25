@@ -501,7 +501,8 @@ class RobotAansturingImpl : RobotAansturing {
                         if (row.trim { it <= ' ' }.startsWith("@")) {
                             println("moveto:$row")
                             println("ss:" + row.trim { it <= ' ' }.substring(1, 3))
-                            movetoVlak(row.trim { it <= ' ' }.substring(1, 3))
+                            val vlak = row.trim().replace("@","")
+                            movetoVlak(vlak)
                         }
                         if (row.trim { it <= ' ' }.startsWith("pak")) {
                             clamp()
