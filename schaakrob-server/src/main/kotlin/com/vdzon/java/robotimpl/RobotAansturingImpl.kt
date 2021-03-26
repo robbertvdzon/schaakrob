@@ -543,6 +543,7 @@ class RobotAansturingImpl : RobotAansturing {
             sleep(10)
             udateStatus()
         }
+        sleep(200)// extra sleep, deze zou weg moeten kunnen
     }
 
     private fun sleep(initialDelay: Int) {

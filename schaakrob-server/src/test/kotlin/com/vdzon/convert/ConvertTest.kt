@@ -91,41 +91,64 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
             val board = Board()
             //Replay all the moves from the game and print the final position in FEN format
             var whitesMove = true
+            var nr: Int = 0
             for (move in moves) {
+                nr++
                 if (move.san.contains("x")) {
                     // slag!
-                    //move.to.
                     val storeSquare = if (whitesMove) {
                         whiteStoreSquares.filter { !it.occupied }.first()
                     } else {
                         blackStoreSquares.filter { !it.occupied }.first()
                     }
                     storeSquare.occupied = true;
-                    myMoves.add(ChessMove(move.to.value(), storeSquare.pos))
+                    myMoves.add(ChessMove(move.to.value(), storeSquare.pos, nr))
                 }
-                myMoves.add(ChessMove(move.from.value(), move.to.value()))
+
+                if (move.san.equals("O-O-O")) {
+                    if (move.from.value().equals("E8")) {
+                        myMoves.add(ChessMove("A8", "D8", nr))
+                    }
+                    if (move.from.value().equals("E1")) {
+                        myMoves.add(ChessMove("A1", "D1", nr))
+                    }
+
+                }
+                if (move.san.equals("O-O") && move.from.equals("E1")) {
+                    if (move.from.value().equals("E1")) {
+                        myMoves.add(ChessMove("H1", "F1", nr))
+                    }
+                    if (move.from.value().equals("E8")) {
+                        myMoves.add(ChessMove("H8", "F8", nr))
+                    }
+                }
+
+
+                myMoves.add(ChessMove(move.from.value(), move.to.value(), nr))
                 board.doMove(move)
                 whitesMove = !whitesMove;
             }
         }
 
-        println("-----------")
-        myMoves.forEach {
-            println(it)
-        }
-        println("-----------")
-        myMoves.forEach {
-            println("@${it.from}#")
-            println("pak#")
-            println("@${it.to}#")
-            println("zet#")
-        }
-        println("----------- done")
+        val demo =
+                myMoves.map {
+                    toDemo(it)
+                }.joinToString("")
+        File("demo.txt").writeText(demo)
+
+    }
+
+    private fun toDemo(it: ChessMove): String {
+        val moves = "@${it.from}#\n" +
+                "pak#\n" +
+                "@${it.to}#\n" +
+                "zet#\n"
+        return if (it.nr % 5 == 0) "home#\n$moves" else moves
     }
 
 
     @Test
-    fun test1(){
+    fun test1() {
         val demo = """
             @E2#
             @A21#
@@ -143,9 +166,9 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
                     if (row != null && !row.startsWith("#")) {
                         if (row.trim { it <= ' ' }.startsWith("@")) {
                             println("moveto:$row")
-                            println("ss:" + row.trim().replace("@",""))
-                            val d = row.trim().replace("@","")
-                            println("Moveto: "+d)
+                            println("ss:" + row.trim().replace("@", ""))
+                            val d = row.trim().replace("@", "")
+                            println("Moveto: " + d)
                         }
                         if (row.trim { it <= ' ' }.startsWith("pak")) {
                             println("clamp")
@@ -164,4 +187,4 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
 }
 
 data class StoreSquare(val pos: String, var occupied: Boolean = false)
-data class ChessMove(val from: String, var to: String)
+data class ChessMove(val from: String, val to: String, val nr: Int)
