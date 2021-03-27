@@ -44,6 +44,7 @@ send: state + pos
 #define SLEEPING 6
 
 #define HOME_SPEED 120
+#define HOME_SPEED_SLOW 500
 
 #define dirPin 3
 #define stepPin 4 
@@ -188,25 +189,28 @@ void parseCommand(){
 }
 
 void processCommand(){
- if (command == 'H') home1();
+ if (command == 'H') home1(HOME_SPEED);
  if (command == 'M') move();
  if (command == 'X') sleeping();
 }
 
-void home1(){
+void home1(int homeSpeed){
   state = HOMING;
   Serial.println("home");
   Serial.print("cmd:");Serial.println(command);
   Serial.print("pos:");Serial.println(requestedPos);
-  home();
+  home(homeSpeed);
   state = READY;
   command = '-';
 }
 
 void move(){
 
-  if (state == HOMING_NEEDED || state == SLEEPING){
-    home1();
+  if (state == HOMING_NEEDED){
+    home1(HOME_SPEED);
+  }
+  if (state == SLEEPING){
+    home1(HOME_SPEED_SLOW);
   }
 
   Serial.println("Start moving");
@@ -293,7 +297,7 @@ void moveNrSteps(int totalSteps, int direction){
   }
 }
 
-void home() {
+void home(int homeSpeed) {
   digitalWrite(enableMotorPin, LOW);
   error = false;
 
@@ -303,45 +307,15 @@ void home() {
   Serial.println("\t move slow up until not high");
   digitalWrite(dirPin, HIGH);
   while (digitalRead(arm1SensorPin)){
-    pulse(stepPin,HOME_SPEED);
+    pulse(stepPin,homeSpeed);
   }
 
   Serial.println("\t move slow down until high");
   digitalWrite(dirPin, LOW);
   while (!digitalRead(arm1SensorPin)){
-    pulse(stepPin, HOME_SPEED);
+    pulse(stepPin, homeSpeed);
   }
-  
 
-//  int delayIndex = 0;
-//  double delay = 0;
-//  double calculatedDelay = 0;
-//  int i = 0;
-//  while (!digitalRead(arm1SensorPin)){
-//    delayIndex = i/indexSteps;
-//    if (i==0 || i%indexSteps==0){
-//      if (delayIndex<delayArraySize) delay = delayList[delayIndex];
-//      float tmp = delay;
-//      tmp = tmp * vertraginsfactor;
-//      tmp = tmp / 100;
-//      calculatedDelay = (int) tmp;
-//    }
-//    pulse(stepPin, HOME_SPEED); // verreken vertraging!
-//    i++;
-//  }
-
-  // move up until not high   
-//  Serial.println("\t move slow up until not high");
-//  digitalWrite(dirPin, HIGH);
-//  while (digitalRead(arm1SensorPin)){
-//    pulse(stepPin,HOME_SPEED);
-//  }
-
-//  Serial.println("\t move klein stukje omhoog");
-//    for (int i = 0; i < 100; i++) {
-//      pulse(stepPin,HOME_SPEED);
-//  }
-  
   Serial.println("\t homing finished");
   currentPos = 00;
 

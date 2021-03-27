@@ -160,6 +160,34 @@ void parseCommand(){
 void processCommand(){
  if (command == 'C') clamp();
  if (command == 'R') release();
+ if (command == 'H') hold();
+ if (command == 'D') drop();
+ if (command == 'A') activateMagnet();
+ if (command == 'I') deactivateMagnet();
+ if (command == 'H') hold();
+ if (command == 'D') drop();
+ if (command == 'A') activateMagnet();
+ if (command == 'I') deactivateMagnet();
+}
+
+void hold(){
+  Serial.print("clamp");
+  analogWrite(pullMagneetPin, 255);
+}
+
+void drop(){
+  Serial.print("clamp");
+  analogWrite(pullMagneetPin, 0);
+}
+
+void activateMagnet(){
+  Serial.print("clamp");
+  analogWrite(magneetPin, 255);
+}
+
+void deactivateMagnet(){
+  Serial.print("clamp");
+  analogWrite(magneetPin, 0);
 }
 
 void clamp(){
