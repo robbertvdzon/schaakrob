@@ -27,6 +27,13 @@
               <button type="submit" v-on:click="release">Laat los</button>
        </span>
       <br>
+      <span>
+              <button type="submit" v-on:click="hold">hold</button>
+              <button type="submit" v-on:click="drop">drop</button>
+              <button type="submit" v-on:click="activate">activate</button>
+              <button type="submit" v-on:click="deactivate">deactivate</button>
+       </span>
+      <br>
       <br>
       Naar vlak:
       <input v-model="vlak" >
@@ -138,6 +145,23 @@ Vue.component("manual", {
       fetch(`/api/sleep`)
       .catch(() => alert("Error"));
     },
+    hold: function (event) {
+      fetch(`/api/hold`)
+      .catch(() => alert("Error"));
+    },
+    drop: function (event) {
+      fetch(`/api/drop`)
+      .catch(() => alert("Error"));
+    },
+    activate: function (event) {
+      fetch(`/api/activate`)
+      .catch(() => alert("Error"));
+    },
+    deactivate: function (event) {
+      fetch(`/api/deactivate`)
+      .catch(() => alert("Error"));
+    },
+
     clamp: function (event) {
       fetch(`/api/clamp`)
       .catch(() => alert("Error"));

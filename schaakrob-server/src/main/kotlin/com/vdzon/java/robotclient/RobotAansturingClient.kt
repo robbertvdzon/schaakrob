@@ -39,6 +39,22 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         get("$host/api/release")
     }
 
+    override fun hold() {
+        get("$host/api/hold")
+    }
+
+    override fun drop() {
+        get("$host/api/drop")
+    }
+
+    override fun activate() {
+        get("$host/api/activate")
+    }
+
+    override fun deactivate() {
+        get("$host/api/deactivate")
+    }
+
     override fun rebuild() {
         get("$host/api/rebuild")
     }

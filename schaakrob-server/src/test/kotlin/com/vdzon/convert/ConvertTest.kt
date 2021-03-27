@@ -143,7 +143,8 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
                 "pak#\n" +
                 "@${it.to}#\n" +
                 "zet#\n"
-        return if (it.nr % 5 == 0) "home#\n$moves" else moves
+//        return if (it.nr % 5 == 0) "home#\n$moves" else moves
+        return moves
     }
 
 

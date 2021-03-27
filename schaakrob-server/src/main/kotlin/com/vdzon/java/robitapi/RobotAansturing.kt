@@ -8,6 +8,10 @@ interface RobotAansturing {
     fun sleep()
     fun clamp()
     fun release()
+    fun hold()
+    fun drop()
+    fun activate()
+    fun deactivate()
     fun rebuild()
     fun restart()
     fun getA8(): String?

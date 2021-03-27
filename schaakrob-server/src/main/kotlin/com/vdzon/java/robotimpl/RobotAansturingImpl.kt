@@ -209,6 +209,43 @@ class RobotAansturingImpl : RobotAansturing {
         }
     }
 
+    override fun hold() {
+        try {
+            arm3!!.write("^H0000000000000000".toByteArray())
+            Thread.sleep(400)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun drop() {
+        try {
+            arm3!!.write("^D0000000000000000".toByteArray())
+            Thread.sleep(400)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun activate() {
+        try {
+            arm3!!.write("^A0000000000000000".toByteArray())
+            Thread.sleep(400)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun deactivate() {
+        try {
+            arm3!!.write("^I0000000000000000".toByteArray())
+            Thread.sleep(400)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
     override fun rebuild() {
         try {
             val writer = PrintWriter("/tmp/rebuildui", "UTF-8")
