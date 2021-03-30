@@ -48,7 +48,6 @@ class RobotAansturingImpl : RobotAansturing {
                 arm1!!.read()
                 arm2!!.read()
                 arm3!!.read()
-                Lock.unlock()
                 initialized = true
             } catch (e: UnsupportedBusNumberException) {
                 println("ERROR, UnsupportedBusNumberException in init")
@@ -57,6 +56,7 @@ class RobotAansturingImpl : RobotAansturing {
                 println("ERROR IOException in init:" + e.message)
                 Thread.sleep(2000)
             }
+            Lock.unlock()
         }
 
         println("Devices found")
@@ -414,23 +414,22 @@ class RobotAansturingImpl : RobotAansturing {
         var zandloperChar = "*"
         while (true) {
             try {
+                Thread.sleep(300)
                 zandloperChar = if (zandloperChar=="*") "o" else "*"
-                Lock.lock()
-                val arm1Status = arm1!!.read()
-                val arm2Status = arm2!!.read()
-                val arm3Status = arm3!!.read()
-                Lock.unlock()
-                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
-                val status = zandloperChar+" "+getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
-                Lock.lock()
+//                Lock.lock()
+//                val arm1Status = arm1!!.read()
+//                val arm2Status = arm2!!.read()
+//                val arm3Status = arm3!!.read()
+//                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
+//                val status = zandloperChar+" "+getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
+                val status = zandloperChar
                 lcd.write(0, ipAdress)
                 lcd.write(1, status)
-                Lock.unlock()
-                Thread.sleep(300)
             } catch (e: Exception) {
                 println("Error updating display:"+e.message)
 //                e.printStackTrace()
             }
+//            Lock.unlock()
         }
     }
 
@@ -438,7 +437,6 @@ class RobotAansturingImpl : RobotAansturing {
         try {
             Lock.lock()
             arm?.write("^H0000000000600000".toByteArray())
-            Lock.unlock()
             if (arm === arm1) {
                 lastPos1 = 0
             }
@@ -448,6 +446,7 @@ class RobotAansturingImpl : RobotAansturing {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     fun calcDelays(pos1: Int, pos2: Int): Long {
@@ -494,11 +493,11 @@ class RobotAansturingImpl : RobotAansturing {
             val arm1Status = arm1!!.read()
             val arm2Status = arm2!!.read()
             val arm3Status = arm3!!.read()
-            Lock.unlock()
             allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     private fun stopLoop() {
