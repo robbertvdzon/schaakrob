@@ -4,6 +4,7 @@ import com.github.bhlangonijr.chesslib.Board
 import com.github.bhlangonijr.chesslib.Square
 import com.github.bhlangonijr.chesslib.move.Move
 import com.github.bhlangonijr.chesslib.pgn.PgnHolder
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 import java.util.*
@@ -32,6 +33,7 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
 
 
     @Test
+    @Ignore
     fun test() {
 
         val board = Board()
