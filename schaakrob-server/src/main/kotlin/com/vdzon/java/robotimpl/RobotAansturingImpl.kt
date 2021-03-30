@@ -422,11 +422,14 @@ class RobotAansturingImpl : RobotAansturing {
                 Lock.unlock()
                 allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
                 val status = zandloperChar+" "+getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
+                Lock.lock()
                 lcd.write(0, ipAdress)
                 lcd.write(1, status)
+                Lock.unlock()
                 Thread.sleep(300)
             } catch (e: Exception) {
-                e.printStackTrace()
+                println("Error updating display:"+e.message)
+//                e.printStackTrace()
             }
         }
     }
