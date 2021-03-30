@@ -178,7 +178,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun release() {
         try {
             arm3!!.writeI2c("^R0000000000000000".toByteArray())
-//            Thread.sleep(400)
+//            Thread.sleep(200)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -393,23 +393,23 @@ class RobotAansturingImpl : RobotAansturing {
         val ipAdress = inetAddress.hostAddress
         lcd.write(0, ipAdress)
         var zandloperChar = "*"
-        while (true) {
-            try {
-                Thread.sleep(300)
-                zandloperChar = if (zandloperChar=="*") "o" else "*"
+//        while (true) {
+//            try {
+//                Thread.sleep(300)
+//                zandloperChar = if (zandloperChar=="*") "o" else "*"
 //                val arm1Status = arm1!!.read()
 //                val arm2Status = arm2!!.read()
 //                val arm3Status = arm3!!.read()
 //                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
 //                val status = zandloperChar+" "+getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
-                val status = zandloperChar
-                lcd.write(0, ipAdress)
-                lcd.write(1, status)
-            } catch (e: Exception) {
-                println("Error updating display:"+e.message)
+//                val status = zandloperChar
+//                lcd.write(0, ipAdress)
+//                lcd.write(1, status)
+//            } catch (e: Exception) {
+//                println("Error updating display:"+e.message)
 //                e.printStackTrace()
-            }
-        }
+//            }
+//        }
     }
 
     private fun home(arm: I2CDevice?) {
