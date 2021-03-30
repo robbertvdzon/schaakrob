@@ -461,7 +461,6 @@ class RobotAansturingImpl : RobotAansturing {
 
         // speedup 2x
         val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
-        print("snelheid:"+snelheid)
 
         delayFactor1 = delayFactor1 * snelheid
         delayFactor2 = delayFactor2 * snelheid
