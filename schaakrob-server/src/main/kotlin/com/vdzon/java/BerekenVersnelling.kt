@@ -30,19 +30,6 @@ object BerekenVersnelling {
         println("delay 3=" + delays.delay3)
         println("10000:" + berekenTijd(10000, delays.delay2, CALCULATION_PROCESSOR_TIME))
         println("20000:" + berekenTijd(20000, delays.delay3, CALCULATION_PROCESSOR_TIME))
-
-
-//    System.out.println("100:"+berekenTijd(100));
-//    System.out.println("1000:"+berekenTijd(1000));
-//    System.out.println("2000:"+berekenTijd(2000));
-//    System.out.println("10000:"+berekenTijd(10000));
-//    System.out.println("15000:"+berekenTijd(15000));
-//
-//    System.out.println("100 = "+(berekenTijd(100)-65)/100);
-//    System.out.println("1000 = "+(berekenTijd(1000)-335)/1000);
-//    System.out.println("2000 = "+(berekenTijd(2000)-525)/2000);
-//    System.out.println("10000 = "+(berekenTijd(10000)-1565)/10000);
-//    System.out.println("15000 = "+(berekenTijd(15000)-2201)/15000);
     }
 
     fun calcDelays(pulses1: Int, pulses2: Int): Delays {

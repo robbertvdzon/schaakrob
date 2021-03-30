@@ -6,6 +6,7 @@ import com.pi4j.io.i2c.I2CDevice
 import com.pi4j.io.i2c.I2CFactory
 import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
+import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
 import java.io.IOException
 import java.io.PrintWriter
@@ -43,9 +44,11 @@ class RobotAansturingImpl : RobotAansturing {
                 arm2 = i2c.getDevice(ARM2)
                 arm3 = i2c.getDevice(ARM3)
                 // test connectoe
+                Lock.lock()
                 arm1!!.read()
                 arm2!!.read()
                 arm3!!.read()
+                Lock.unlock()
                 initialized = true
             } catch (e: UnsupportedBusNumberException) {
                 println("ERROR, UnsupportedBusNumberException in init")
@@ -64,7 +67,6 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun movetoVlak(vlak: String) {
-        println("move to vlak $vlak")
         val posA8 = getA8()
         val posA11 = getA11()
         val posA21 = getA21()
@@ -79,8 +81,6 @@ class RobotAansturingImpl : RobotAansturing {
         val y1 = posH1!!.split(",".toRegex()).toTypedArray()[0].toInt()
         val xDelta = (xa - xh) / 7
         val yDelta = (y8 - y1) / 7
-        println("xDelta=$xDelta")
-        println("yDelta=$yDelta")
 
         // calc delta van bovenste 2 rijen
         val qy21 = posA21!!.split(",".toRegex()).toTypedArray()[0].toInt()
@@ -92,8 +92,6 @@ class RobotAansturingImpl : RobotAansturing {
 
         val letter = vlak.toUpperCase()[0]
         val cijfer = vlak.substring(1)
-        println("letter=$letter")
-        println("cijfer=$cijfer")
         var x = xa
         if (letter == 'A') x = xa
         if (letter == 'B') x = xa - xDelta * 1
@@ -124,7 +122,6 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun moveto(x: Int, y: Int) {
-        println("move to pos $x,$y")
         calcDelays(x, y)
         gotoPos(arm1, x, formattedDelayFactor1)
         gotoPos(arm2, y, formattedDelayFactor2)
@@ -142,6 +139,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun sleep() {
         println("sleeping")
 //        moveto(100, 100)
+        Lock.lock()
         try {
             val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
             val delay = 100*snelheid;
@@ -151,17 +149,17 @@ class RobotAansturingImpl : RobotAansturing {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        Lock.unlock()
         waitUntilReady(50)
         lastPos2 = 0
         lastPos1 = 0
     }
 
     fun gotoPos(arm: I2CDevice?, pos: Int, vertraging: String) {
+        Lock.lock()
         try {
-            println("gotopos:" + pos + " to " + arm!!.address + " vertraging:" + vertraging)
             val formattedPos = String.format("%06d", pos)
             val command = "^M$formattedPos$vertraging"
-            println("command:" + command + " to " + arm.address)
             arm?.write(command.toByteArray())
             if (arm === arm1) {
                 lastPos1 = pos
@@ -172,62 +170,73 @@ class RobotAansturingImpl : RobotAansturing {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     override fun clamp() {
-        println("clamp")
+        Lock.lock()
         try {
             arm3!!.write("^C0000000000000000".toByteArray())
 //            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     override fun release() {
-        println("release")
+        Lock.lock()
         try {
             arm3!!.write("^R0000000000000000".toByteArray())
 //            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     override fun hold() {
+        Lock.lock()
         try {
             arm3!!.write("^H0000000000000000".toByteArray())
 //            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     override fun drop() {
+        Lock.lock()
         try {
             arm3!!.write("^D0000000000000000".toByteArray())
 //            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     override fun activate() {
+        Lock.lock()
         try {
             arm3!!.write("^A0000000000000000".toByteArray())
 //            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
     override fun deactivate() {
+        Lock.lock()
         try {
             arm3!!.write("^I0000000000000000".toByteArray())
 //            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Lock.unlock()
     }
 
 
@@ -258,17 +267,14 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun setA8(pos: String) {
-        println("save a8:"+pos)
         saveToFile("/home/pi/a8.data", pos)
     }
 
     override fun setA11(pos: String) {
-        println("save a11:"+pos)
         saveToFile("/home/pi/a11.data", pos)
     }
 
     override fun setA21(pos: String) {
-        println("save a21:"+pos)
         saveToFile("/home/pi/a21.data", pos)
     }
 
@@ -285,17 +291,14 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun setH1(pos: String) {
-        println("save h1:"+pos)
         saveToFile("/home/pi/h1.data", pos)
     }
 
     override fun setH10(pos: String) {
-        println("save h10:"+pos)
         saveToFile("/home/pi/h10.data", pos)
     }
 
     override fun setH20(pos: String) {
-        println("save h20:"+pos)
         saveToFile("/home/pi/h20.data", pos)
     }
 
@@ -412,9 +415,11 @@ class RobotAansturingImpl : RobotAansturing {
         while (true) {
             try {
                 zandloperChar = if (zandloperChar=="*") "o" else "*"
+                Lock.lock()
                 val arm1Status = arm1!!.read()
                 val arm2Status = arm2!!.read()
                 val arm3Status = arm3!!.read()
+                Lock.unlock()
                 allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
                 val status = zandloperChar+" "+getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
                 lcd.write(0, ipAdress)
@@ -428,7 +433,9 @@ class RobotAansturingImpl : RobotAansturing {
 
     private fun home(arm: I2CDevice?) {
         try {
+            Lock.lock()
             arm?.write("^H0000000000600000".toByteArray())
+            Lock.unlock()
             if (arm === arm1) {
                 lastPos1 = 0
             }
@@ -443,8 +450,6 @@ class RobotAansturingImpl : RobotAansturing {
     fun calcDelays(pos1: Int, pos2: Int): Long {
         val pulses1 = Math.abs(pos1 - lastPos1)
         val pulses2 = Math.abs(pos2 - lastPos2)
-        println("pulses1=$pulses1")
-        println("pulses2=$pulses2")
         val delays = BerekenVersnelling.calcDelays(pulses1, pulses2)
         var delayFactor1: Double = if (pulses1 == 0) 1.0 else delays!!.delay1
         var delayFactor2: Double = if (pulses2 == 0) 1.0 else delays!!.delay2
@@ -483,9 +488,11 @@ class RobotAansturingImpl : RobotAansturing {
 
     private fun udateStatus() {
         try {
+            Lock.lock()
             val arm1Status = arm1!!.read()
             val arm2Status = arm2!!.read()
             val arm3Status = arm3!!.read()
+            Lock.unlock()
             allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
         } catch (e: Exception) {
             e.printStackTrace()
@@ -520,8 +527,6 @@ class RobotAansturingImpl : RobotAansturing {
                 Consumer { row: String? ->
                     if (row != null && !row.startsWith("#")) {
                         if (row.trim { it <= ' ' }.startsWith("@")) {
-                            println("moveto:$row")
-                            println("ss:" + row.trim { it <= ' ' }.substring(1, 3))
                             val vlak = row.trim().replace("@","")
                             movetoVlak(vlak)
                         }

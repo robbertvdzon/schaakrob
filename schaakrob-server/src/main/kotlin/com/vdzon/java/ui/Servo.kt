@@ -80,11 +80,6 @@ class Servo {
         val totalTimeWithSkip = realSteps * STUUR_TIME_PER_STEP_IN_MSEC.toLong()
         val timeDiff = time - totalTimeWithSkip
         extraDelay = timeDiff / realSteps
-        println("startPos=$startPos")
-        println("eindPos=$eindPos")
-        println("step=$step")
-        println("skipSteps=$skipSteps")
-        println("extraDelay=$extraDelay")
         var p = startPos
         while (p != eindPos) {
             if (p % skipSteps == 0) {

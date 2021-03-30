@@ -11,7 +11,6 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     private val httpClient = HttpClients.createDefault()
     private var host = ""
     override fun movetoVlak(vlak: String) {
-        println("move to vlak: "+vlak)
         post("$host/api/movevlak", vlak)
     }
 
@@ -144,7 +143,6 @@ class RobotAansturingClient(host: String) : RobotAansturing {
 
     private operator fun get(url: String): String? {
         try {
-            println("call:$url")
             val request = HttpGet(url)
             httpClient.execute(request).use { response ->
                 println(response.statusLine.toString())
@@ -155,7 +153,6 @@ class RobotAansturingClient(host: String) : RobotAansturing {
                 if (entity != null) {
                     // return it as a String
                     val result = EntityUtils.toString(entity)
-                    println("Body:$result")
                     return result
                 }
             }
@@ -167,7 +164,6 @@ class RobotAansturingClient(host: String) : RobotAansturing {
 
     private fun post(url: String, body: String): String? {
         try {
-            println("call post:$url")
             val request = HttpPost(url)
             request.entity = StringEntity(body)
             httpClient.execute(request).use { response ->
