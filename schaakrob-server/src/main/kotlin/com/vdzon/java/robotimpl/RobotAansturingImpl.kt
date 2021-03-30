@@ -83,27 +83,12 @@ class RobotAansturingImpl : RobotAansturing {
         println("yDelta=$yDelta")
 
         // calc delta van bovenste 2 rijen
-//        val qxa = posA21!!.split(",".toRegex()).toTypedArray()[1].toInt()
-//        val qxh = posH20!!.split(",".toRegex()).toTypedArray()[1].toInt()
         val qy21 = posA21!!.split(",".toRegex()).toTypedArray()[0].toInt()
         val qy20 = posH20!!.split(",".toRegex()).toTypedArray()[0].toInt()
-//        val qxDelta = (qxa - qxh) / 7
-//        val qyDelta = (qy21 - qy20) / 7
-//        println("qxDelta=$qxDelta")
-//        println("qyDelta=$qyDelta")
 //
         // calc delta van onderste 2 rijen
-//        val rxa = posA11!!.split(",".toRegex()).toTypedArray()[1].toInt()
-//        val rxh = posH10!!.split(",".toRegex()).toTypedArray()[1].toInt()
         val ry11 = posA11!!.split(",".toRegex()).toTypedArray()[0].toInt()
         val ry10 = posH10!!.split(",".toRegex()).toTypedArray()[0].toInt()
-//        val rxDelta = (rxa - rxh) / 7
-//        val ryDelta = (ry11 - ry10) / 7
-//        println("rxDelta=$rxDelta")
-//        println("ryDelta=$ryDelta")
-
-
-
 
         val letter = vlak.toUpperCase()[0]
         val cijfer = vlak.substring(1)
@@ -143,7 +128,7 @@ class RobotAansturingImpl : RobotAansturing {
         calcDelays(x, y)
         gotoPos(arm1, x, formattedDelayFactor1)
         gotoPos(arm2, y, formattedDelayFactor2)
-        waitUntilReady(100)
+        waitUntilReady(20)
     }
 
     override fun homeVert() {
@@ -193,7 +178,7 @@ class RobotAansturingImpl : RobotAansturing {
         println("clamp")
         try {
             arm3!!.write("^C0000000000000000".toByteArray())
-            Thread.sleep(400)
+//            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -203,7 +188,7 @@ class RobotAansturingImpl : RobotAansturing {
         println("release")
         try {
             arm3!!.write("^R0000000000000000".toByteArray())
-            Thread.sleep(400)
+//            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -212,7 +197,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun hold() {
         try {
             arm3!!.write("^H0000000000000000".toByteArray())
-            Thread.sleep(400)
+//            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -221,7 +206,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun drop() {
         try {
             arm3!!.write("^D0000000000000000".toByteArray())
-            Thread.sleep(400)
+//            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -230,7 +215,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun activate() {
         try {
             arm3!!.write("^A0000000000000000".toByteArray())
-            Thread.sleep(400)
+//            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -239,7 +224,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun deactivate() {
         try {
             arm3!!.write("^I0000000000000000".toByteArray())
-            Thread.sleep(400)
+//            Thread.sleep(400)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -502,7 +487,6 @@ class RobotAansturingImpl : RobotAansturing {
             val arm2Status = arm2!!.read()
             val arm3Status = arm3!!.read()
             allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
-            Thread.sleep(10)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -580,7 +564,7 @@ class RobotAansturingImpl : RobotAansturing {
             sleep(10)
             udateStatus()
         }
-        sleep(200)// extra sleep, deze zou weg moeten kunnen
+//        sleep(200)// extra sleep, deze zou weg moeten kunnen
     }
 
     private fun sleep(initialDelay: Int) {
