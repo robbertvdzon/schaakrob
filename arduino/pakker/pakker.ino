@@ -55,6 +55,8 @@ int SLAVE_ADDRESS = 5;
 
 void setup() {
 
+  TCCR2B = TCCR2B & B11111000 | B00000001; // for PWM frequency of 31372.55 Hz
+
   pinMode(pullMagneetPin, OUTPUT);
   pinMode(magneetPin, OUTPUT);
   pinMode(magneet2PinB, OUTPUT);
@@ -195,12 +197,12 @@ void clamp(){
   Serial.print("clamp");
   analogWrite(magneetPin, 0);
   analogWrite(pullMagneetPin, 255); 
-  delay(50);
+  delay(20);
   analogWrite(pullMagneetPin, 50); 
   analogWrite(magneetPin, 255); 
-  delay(50);
+  delay(20);
   analogWrite(pullMagneetPin, 0); 
-  delay(100);
+  delay(40);
   analogWrite(magneetPin, 150); 
   Serial.println("RESET CURRENT COMMAND");
   state = READY;
@@ -211,10 +213,10 @@ void release(){
   state = RELEASING;
   Serial.print("release");
   analogWrite(pullMagneetPin, 255); 
-  delay(50);
+  delay(20);
   analogWrite(pullMagneetPin, 50); 
   analogWrite(magneetPin, 0);
-  delay(200);
+  delay(50);
   analogWrite(pullMagneetPin, 0); 
   Serial.println("RESET CURRENT COMMAND");
   state = READY;
