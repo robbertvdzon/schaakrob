@@ -585,6 +585,7 @@ private fun I2CDevice.readI2c(): Int {
         catch (e:Exception){
             tryCount++;
             println("read failed $tryCount times : ${e.message}")
+            sleep(100)
         }
     }
     Lock.unlock()
@@ -604,7 +605,18 @@ private fun I2CDevice.writeI2c(toByteArray: ByteArray) {
         catch (e:Exception){
             tryCount++;
             println("write failed $tryCount times : ${e.message}")
+            sleep(100)
         }
     }
     Lock.unlock()
+}
+
+private fun sleep(time:Long){
+    try{
+        Thread.sleep(time)
+    }
+    catch (e:Exception){
+
+    }
+
 }
