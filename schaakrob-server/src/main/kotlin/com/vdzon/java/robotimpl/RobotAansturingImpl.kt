@@ -553,7 +553,7 @@ private fun I2CDevice.readI2c(): Int {
     Lock.lock()
     var succeeded = false
     var tryCount = 0
-    while (!succeeded && tryCount<5) {
+    while (!succeeded && tryCount<20) {
         try {
             result = read()
             succeeded = true
@@ -573,7 +573,7 @@ private fun I2CDevice.writeI2c(toByteArray: ByteArray) {
     Lock.lock()
     var succeeded = false
     var tryCount = 0
-    while (!succeeded && tryCount<5) {
+    while (!succeeded && tryCount<20) {
         try {
             write(toByteArray)
             succeeded = true
