@@ -54,6 +54,10 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         get("$host/api/deactivate")
     }
 
+    override fun bootsound() {
+        get("$host/api/bootsound")
+    }
+
     override fun rebuild() {
         get("$host/api/rebuild")
     }

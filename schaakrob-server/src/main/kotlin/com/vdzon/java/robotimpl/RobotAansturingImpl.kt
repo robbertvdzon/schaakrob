@@ -196,6 +196,11 @@ class RobotAansturingImpl : RobotAansturing {
         waitUntilReady(20)
     }
 
+    override fun bootsound() {
+        arm3!!.writeI2c("^B0000000000000000".toByteArray())
+        waitUntilReady(20)
+    }
+
 
     override fun rebuild() {
         try {
@@ -445,7 +450,7 @@ class RobotAansturingImpl : RobotAansturing {
             val arm1Status = arm1!!.readI2c()
             val arm2Status = arm2!!.readI2c()
             val arm3Status = arm3!!.readI2c()
-            allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
+            allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1 // arm3 : alleen checken dat hij niet aan het moven is
         } catch (e: Exception) {
             e.printStackTrace()
         }

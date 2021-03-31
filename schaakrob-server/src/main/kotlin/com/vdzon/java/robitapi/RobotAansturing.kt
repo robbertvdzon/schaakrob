@@ -12,6 +12,7 @@ interface RobotAansturing {
     fun drop()
     fun activate()
     fun deactivate()
+    fun bootsound();
     fun rebuild()
     fun restart()
     fun getA8(): String?

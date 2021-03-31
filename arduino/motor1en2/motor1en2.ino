@@ -192,6 +192,7 @@ void processCommand(){
  if (command == 'H') home1(HOME_SPEED);
  if (command == 'M') move();
  if (command == 'X') sleeping();
+ if (command == 'B') bootsound();
 }
 
 void home1(int homeSpeed){
@@ -357,6 +358,11 @@ void sleeping() {
   digitalWrite(enableMotorPin, HIGH);
   state = SLEEPING;
   command = '-';  
+}
+
+void bootsound(){
+    beepLong();
+    beepLong();
 }
 
 void bootSeq(){

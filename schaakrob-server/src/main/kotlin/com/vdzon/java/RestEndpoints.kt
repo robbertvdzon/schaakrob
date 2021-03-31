@@ -17,6 +17,7 @@ class RestEndpoints {
         app["/api/sleep", { ctx: Context? -> robotAansturing.sleep() }]
         app["/api/clamp", { ctx: Context? -> robotAansturing.clamp() }]
         app["/api/release", { ctx: Context? -> robotAansturing.release() }]
+        app["/api/bootsound", { ctx: Context? -> robotAansturing.bootsound() }]
         app["/api/hold", { ctx: Context? -> robotAansturing.hold() }]
         app["/api/drop", { ctx: Context? -> robotAansturing.drop() }]
         app["/api/activate", { ctx: Context? -> robotAansturing.activate() }]
