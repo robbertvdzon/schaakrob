@@ -167,57 +167,33 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun clamp() {
-        try {
-            arm3!!.writeI2c("^C0000000000000000".toByteArray())
-//            Thread.sleep(400)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        arm3!!.writeI2c("^C0000000000000000".toByteArray())
+        waitUntilReady(20)
     }
 
     override fun release() {
-        try {
-            arm3!!.writeI2c("^R0000000000000000".toByteArray())
-//            Thread.sleep(200)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        arm3!!.writeI2c("^R0000000000000000".toByteArray())
+        waitUntilReady(20)
     }
 
     override fun hold() {
-        try {
-            arm3!!.writeI2c("^H0000000000000000".toByteArray())
-//            Thread.sleep(400)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        arm3!!.writeI2c("^H0000000000000000".toByteArray())
+        waitUntilReady(20)
     }
 
     override fun drop() {
-        try {
-            arm3!!.writeI2c("^D0000000000000000".toByteArray())
-//            Thread.sleep(400)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        arm3!!.writeI2c("^D0000000000000000".toByteArray())
+        waitUntilReady(20)
     }
 
     override fun activate() {
-        try {
-            arm3!!.writeI2c("^A0000000000000000".toByteArray())
-//            Thread.sleep(400)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        arm3!!.writeI2c("^A0000000000000000".toByteArray())
+        waitUntilReady(20)
     }
 
     override fun deactivate() {
-        try {
-            arm3!!.writeI2c("^I0000000000000000".toByteArray())
-//            Thread.sleep(400)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        arm3!!.writeI2c("^I0000000000000000".toByteArray())
+        waitUntilReady(20)
     }
 
 
@@ -477,7 +453,7 @@ class RobotAansturingImpl : RobotAansturing {
 
     private fun stopLoop() {
         if (currentLoopThread != null) {
-            currentLoopThread!!.stop()
+            currentLoopThread=null
         }
     }
 
@@ -501,7 +477,7 @@ class RobotAansturingImpl : RobotAansturing {
         val split = text!!.split("#".toRegex()).toTypedArray()
         Arrays.asList(*split).forEach(
                 Consumer { row: String? ->
-                    if (row != null && !row.startsWith("#")) {
+                    if (row != null && !row.startsWith("#") && currentLoopThread!=null) {// check currentLoopThread: als die null is, dan is gevraagd op de demo te stoppen
                         if (row.trim { it <= ' ' }.startsWith("@")) {
                             val vlak = row.trim().replace("@","")
                             movetoVlak(vlak)
