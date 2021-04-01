@@ -170,7 +170,7 @@ class RobotAansturingImpl : RobotAansturing {
         arm3!!.writeI2c("^C0000000000000000".toByteArray())
         waitUntilReady(20)
         try {
-            val delay = getDelayNaPak()
+            val delay = getDelayNaPak()?.trim()
             Thread.sleep(delay?.toLong()?:0L)
 
         }
@@ -183,7 +183,7 @@ class RobotAansturingImpl : RobotAansturing {
         arm3!!.writeI2c("^R0000000000000000".toByteArray())
         waitUntilReady(20)
         try {
-            val delay = getDelayNaZet()
+            val delay = getDelayNaZet()?.trim()
             Thread.sleep(delay?.toLong()?:0L)
 
         }
