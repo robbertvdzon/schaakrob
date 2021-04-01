@@ -75,12 +75,12 @@
       <br>
       <br>
       Delay na pak:
-      <input v-model="delayNaPak" >
+      <input v-model="delaynapak" >
       <button type="submit" v-on:click="saveDelayNaPak">Save</button>
       <br>
       <br>
       Delay na zet:
-      <input v-model="delayNaZet" >
+      <input v-model="delaynazak" >
       <button type="submit" v-on:click="saveDelayNaZet">Save</button>
       <br>
 
