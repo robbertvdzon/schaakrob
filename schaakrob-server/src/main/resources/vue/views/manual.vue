@@ -73,6 +73,16 @@
       <input v-model="snelheid" >
       <button type="submit" v-on:click="saveSnelheid">Save</button>
       <br>
+      <br>
+      Delay na pak:
+      <input v-model="delayNaPak" >
+      <button type="submit" v-on:click="saveDelayNaPak">Save</button>
+      <br>
+      <br>
+      Delay na zet:
+      <input v-model="delayNaZet" >
+      <button type="submit" v-on:click="saveDelayNaZet">Save</button>
+      <br>
 
     </div>
   </app-frame>
@@ -90,6 +100,8 @@ Vue.component("manual", {
     h10pos:"",
     h20pos:"",
     snelheid:"2.0",
+    delaynapak:"2.0",
+    delaynazet:"2.0",
     vlak:"A8"
   }),
   created() {
@@ -130,6 +142,16 @@ Vue.component("manual", {
       fetch(`/api/snelheid`)
       .then(res => res.text())
       .then(text => this.snelheid=text)
+      .catch(() => alert("Error"));
+
+      fetch(`/api/delaynapak`)
+      .then(res => res.text())
+      .then(text => this.delaynapak=text)
+      .catch(() => alert("Error"));
+
+      fetch(`/api/delaynazet`)
+      .then(res => res.text())
+      .then(text => this.delaynazet=text)
       .catch(() => alert("Error"));
 
     },
@@ -236,6 +258,22 @@ Vue.component("manual", {
     },
     saveSnelheid: function (event) {
       axios.post(`/api/snelheid`, this.snelheid)
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
+    saveDelayNaPak: function (event) {
+      axios.post(`/api/delaynapak`, this.snelheid)
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
+    saveDelayNaZet: function (event) {
+      axios.post(`/api/delaynazet`, this.snelheid)
       .then(res => {
       })
       .catch(error => {

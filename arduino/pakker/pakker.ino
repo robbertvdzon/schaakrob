@@ -197,14 +197,14 @@ void clamp(){
   Serial.print("clamp");
   analogWrite(magneetPin, 0);
   analogWrite(pullMagneetPin, 255); 
-  delay(20);
-  analogWrite(pullMagneetPin, 50); 
+  delay(10);
   analogWrite(magneetPin, 255); 
-  delay(20);
+  delay(100);
   analogWrite(pullMagneetPin, 0); 
-  delay(40);
+  delay(20);
   analogWrite(magneetPin, 150); 
   Serial.println("RESET CURRENT COMMAND");
+  delay(50);
   state = READY;
   command = '-';
 }
@@ -213,11 +213,11 @@ void release(){
   state = RELEASING;
   Serial.print("release");
   analogWrite(pullMagneetPin, 255); 
-  delay(20);
-  analogWrite(pullMagneetPin, 50); 
+  delay(40);
   analogWrite(magneetPin, 0);
-  delay(50);
+  delay(120);
   analogWrite(pullMagneetPin, 0); 
+  delay(50);
   Serial.println("RESET CURRENT COMMAND");
   state = READY;
   command = '-';

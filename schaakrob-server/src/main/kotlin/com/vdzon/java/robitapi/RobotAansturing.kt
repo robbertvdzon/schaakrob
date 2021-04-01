@@ -29,6 +29,10 @@ interface RobotAansturing {
     fun setH20(pos: String)
     fun getSnelheid(): String?
     fun setSnelheid(snelheid: String)
+    fun getDelayNaPak(): String?
+    fun setDelayNaPak(delay: String)
+    fun getDelayNaZet(): String?
+    fun setDelayNaZet(delay: String)
     fun getDemoString(): String?
     fun setDemoString(demoString: String)
     fun runDemoLoop()

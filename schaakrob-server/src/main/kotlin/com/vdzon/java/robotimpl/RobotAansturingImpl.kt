@@ -169,11 +169,27 @@ class RobotAansturingImpl : RobotAansturing {
     override fun clamp() {
         arm3!!.writeI2c("^C0000000000000000".toByteArray())
         waitUntilReady(20)
+        try {
+            val delay = getDelayNaPak()
+            Thread.sleep(delay?.toLong()?:0L)
+
+        }
+        catch (e:Exception){
+            e.printStackTrace()
+        }
     }
 
     override fun release() {
         arm3!!.writeI2c("^R0000000000000000".toByteArray())
         waitUntilReady(20)
+        try {
+            val delay = getDelayNaZet()
+            Thread.sleep(delay?.toLong()?:0L)
+
+        }
+        catch (e:Exception){
+            e.printStackTrace()
+        }
     }
 
     override fun hold() {
@@ -270,6 +286,22 @@ class RobotAansturingImpl : RobotAansturing {
 
     override fun setSnelheid(snelheid: String) {
         saveToFile("/home/pi/snelheid.data", snelheid)
+    }
+
+    override fun getDelayNaPak(): String? {
+        return loadFile("/home/pi/pakdelay.data")
+    }
+
+    override fun setDelayNaPak(delay: String) {
+        saveToFile("/home/pi/pakdelay.data", delay)
+    }
+
+    override fun getDelayNaZet(): String? {
+        return loadFile("/home/pi/zetdelay.data")
+    }
+
+    override fun setDelayNaZet(delay: String) {
+        saveToFile("/home/pi/zetdelay.data", delay)
     }
 
     override fun getDemoString(): String? {
