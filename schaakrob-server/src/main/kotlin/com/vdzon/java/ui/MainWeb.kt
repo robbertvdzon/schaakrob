@@ -29,8 +29,8 @@ class MainWeb {
         }
         RestEndpoints().initRestEndpoints(app, robotAansturing)
         println("Starting server")
-        robotAansturing.bootsound()
         app!!.start(8080)
+        robotAansturing.bootsound()
     }
 
     fun stop() {
