@@ -80,7 +80,7 @@
       <br>
       <br>
       Delay na zet:
-      <input v-model="delaynazak" >
+      <input v-model="delaynazet" >
       <button type="submit" v-on:click="saveDelayNaZet">Save</button>
       <br>
 
