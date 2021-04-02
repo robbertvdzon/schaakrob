@@ -1,5 +1,7 @@
 package com.vdzon.java
 
+import com.vdzon.java.ui.MainWeb
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Collectors
 
@@ -11,6 +13,7 @@ object BerekenVersnelling {
   10.000 1576
   15.000 2201
    */
+    private val log = LoggerFactory.getLogger(BerekenVersnelling::class.java)
     const val MAX_SNELHEID = 1000000 / 40 // pulsen per sec
             .toDouble()
     const val VERSNELLINGSTIJD = 200000.0 // in microsec
@@ -20,16 +23,16 @@ object BerekenVersnelling {
     @JvmStatic
     fun main(args: Array<String>) {
         val snelheidList = getSnelheidList().stream().map { i: Int -> i.toString() }.collect(Collectors.toList())
-        println("static const int delayList[] = {" + java.lang.String.join(",", snelheidList) + "};")
-        println("static const int delayArraySize = " + snelheidList.size + ";")
-        println("static const int indexSteps = $INDEX_STEPS;")
-        println("10000:" + berekenTijd(10000))
-        println("20000:" + berekenTijd(20000))
+        log.info("static const int delayList[] = {" + java.lang.String.join(",", snelheidList) + "};")
+        log.info("static const int delayArraySize = " + snelheidList.size + ";")
+        log.info("static const int indexSteps = $INDEX_STEPS;")
+        log.info("10000:" + berekenTijd(10000))
+        log.info("20000:" + berekenTijd(20000))
         val delays = calcDelays(10000, 20000)
-        println("delay 2=" + delays.delay2)
-        println("delay 3=" + delays.delay3)
-        println("10000:" + berekenTijd(10000, delays.delay2, CALCULATION_PROCESSOR_TIME))
-        println("20000:" + berekenTijd(20000, delays.delay3, CALCULATION_PROCESSOR_TIME))
+        log.info("delay 2=" + delays.delay2)
+        log.info("delay 3=" + delays.delay3)
+        log.info("10000:" + berekenTijd(10000, delays.delay2, CALCULATION_PROCESSOR_TIME))
+        log.info("20000:" + berekenTijd(20000, delays.delay3, CALCULATION_PROCESSOR_TIME))
     }
 
     fun calcDelays(pulses1: Int, pulses2: Int): Delays {

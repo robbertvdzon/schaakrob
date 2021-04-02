@@ -1,13 +1,16 @@
 package com.vdzon.java.robotclient
 
+import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.robitapi.RobotAansturing
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
+import org.slf4j.LoggerFactory
 
 class RobotAansturingClient(host: String) : RobotAansturing {
+    private val log = LoggerFactory.getLogger(RobotAansturingClient::class.java)
     private val httpClient = HttpClients.createDefault()
     private var host = ""
     override fun movetoVlak(vlak: String) {
@@ -163,10 +166,10 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         try {
             val request = HttpGet(url)
             httpClient.execute(request).use { response ->
-                println(response.statusLine.toString())
+                log.info(response.statusLine.toString())
                 val entity = response.entity
                 //        Header headers = entity.getContentType();
-//        System.out.println(headers);
+//        log.info(headers);
 //
                 if (entity != null) {
                     // return it as a String
@@ -185,10 +188,10 @@ class RobotAansturingClient(host: String) : RobotAansturing {
             val request = HttpPost(url)
             request.entity = StringEntity(body)
             httpClient.execute(request).use { response ->
-                println(response.statusLine.toString())
+                log.info(response.statusLine.toString())
                 val entity = response.entity
                 //        Header headers = entity.getContentType();
-//        System.out.println(headers);
+//        log.info(headers);
 //
                 if (entity != null) {
                     // return it as a String

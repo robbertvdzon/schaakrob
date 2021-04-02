@@ -7,11 +7,14 @@ import com.vdzon.java.robotimpl.RobotAansturingImpl
 import io.javalin.Javalin
 import io.javalin.core.JavalinConfig
 import io.javalin.plugin.rendering.vue.VueComponent
+import org.slf4j.LoggerFactory
 
 class MainWeb {
+    private val log = LoggerFactory.getLogger(MainWeb::class.java)
+
     var app: Javalin? = null
     fun start(schaakbord: Boolean) {
-        println("Starting backend..")
+        log.info("Starting backend..")
         app = Javalin.create { config: JavalinConfig ->
             config.enableWebjars()
             config.addStaticFiles("/html")
@@ -28,9 +31,9 @@ class MainWeb {
             RobotAansturingClient("http://192.168.178.48:8080")
         }
         RestEndpoints().initRestEndpoints(app, robotAansturing)
-        println("Starting server")
-        app!!.start(8080)
+        log.info("Starting server")
         robotAansturing.bootsound()
+        app!!.start(8080)
     }
 
     fun stop() {

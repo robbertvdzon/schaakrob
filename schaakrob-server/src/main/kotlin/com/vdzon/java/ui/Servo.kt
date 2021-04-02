@@ -6,9 +6,13 @@ import com.pi4j.io.gpio.GpioFactory
 import com.pi4j.io.gpio.GpioPinPwmOutput
 import com.pi4j.io.i2c.I2CBus
 import com.pi4j.io.i2c.I2CFactory
+import com.vdzon.java.robotclient.RobotAansturingClient
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 
 class Servo {
+    private val log = LoggerFactory.getLogger(RobotAansturingClient::class.java)
+
     private var provider: PCA9685GpioProvider? = null
     private var busy = false
 
@@ -45,7 +49,7 @@ class Servo {
         val thread = Thread(Runnable {
             busy = true
             try {
-                println("Start init in thread")
+                log.info("Start init in thread")
                 init()
                 while (true) {
                     val request = request
@@ -86,7 +90,7 @@ class Servo {
                 try {
                     provider!!.setPwm(PCA9685Pin.PWM_00, p)
                 } catch (ex: Exception) {
-                    println("ERROR writing " + p + " : " + ex.message)
+                    log.info("ERROR writing " + p + " : " + ex.message)
                 }
                 if (extraDelay > 0) {
                     sleep(extraDelay)

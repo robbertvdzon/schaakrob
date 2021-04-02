@@ -8,6 +8,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
+import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter
 import java.net.InetAddress
@@ -18,8 +19,10 @@ import java.nio.file.Paths
 import java.util.*
 import java.util.function.Consumer
 
+private val log = LoggerFactory.getLogger(RobotAansturingImpl::class.java)
 
 class RobotAansturingImpl : RobotAansturing {
+
     var lastPos1 = 0
     var lastPos2 = 0
     var formattedDelayFactor1 = "0050"
@@ -38,26 +41,26 @@ class RobotAansturingImpl : RobotAansturing {
         var initialized = false
         while (!initialized ) {
             try {
-                println("Open devices")
+                log.info("Open devices")
                 val i2c = I2CFactory.getInstance(I2CBus.BUS_1)
                 arm1 = i2c.getDevice(ARM1)
                 arm2 = i2c.getDevice(ARM2)
                 arm3 = i2c.getDevice(ARM3)
                 // test connectoe
-                arm1!!.readI2c()
-                arm2!!.readI2c()
-                arm3!!.readI2c()
+                arm1!!.readI2c("arm1")
+                arm2!!.readI2c("arm1")
+                arm3!!.readI2c("arm1")
                 initialized = true
             } catch (e: UnsupportedBusNumberException) {
-                println("ERROR, UnsupportedBusNumberException in init")
+                log.info("ERROR, UnsupportedBusNumberException in init")
                 Thread.sleep(2000)
             } catch (e: IOException) {
-                println("ERROR IOException in init:" + e.message)
+                log.info("ERROR IOException in init:" + e.message)
                 Thread.sleep(2000)
             }
         }
 
-        println("Devices found")
+        log.info("Devices found")
         val updateDisplayThread = Thread(Runnable { startDisplayThread() })
         updateDisplayThread.start()
 
@@ -65,6 +68,7 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun movetoVlak(vlak: String) {
+        log.info("start: move to "+vlak)
         val posA8 = getA8()
         val posA11 = getA11()
         val posA21 = getA21()
@@ -117,6 +121,8 @@ class RobotAansturingImpl : RobotAansturing {
         if (x > 13500) x = 13500
         if (x < 0) x = 0
         moveto(y, x)
+        log.info("done: move to "+vlak)
+
     }
 
     override fun moveto(x: Int, y: Int) {
@@ -135,13 +141,13 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun sleep() {
-        println("sleeping")
+        log.info("sleeping")
         try {
             val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
             val delay = 100*snelheid;
             val formattedDelayFactor = String.format("%04d", delay.toInt())
-            arm1!!.writeI2c(("^X000000"+formattedDelayFactor).toByteArray())
-            arm2!!.writeI2c(("^X000000"+formattedDelayFactor).toByteArray())
+            arm1!!.writeI2c(("^X000000"+formattedDelayFactor).toByteArray(),"arm1")
+            arm2!!.writeI2c(("^X000000"+formattedDelayFactor).toByteArray(),"arm2")
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -154,7 +160,7 @@ class RobotAansturingImpl : RobotAansturing {
         try {
             val formattedPos = String.format("%06d", pos)
             val command = "^M$formattedPos$vertraging"
-            arm?.writeI2c(command.toByteArray())
+            arm?.writeI2c(command.toByteArray(), armName(arm))
             if (arm === arm1) {
                 lastPos1 = pos
             }
@@ -167,8 +173,10 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun clamp() {
-        arm3!!.writeI2c("^C0000000000000000".toByteArray())
+        log.info("start: pak ")
+        arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
+        log.info("ready: pak ")
         try {
             val delay = getDelayNaPak()?.trim()
             Thread.sleep(delay?.toLong()?:0L)
@@ -177,11 +185,14 @@ class RobotAansturingImpl : RobotAansturing {
         catch (e:Exception){
             e.printStackTrace()
         }
+        log.info("done: pak ")
     }
 
     override fun release() {
-        arm3!!.writeI2c("^R0000000000000000".toByteArray())
+        log.info("start: release ")
+        arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
+        log.info("ready: release ")
         try {
             val delay = getDelayNaZet()?.trim()
             Thread.sleep(delay?.toLong()?:0L)
@@ -190,31 +201,31 @@ class RobotAansturingImpl : RobotAansturing {
         catch (e:Exception){
             e.printStackTrace()
         }
+        log.info("done: release ")
     }
 
     override fun hold() {
-        arm3!!.writeI2c("^H0000000000000000".toByteArray())
+        arm3!!.writeI2c("^H0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
     }
 
     override fun drop() {
-        arm3!!.writeI2c("^D0000000000000000".toByteArray())
+        arm3!!.writeI2c("^D0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
     }
 
     override fun activate() {
-        arm3!!.writeI2c("^A0000000000000000".toByteArray())
+        arm3!!.writeI2c("^A0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
     }
 
     override fun deactivate() {
-        arm3!!.writeI2c("^I0000000000000000".toByteArray())
+        arm3!!.writeI2c("^I0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
     }
 
     override fun bootsound() {
-        arm3!!.writeI2c("^B0000000000000000".toByteArray())
-        waitUntilReady(20)
+        arm3!!.writeI2c("^B0000000000000000".toByteArray(),"arm3")
     }
 
 
@@ -385,7 +396,7 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun startDisplayThread() {
-        println("Start display thread")
+        log.info("Start display thread")
         var lcd:I2CLcdDisplay? = null
         while (lcd==null ) {
             try{
@@ -393,11 +404,11 @@ class RobotAansturingImpl : RobotAansturing {
                 lcd.setCursorHome()
                 lcd.clear();
             } catch (e: Exception) {
-                println("Error loading display:"+e.message)
+                log.info("Error loading display:"+e.message)
                 Thread.sleep(3000)
             }
         }
-        println("Display found")
+        log.info("Display found")
 
         lcd.setCursorHome()
         lcd.clear();
@@ -419,7 +430,7 @@ class RobotAansturingImpl : RobotAansturing {
 //                lcd.write(0, ipAdress)
 //                lcd.write(1, status)
 //            } catch (e: Exception) {
-//                println("Error updating display:"+e.message)
+//                log.info("Error updating display:"+e.message)
 //                e.printStackTrace()
 //            }
 //        }
@@ -427,7 +438,7 @@ class RobotAansturingImpl : RobotAansturing {
 
     private fun home(arm: I2CDevice?) {
         try {
-            arm?.writeI2c("^H0000000000600000".toByteArray())
+            arm?.writeI2c("^H0000000000600000".toByteArray(), armName(arm))
             if (arm === arm1) {
                 lastPos1 = 0
             }
@@ -438,6 +449,16 @@ class RobotAansturingImpl : RobotAansturing {
             e.printStackTrace()
         }
     }
+
+    private fun armName(arm: I2CDevice?)=
+        when (arm){
+            arm1 -> "arm1"
+            arm2 -> "arm2"
+            arm3 -> "arm3"
+            else -> "?"
+        }
+
+
 
     fun calcDelays(pos1: Int, pos2: Int): Long {
         val pulses1 = Math.abs(pos1 - lastPos1)
@@ -479,12 +500,13 @@ class RobotAansturingImpl : RobotAansturing {
 
     private fun udateStatus() {
         try {
-            val arm1Status = arm1!!.readI2c()
-            val arm2Status = arm2!!.readI2c()
-            val arm3Status = arm3!!.readI2c()
+            val arm1Status = arm1!!.readI2c("arm1")
+            val arm2Status = arm2!!.readI2c("arm2")
+            val arm3Status = arm3!!.readI2c("arm3")
             allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1 // arm3 : alleen checken dat hij niet aan het moven is
         } catch (e: Exception) {
             e.printStackTrace()
+            allReady = false
         }
     }
 
@@ -585,7 +607,7 @@ class RobotAansturingImpl : RobotAansturing {
     }
 }
 
-private fun I2CDevice.readI2c(): Int {
+private fun I2CDevice.readI2c(devicename: String): Int {
     var result:Int = -1;
     Lock.lock()
     var succeeded = false
@@ -597,7 +619,7 @@ private fun I2CDevice.readI2c(): Int {
         }
         catch (e:Exception){
             tryCount++;
-            println("read failed $tryCount times : ${e.message}")
+            log.info("read failed $tryCount times for $devicename: ${e.message}")
             sleep(100)
         }
     }
@@ -606,7 +628,7 @@ private fun I2CDevice.readI2c(): Int {
 
 }
 
-private fun I2CDevice.writeI2c(toByteArray: ByteArray) {
+private fun I2CDevice.writeI2c(toByteArray: ByteArray, devicename: String) {
     Lock.lock()
     var succeeded = false
     var tryCount = 0
@@ -617,7 +639,7 @@ private fun I2CDevice.writeI2c(toByteArray: ByteArray) {
         }
         catch (e:Exception){
             tryCount++;
-            println("write failed $tryCount times : ${e.message}")
+            log.info("write failed $tryCount times for $devicename: ${e.message}")
             sleep(100)
         }
     }
