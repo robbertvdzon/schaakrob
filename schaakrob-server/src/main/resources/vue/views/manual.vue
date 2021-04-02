@@ -20,6 +20,7 @@
               <button type="submit" v-on:click="home_vert">home vertical</button>
               <button type="submit" v-on:click="home_hor">home horizontal</button>
               <button type="submit" v-on:click="sleeping">Sleep</button>
+              <button type="submit" v-on:click="bootsound">Bootsound</button>
        </span>
       <br>
       <span>
@@ -192,6 +193,10 @@ Vue.component("manual", {
       fetch(`/api/release`)
       .catch(() => alert("Error"));
     },
+    bootsound: function (event) {
+      fetch(`/api/bootsound`)
+      .catch(() => alert("Error"));
+    },
     move: function (event) {
       axios.post(`/api/move`, this.pos)
       .then(res => {
@@ -265,7 +270,7 @@ Vue.component("manual", {
       })
     },
     saveDelayNaPak: function (event) {
-      axios.post(`/api/delaynapak`, this.snelheid)
+      axios.post(`/api/delaynapak`, this.delaynapak)
       .then(res => {
       })
       .catch(error => {
@@ -273,7 +278,7 @@ Vue.component("manual", {
       })
     },
     saveDelayNaZet: function (event) {
-      axios.post(`/api/delaynazet`, this.snelheid)
+      axios.post(`/api/delaynazet`, this.delaynazet)
       .then(res => {
       })
       .catch(error => {

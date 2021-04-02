@@ -58,6 +58,7 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     }
 
     override fun bootsound() {
+        log.info("call bootsound")
         get("$host/api/bootsound")
     }
 
