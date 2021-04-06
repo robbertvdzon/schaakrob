@@ -175,21 +175,25 @@ void processCommand(){
 void hold(){
   Serial.print("clamp");
   analogWrite(pullMagneetPin, 255);
+  command = '-';      
 }
 
 void drop(){
   Serial.print("clamp");
   analogWrite(pullMagneetPin, 0);
+  command = '-';      
 }
 
 void activateMagnet(){
   Serial.print("clamp");
   analogWrite(magneetPin, 255);
+  command = '-';      
 }
 
 void deactivateMagnet(){
   Serial.print("clamp");
   analogWrite(magneetPin, 0);
+  command = '-';      
 }
 
 void clamp(){
@@ -224,8 +228,9 @@ void release(){
 }
 
 void bootSeq(){
-    beep();
-    beep();
+  beep();
+  beep();
+  command = '-';    
 }
 
 void beep(){

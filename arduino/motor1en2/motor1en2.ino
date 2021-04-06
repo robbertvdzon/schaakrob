@@ -319,7 +319,7 @@ void home(int homeSpeed) {
 
   Serial.println("\t homing finished");
   currentPos = 00;
-
+  command = '-';
 
 }
 
@@ -363,6 +363,7 @@ void sleeping() {
 void bootsound(){
     beepLong();
     beepLong();
+    command = '-';  
 }
 
 void bootSeq(){
