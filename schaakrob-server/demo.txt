@@ -438,3 +438,5 @@ zet#
 pak#
 @A7#
 zet#
+home#
+sleep#

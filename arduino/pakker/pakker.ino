@@ -27,6 +27,8 @@ send: state + pos
 */
 
 #include <Wire.h>
+#include <SPI.h>
+#include <RH_ASK.h>
 
 #define NR_OF_BYTES_TO_READ 12
 
@@ -38,13 +40,15 @@ send: state + pos
 
 #define magneetPin 3
 #define pullMagneetPin 5
-#define magneet2PinA 4
-#define magneet2PinB 2
+
 #define beepPin 9
 
 #define adressPin1 10
 #define adressPin2 11
 
+// default RH_ASK rf_driver(2000, 11, 12, 10, false)
+RH_ASK rf_driver(2000, 11, 4);
+  
 char command;
 int requestedPos;
 int vertraginsfactor;
@@ -59,8 +63,8 @@ void setup() {
 
   pinMode(pullMagneetPin, OUTPUT);
   pinMode(magneetPin, OUTPUT);
-  pinMode(magneet2PinB, OUTPUT);
-  pinMode(magneet2PinA, OUTPUT);
+
+
   pinMode(beepPin, OUTPUT);
 
 
@@ -83,6 +87,10 @@ void setup() {
   Wire.onReceive(receiveData);
   Wire.onRequest(sendData);
 
+
+  // Initialize ASK Object
+  rf_driver.init();
+    
   // show that we have been restarted
   bootSeq();
 
@@ -91,7 +99,9 @@ void setup() {
   analogWrite(magneetPin, 0);
   analogWrite(pullMagneetPin, 0);
   
-  
+  const char *msg = "D";
+  rf_driver.send((uint8_t *)msg, strlen(msg));
+  rf_driver.waitPacketSent();  
 
 }
 
@@ -211,6 +221,10 @@ void clamp(){
   delay(50);
   state = READY;
   command = '-';
+
+  const char *msg = "A";
+  rf_driver.send((uint8_t *)msg, strlen(msg));
+  rf_driver.waitPacketSent();
 }
 
 void release(){
@@ -225,6 +239,11 @@ void release(){
   Serial.println("RESET CURRENT COMMAND");
   state = READY;
   command = '-';
+
+  const char *msg = "B";
+  rf_driver.send((uint8_t *)msg, strlen(msg));
+  rf_driver.waitPacketSent();
+  
 }
 
 void bootSeq(){
