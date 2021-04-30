@@ -42,6 +42,7 @@ send: state + pos
 #define IN_ERROR 4
 #define GOING_TO_SLEEP 5
 #define SLEEPING 6
+#define FATAL_ERROR 7
 
 #define HOME_SPEED 120
 #define HOME_SPEED_SLOW 500
@@ -217,6 +218,7 @@ void processCommand(){
 }
 
 void home1(int homeSpeed){
+  if (state == FATAL_ERROR) return;
   state = HOMING;
   Serial.println("home");
   Serial.print("cmd:");Serial.println(command);
@@ -227,6 +229,7 @@ void home1(int homeSpeed){
 }
 
 void move(){
+  if (state == FATAL_ERROR) return;
 
   if (state == HOMING_NEEDED){
     home1(HOME_SPEED);
@@ -259,6 +262,7 @@ void checkError(){
   if (state == HOMING) return;
   if (state == GOING_TO_SLEEP) return;
   if (state == SLEEPING) return;
+  if (state == FATAL_ERROR) return;
 
   boolean homeSensorOn = digitalRead(arm1SensorPin)==1 && currentPos>100;
   boolean topSensorOn = digitalRead(arm2SensorPin)==1 && currentPos>100;
@@ -284,28 +288,53 @@ void checkError(){
 void moveUp(int reqPos){
   digitalWrite(enableMotorPin, LOW);
   digitalWrite(dirPin, HIGH);
-  long startTime = millis();
-  moveNrSteps(reqPos - currentPos, +1);
-  long totalTime = millis() - startTime;
-}
+  boolean succeeded = moveNrSteps(reqPos - currentPos, +1);
+  if (!succeeded){
+    Serial.println("HOME SLOW");  
+    state = HOMING;
+    home(HOME_SPEED_SLOW);
+    Serial.println("FINISHED HOME, MOVE AGAIN");    
+    state = MOVING;
+    digitalWrite(dirPin, HIGH);
+    succeeded = moveNrSteps(reqPos - currentPos, +1);
+    if (!succeeded){
+       Serial.println("FAILED AGAIN: FATAL ERROR");    
+       state = FATAL_ERROR;
+    }
+  }}
 
 void moveDown(int reqPos){
   digitalWrite(enableMotorPin, LOW);
   digitalWrite(dirPin, LOW);
-  moveNrSteps(currentPos - reqPos, -1);
+  boolean succeeded = moveNrSteps(currentPos - reqPos, -1);
+  if (!succeeded){
+    Serial.println("HOME SLOW");    
+    state = HOMING;
+    home(HOME_SPEED_SLOW);
+    Serial.println("FINISHED HOME, MOVE AGAIN");    
+    state = MOVING;
+    digitalWrite(dirPin, HIGH);
+    succeeded = moveNrSteps(reqPos - currentPos, +1);
+    if (!succeeded){
+       Serial.println("FAILED AGAIN: FATAL ERROR");    
+       state = FATAL_ERROR;
+    }
+  }
 }
 
-void moveNrSteps(int totalSteps, int direction){
+bool moveNrSteps(int totalSteps, int direction){
   long halfway = totalSteps/2;
   int delayIndex = 0;
   int remainingDelayIndex = 0;
   int remainingSteps;
   int pulsesCounted1 = 0;
   int pulsesCounted2 = 0;
+  int diffBetweenPulses = 0;
   bool lastEncodeSensorState1 = false;
   bool lastEncodeSensorState2 = false;
   double delay = 0;
   double calculatedDelay = 0;
+
   for (int i = 0; i < totalSteps; i++) {
     bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
     bool currentEncodeSensorState2 = digitalRead(encoderPin2); // altijd sensor lezen (om de motor soepeler te laten lopen)
@@ -318,6 +347,11 @@ void moveNrSteps(int totalSteps, int direction){
         pulsesCounted2++;
         lastEncodeSensorState2=currentEncodeSensorState2;
       }
+    }
+    diffBetweenPulses = pulsesCounted1 - pulsesCounted2;
+    if (diffBetweenPulses<-3 || diffBetweenPulses>3) {
+         Serial.println("ERROR");
+        return false;// error status
     }
     remainingSteps = totalSteps - i;
     delayIndex = i/indexSteps;
@@ -338,6 +372,7 @@ void moveNrSteps(int totalSteps, int direction){
   Serial.println(pulsesCounted1);
   Serial.print("Count2:");
   Serial.println(pulsesCounted2);
+  return true;
 }
 
 void home(int homeSpeed) {
@@ -377,6 +412,7 @@ void home(int homeSpeed) {
 
 
 void sleeping() {
+  if (state == FATAL_ERROR) return;
   state = GOING_TO_SLEEP;
   digitalWrite(enableMotorPin, LOW);
   error = false;
