@@ -11,8 +11,8 @@
 #include <RF24.h>
 #include <Adafruit_PWMServoDriver.h>
 
-RF24 radio(7, 8); // CE, CSN
-const byte address[6] = "00001";
+RF24 radio(8,9); // CE, CSN
+const byte address[6] = "00002";
 
 const int SERVOMIN = 120; // this is the 'minimum' pulse length count (out of 4096)
 const int SERVOMAX = 620; // this is the 'maximum' pulse length count (out of 4096)
@@ -52,6 +52,17 @@ void setup() {
   digitalWrite(4, HIGH);
   delay(200);
   digitalWrite(4, LOW);
+
+
+// test loop, remove this code!
+ pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
+ pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
+ delay(200);
+ digitalWrite(2, HIGH);
+ pwm.setPWM(0, 0, SERVO_MIDDLE);
+ pwm.setPWM(1, 0, SERVO_MIDDLE);
+ delay(200);
+ digitalWrite(2, LOW);
 
 
 }
@@ -98,6 +109,8 @@ void loop() {
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
     }    
-    Serial.println(text);
+    if(strcmp(text, "") != 0){
+      Serial.println(text);
+    }
   }
 }

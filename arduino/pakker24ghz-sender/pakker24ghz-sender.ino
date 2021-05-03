@@ -10,7 +10,7 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 RF24 radio(7, 8); // CE, CSN
-const byte address[6] = "00001";
+const byte address[6] = "00002";
 
 int lastButton1 = 0;
 int lastButton2 = 0;
@@ -33,10 +33,12 @@ void loop() {
     if (button1==0){
       const char text[] = "zet1";
       radio.write(&text, sizeof(text));
+      Serial.println("zet1");
     }
     else{
       const char text[] = "pak1";
       radio.write(&text, sizeof(text));
+      Serial.println("pak1");
     }
   }
   if (button2!=lastButton2){
@@ -44,10 +46,12 @@ void loop() {
     if (button2==0){
       const char text[] = "zet2";
       radio.write(&text, sizeof(text));
+      Serial.println("zet2");
     }
     else{
       const char text[] = "pak2";
       radio.write(&text, sizeof(text));
+      Serial.println("pak2");
     }
     
 
