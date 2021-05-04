@@ -1,10 +1,8 @@
-package com.vdzon.java.robotimpl.rf;
+package com.vdzon.java.robotimpl.rf
 
-public interface ReceiveListener {
-
+interface ReceiveListener {
     /**
      * @param data data bytes arrived
      */
-    void dataReceived(int[] data);
-
+    fun dataReceived(data: IntArray)
 }

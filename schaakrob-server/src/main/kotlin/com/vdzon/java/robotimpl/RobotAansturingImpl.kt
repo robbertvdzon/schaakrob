@@ -48,7 +48,7 @@ class RobotAansturingImpl : RobotAansturing {
             try {
 
                 log.info("Send test command")
-                var nrf: NRF24L01 = NRF24L01.getInstance()
+                var nrf: NRF24L01 = NRF24L01.instance
                 nrf.start()
                 nrf.send(0,3,3,5, intArrayOf(0,0,0,0,2),4, intArrayOf(65,66,67,68,69))
                 nrf.shutdown();
