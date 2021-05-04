@@ -1,15 +1,10 @@
-package com.vdzon.java.robotimpl.rf
+package com.vdzon.java.robotimpl
 
-import com.vdzon.java.robotimpl.rf.IRegister
 import java.lang.Runnable
 import kotlin.jvm.Volatile
-import com.vdzon.java.robotimpl.rf.ReceiveListener
-import com.vdzon.java.robotimpl.rf.NRF24L01.EmptyReceiveListener
 import java.util.concurrent.BlockingQueue
-import com.vdzon.java.robotimpl.rf.NRF24L01.DataPackage
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ExecutorService
-import com.vdzon.java.robotimpl.rf.NRF24L01
 import com.pi4j.wiringpi.Gpio
 import java.util.concurrent.Executors
 import com.pi4j.wiringpi.GpioUtil

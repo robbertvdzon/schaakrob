@@ -8,7 +8,6 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
-import com.vdzon.java.robotimpl.rf.NRF24L01
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter

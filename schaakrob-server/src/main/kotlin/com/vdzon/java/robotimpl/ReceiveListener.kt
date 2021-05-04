@@ -1,4 +1,4 @@
-package com.vdzon.java.robotimpl.rf
+package com.vdzon.java.robotimpl
 
 interface ReceiveListener {
     /**
