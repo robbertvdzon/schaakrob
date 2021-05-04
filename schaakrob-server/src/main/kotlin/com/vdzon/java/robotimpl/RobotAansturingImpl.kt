@@ -8,6 +8,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
+import com.vdzon.java.robotimpl.rf.NRF24L01
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter
@@ -32,8 +33,12 @@ class RobotAansturingImpl : RobotAansturing {
     private var arm2: I2CDevice? = null
     private var arm3: I2CDevice? = null
 //    private var display: I2CDevice? = null
+
+
+
     private var currentLoopThread: Thread? = null
     fun init() {
+
         if (arm1 != null) {
             return
         }
@@ -41,6 +46,14 @@ class RobotAansturingImpl : RobotAansturing {
         var initialized = false
         while (!initialized ) {
             try {
+
+                log.info("Send test command")
+                var nrf: NRF24L01 = NRF24L01.getInstance()
+                nrf.start()
+                nrf.send(0,3,3,5, intArrayOf(0,0,0,0,2),4, intArrayOf(65,66,67,68,69))
+                nrf.shutdown();
+
+
                 log.info("Open devices")
                 val i2c = I2CFactory.getInstance(I2CBus.BUS_1)
                 arm1 = i2c.getDevice(ARM1)

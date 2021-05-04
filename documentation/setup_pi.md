@@ -53,3 +53,12 @@ done
 
 Change permissies:
 chmod a+x /home/pi/ui.sh
+
+
+## SETUP CONNECTION TO nRF24L01
+(following these steps: https://www.hackster.io/wirekraken/connecting-an-nrf24l01-to-raspberry-pi-9c0a57)
+
+sudo raspi-config 
+(enable SPI)
+sudo reboot
+
