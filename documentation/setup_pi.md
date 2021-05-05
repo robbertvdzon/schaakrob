@@ -63,6 +63,9 @@ sudo raspi-config
 (enable SPI)
 sudo reboot
 
-sudo apt-get install wiringpi
-
-sudo apt-get install execstack
+sudo apt-get remove wiringpi -y
+sudo apt-get --yes install git-core gcc make
+cd ~
+git clone https://github.com/WiringPi/WiringPi --branch master --single-branch wiringpi
+cd ~/wiringpi
+sudo ./build
