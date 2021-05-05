@@ -623,10 +623,10 @@ class NRF24L01 private constructor() : IRegister, Runnable {
         Gpio.pullUpDnControl(IRQ, Gpio.PUD_UP)
         println("init x 8");
 
-        /*LED light*/GpioUtil.export(LED, GpioUtil.DIRECTION_OUT)
-        Gpio.pinMode(LED, Gpio.OUTPUT)
-        Gpio.pullUpDnControl(LED, Gpio.PUD_UP)
-        println("init x 9");
+//        /LEDED light*/GpioUtil.export(LED, GpioUtil.DIRECTION_OUT)
+//        Gpio.pinMode(LED, Gpio.OUTPUT)
+//        Gpio.pullUpDnControl(LED, Gpio.PUD_UP)
+//        println("init x 9");
 
         init()
         println("init x 10");
