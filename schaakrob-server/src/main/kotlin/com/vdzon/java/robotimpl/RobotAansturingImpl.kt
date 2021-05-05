@@ -46,7 +46,7 @@ class RobotAansturingImpl : RobotAansturing {
         while (!initialized ) {
             try {
 
-                log.info("Send test command: 1")
+                log.info("Send test command:1x")
                 Thread.sleep(1000)
                 var nrf: NRF24L01 = NRF24L01.instance
                 log.info("Send test command:2")
