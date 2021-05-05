@@ -46,11 +46,20 @@ class RobotAansturingImpl : RobotAansturing {
         while (!initialized ) {
             try {
 
-                log.info("Send test command")
+                log.info("Send test command: 1")
+                Thread.sleep(1000)
                 var nrf: NRF24L01 = NRF24L01.instance
+                log.info("Send test command:2")
+                Thread.sleep(1000)
                 nrf.start()
+                log.info("Send test command:3")
+                Thread.sleep(1000)
                 nrf.send(0,3,3,5, intArrayOf(0,0,0,0,2),4, intArrayOf(65,66,67,68,69))
+                log.info("Send test command:4")
+                Thread.sleep(1000)
                 nrf.shutdown();
+                log.info("Send test command:5")
+                Thread.sleep(1000)
 
 
                 log.info("Open devices")
