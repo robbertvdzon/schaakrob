@@ -124,32 +124,32 @@ class NRF24L01 private constructor() : IRegister, Runnable {
         /**
          * irq GPIO_2
          */
-        private const val IRQ = 2
+        private const val IRQ = 5//2
 
         /**
          * miso GPIO_12
          */
-        private const val MISO = 9 //12;
+        private const val MISO = 4//9 //12;
 
         /**
          * ce GPIO_11
          */
-        private const val CE = 17 //11
+        private const val CE = 3//17 //11
 
         /**
          * mosi GPIO_13
          */
-        private const val MOSI = 10 //13;
+        private const val MOSI = 2//10 //13;
 
         /**
          * sclk GPIO_14
          */
-        private const val SCLK = 11 //14;
+        private const val SCLK = 1//11 //14;
 
         /**
          * csn GPIO_0
          */
-        private const val CSN = 8 //0;
+        private const val CSN = 0//8 //0;
 
         /**
          * default data width 16, NRF support 32 in max
