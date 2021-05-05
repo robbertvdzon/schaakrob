@@ -57,15 +57,17 @@ chmod a+x /home/pi/ui.sh
 
 ## SETUP CONNECTION TO nRF24L01
 (following these steps: https://www.hackster.io/wirekraken/connecting-an-nrf24l01-to-raspberry-pi-9c0a57)
-
-
 sudo raspi-config 
 (enable SPI)
 sudo reboot
 
+# Onderstaande alleen als wireingpi native lib crashed
 sudo apt-get remove wiringpi -y
 sudo apt-get --yes install git-core gcc make
 cd ~
 git clone https://github.com/WiringPi/WiringPi --branch master --single-branch wiringpi
 cd ~/wiringpi
 sudo ./build
+
+# bekijk status van de gpio:
+gpio readal
