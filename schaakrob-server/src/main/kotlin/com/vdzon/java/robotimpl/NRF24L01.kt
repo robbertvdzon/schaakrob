@@ -164,7 +164,9 @@ class NRF24L01 private constructor() : IRegister, Runnable {
         val instance = NRF24L01()
 
         init {
+            println("init A 1"); Thread.sleep(500);
             Gpio.wiringPiSetup()
+            println("init A 2"); Thread.sleep(500);
         }
     }
 
@@ -203,20 +205,32 @@ class NRF24L01 private constructor() : IRegister, Runnable {
      * then light up LED bubble on GPIO_21
      */
     private fun init() {
+        println("init 1"); Thread.sleep(500);
         Gpio.digitalWrite(CE, 0)
+        println("init 2"); Thread.sleep(500);
         Gpio.digitalWrite(CSN, 1)
+        println("init 3"); Thread.sleep(500);
         Gpio.digitalWrite(SCLK, 0)
+        println("init 4"); Thread.sleep(500);
         writeRegister(IRegister.W_REGISTER + IRegister.EN_AA, 0x01)
+        println("init 5"); Thread.sleep(500);
         writeRegister(IRegister.W_REGISTER + IRegister.EN_RXADDR, 0x01) // enable channel 0
+        println("init 6"); Thread.sleep(500);
         writeRegister(IRegister.W_REGISTER + IRegister.SETUP_RETR, 0x1f) // set auto retry delay 500us, retry 15 times
+        println("init 7"); Thread.sleep(500);
         writeRegister(IRegister.W_REGISTER + IRegister.STATUS, 0x7e) // clear RX_DR,TX_DS,MAX_RT flags
+        println("init 8"); Thread.sleep(500);
         writeRegister(
             IRegister.W_REGISTER + IRegister.CONFIG,
             0x7e
         ) // enable RX_DR irq, block TX_DS+MAX_RT, enable CRC powerup, in receive mode PTX
+        println("init 9"); Thread.sleep(500);
         flushTx()
+        println("init 10"); Thread.sleep(500);
         flushRx()
+        println("init 11"); Thread.sleep(500);
         Gpio.digitalWrite(LED, 1)
+        println("init 12"); Thread.sleep(500);
     }
 
     /**
