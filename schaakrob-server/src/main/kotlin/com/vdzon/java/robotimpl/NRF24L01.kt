@@ -164,9 +164,6 @@ class NRF24L01 private constructor() : IRegister, Runnable {
         val instance = NRF24L01()
 
         init {
-            println("init A 1"); Thread.sleep(500);
-            Gpio.wiringPiSetup()
-            println("init A 2"); Thread.sleep(500);
         }
     }
 
@@ -597,6 +594,12 @@ class NRF24L01 private constructor() : IRegister, Runnable {
      *
      */
     init {
+
+        println("init A 1"); Thread.sleep(500);
+        Gpio.wiringPiSetup()
+        println("init A 2"); Thread.sleep(500);
+
+
         println("init x 1"); Thread.sleep(500);
 
         /*CSN*/
