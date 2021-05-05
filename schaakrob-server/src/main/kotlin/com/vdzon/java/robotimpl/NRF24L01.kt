@@ -597,9 +597,13 @@ class NRF24L01 private constructor() : IRegister, Runnable {
      *
      */
     init {
+        println("init x 1"); Thread.sleep(500);
+
         /*CSN*/
         GpioUtil.export(CSN, GpioUtil.DIRECTION_OUT)
+        println("init x 2"); Thread.sleep(500);
         Gpio.pinMode(CSN, Gpio.OUTPUT)
+        println("init x 3"); Thread.sleep(500);
 
         /*SCLK*/GpioUtil.export(SCLK, GpioUtil.DIRECTION_OUT)
         Gpio.pinMode(SCLK, Gpio.OUTPUT)
@@ -621,7 +625,11 @@ class NRF24L01 private constructor() : IRegister, Runnable {
         /*LED light*/GpioUtil.export(LED, GpioUtil.DIRECTION_OUT)
         Gpio.pinMode(LED, Gpio.OUTPUT)
         Gpio.pullUpDnControl(LED, Gpio.PUD_UP)
+        println("init x 4"); Thread.sleep(500);
+
         init()
+        println("init x 5"); Thread.sleep(500);
         setRxMode(localRFChanel, 5, localRFAddress)
+        println("init x 6"); Thread.sleep(500);
     }
 }
