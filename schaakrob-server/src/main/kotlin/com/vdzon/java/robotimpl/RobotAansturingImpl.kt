@@ -405,7 +405,7 @@ class RobotAansturingImpl : RobotAansturing {
         var lcd:I2CLcdDisplay? = null
         while (lcd==null ) {
             try{
-                lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
+                lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x36, 3, 0, 1, 2, 7, 6, 5, 4)
                 lcd.setCursorHome()
                 lcd.clear();
             } catch (e: Exception) {
@@ -600,7 +600,7 @@ class RobotAansturingImpl : RobotAansturing {
         private const val ARM1 = 0x8
         private const val ARM2 = 0x6
         private const val ARM3 = 0x5
-        private const val DISPLAY = 0x36
+        private const val DISPLAY = 0x38
     }
 
     init {
