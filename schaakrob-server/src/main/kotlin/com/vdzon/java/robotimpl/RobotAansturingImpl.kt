@@ -65,8 +65,8 @@ class RobotAansturingImpl : RobotAansturing {
         }
 
         log.info("Devices found")
-        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
-        updateDisplayThread.start()
+//        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
+//        updateDisplayThread.start()
 
 
     }
