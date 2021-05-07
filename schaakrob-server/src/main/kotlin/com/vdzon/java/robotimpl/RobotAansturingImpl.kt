@@ -65,8 +65,8 @@ class RobotAansturingImpl : RobotAansturing {
         }
 
         log.info("Devices found")
-//        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
-//        updateDisplayThread.start()
+        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
+        updateDisplayThread.start()
 
 
     }
@@ -508,7 +508,6 @@ class RobotAansturingImpl : RobotAansturing {
             val arm1Status = arm1!!.readI2c("arm1")
             val arm2Status = arm2!!.readI2c("arm2")
             val arm3Status = arm3!!.readI2c("arm3")
-            println("status $arm1Status $arm2Status $arm2Status  ")
             allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1 // arm3 : alleen checken dat hij niet aan het moven is
         } catch (e: Exception) {
             e.printStackTrace()
@@ -580,14 +579,12 @@ class RobotAansturingImpl : RobotAansturing {
 
 
     private fun waitUntilReady(initialDelay: Int) {
-        println("wacht tot ready")
         sleep(initialDelay)
         udateStatus()
         while (!allReady) {
-            sleep(500)
+            sleep(10)
             udateStatus()
         }
-        println("is ready")
 //        sleep(200)// extra sleep, deze zou weg moeten kunnen
     }
 
