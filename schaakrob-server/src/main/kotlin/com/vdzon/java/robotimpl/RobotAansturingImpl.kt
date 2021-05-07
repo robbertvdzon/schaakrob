@@ -54,6 +54,7 @@ class RobotAansturingImpl : RobotAansturing {
                 arm1!!.readI2c("arm1")
                 arm2!!.readI2c("arm2")
                 arm3!!.readI2c("arm3")
+
                 initialized = true
             } catch (e: UnsupportedBusNumberException) {
                 log.info("ERROR, UnsupportedBusNumberException in init")
@@ -65,8 +66,8 @@ class RobotAansturingImpl : RobotAansturing {
         }
 
         log.info("Devices found")
-        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
-        updateDisplayThread.start()
+//        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
+//        updateDisplayThread.start()
 
 
     }
