@@ -70,4 +70,4 @@ cd ~/wiringpi
 sudo ./build
 
 # bekijk status van de gpio:
-gpio readal
+gpio readall

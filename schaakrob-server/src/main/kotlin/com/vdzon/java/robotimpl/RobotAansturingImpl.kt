@@ -45,19 +45,6 @@ class RobotAansturingImpl : RobotAansturing {
         var initialized = false
         while (!initialized ) {
             try {
-
-                var nrf: NRF24L01 = NRF24L01.instance
-                nrf.start()
-                log.info("send 1")
-                nrf.send(0,1,3,5, intArrayOf(0,0,0,0,2),4, intArrayOf(65,66,67,68))
-                Thread.sleep(5000)
-                log.info("send 2")
-                nrf.send(0,1,3,5, intArrayOf(0,0,0,0,2),4, intArrayOf(112,97,107,49 ))
-                Thread.sleep(5000)
-                log.info("shutdown")
-                nrf.shutdown();
-
-
                 log.info("Open devices")
                 val i2c = I2CFactory.getInstance(I2CBus.BUS_1)
                 arm1 = i2c.getDevice(ARM1)
@@ -65,8 +52,8 @@ class RobotAansturingImpl : RobotAansturing {
                 arm3 = i2c.getDevice(ARM3)
                 // test connectoe
                 arm1!!.readI2c("arm1")
-                arm2!!.readI2c("arm1")
-                arm3!!.readI2c("arm1")
+                arm2!!.readI2c("arm2")
+                arm3!!.readI2c("arm3")
                 initialized = true
             } catch (e: UnsupportedBusNumberException) {
                 log.info("ERROR, UnsupportedBusNumberException in init")
@@ -78,8 +65,8 @@ class RobotAansturingImpl : RobotAansturing {
         }
 
         log.info("Devices found")
-        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
-        updateDisplayThread.start()
+//        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
+//        updateDisplayThread.start()
 
 
     }

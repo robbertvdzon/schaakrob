@@ -202,32 +202,20 @@ class NRF24L01 private constructor() : IRegister, Runnable {
      * then light up LED bubble on GPIO_21
      */
     private fun init() {
-        println("init 1"); 
         Gpio.digitalWrite(CE, 0)
-        println("init 2"); 
         Gpio.digitalWrite(CSN, 1)
-        println("init 3"); 
         Gpio.digitalWrite(SCLK, 0)
-        println("init 4"); 
         writeRegister(IRegister.W_REGISTER + IRegister.EN_AA, 0x01)
-        println("init 5"); 
         writeRegister(IRegister.W_REGISTER + IRegister.EN_RXADDR, 0x01) // enable channel 0
-        println("init 6"); 
         writeRegister(IRegister.W_REGISTER + IRegister.SETUP_RETR, 0x1f) // set auto retry delay 500us, retry 15 times
-        println("init 7"); 
         writeRegister(IRegister.W_REGISTER + IRegister.STATUS, 0x7e) // clear RX_DR,TX_DS,MAX_RT flags
-        println("init 8"); 
         writeRegister(
             IRegister.W_REGISTER + IRegister.CONFIG,
             0x7e
         ) // enable RX_DR irq, block TX_DS+MAX_RT, enable CRC powerup, in receive mode PTX
-        println("init 9"); 
         flushTx()
-        println("init 10"); 
         flushRx()
-        println("init 11"); 
         Gpio.digitalWrite(LED, 1)
-        println("init 12"); 
     }
 
     /**
@@ -599,29 +587,23 @@ class NRF24L01 private constructor() : IRegister, Runnable {
         /*CSN*/
         GpioUtil.export(CSN, GpioUtil.DIRECTION_OUT)
         Gpio.pinMode(CSN, Gpio.OUTPUT)
-        println("init x 3"); 
 
         /*SCLK*/GpioUtil.export(SCLK, GpioUtil.DIRECTION_OUT)
         Gpio.pinMode(SCLK, Gpio.OUTPUT)
-        println("init x 4");
 
         /*mosi*/GpioUtil.export(MOSI, GpioUtil.DIRECTION_OUT)
         Gpio.pinMode(MOSI, Gpio.OUTPUT)
 
-        println("init x 5");
         /*ce*/GpioUtil.export(CE, GpioUtil.DIRECTION_OUT)
         Gpio.pinMode(CE, Gpio.OUTPUT)
 
-        println("init x 6");
         /*miso*/GpioUtil.export(MISO, GpioUtil.DIRECTION_IN)
         Gpio.pinMode(MISO, Gpio.OUTPUT)
         Gpio.pullUpDnControl(MISO, Gpio.PUD_UP)
-        println("init x 7");
 
         /*irq*/GpioUtil.export(IRQ, GpioUtil.DIRECTION_IN)
         Gpio.pinMode(MISO, Gpio.INPUT)
         Gpio.pullUpDnControl(IRQ, Gpio.PUD_UP)
-        println("init x 8");
 
 //        /LEDED light*/GpioUtil.export(LED, GpioUtil.DIRECTION_OUT)
 //        Gpio.pinMode(LED, Gpio.OUTPUT)
@@ -629,8 +611,6 @@ class NRF24L01 private constructor() : IRegister, Runnable {
 //        println("init x 9");
 
         init()
-        println("init x 10");
         setRxMode(localRFChanel, 5, localRFAddress)
-        println("init x 11");
     }
 }
