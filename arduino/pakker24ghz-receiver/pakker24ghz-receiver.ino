@@ -43,16 +43,8 @@ void setup() {
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
+  digitalWrite(2, LOW);  
   Serial.println("START");
-
-  digitalWrite(4, HIGH);
-  delay(50);
-  digitalWrite(4, LOW);
-  delay(50);
-  digitalWrite(4, HIGH);
-  delay(200);
-  digitalWrite(4, LOW);
-
 
 // test loop, remove this code!
  pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
@@ -61,8 +53,13 @@ void setup() {
  digitalWrite(2, HIGH);
  pwm.setPWM(0, 0, SERVO_MIDDLE);
  pwm.setPWM(1, 0, SERVO_MIDDLE);
+ delay(400);
+ pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
+ pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
  delay(200);
  digitalWrite(2, LOW);
+ pwm.setPWM(0, 0, SERVO_MIDDLE);
+ pwm.setPWM(1, 0, SERVO_MIDDLE);
 
 
 }

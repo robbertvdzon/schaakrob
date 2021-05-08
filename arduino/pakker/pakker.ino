@@ -29,6 +29,8 @@ send: state + pos
 #include <Wire.h>
 #include <SPI.h>
 #include <RH_ASK.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
 #define NR_OF_BYTES_TO_READ 12
 
@@ -48,6 +50,14 @@ send: state + pos
 
 // default RH_ASK rf_driver(2000, 11, 12, 10, false)
 RH_ASK rf_driver(2000, 11, 4);
+
+
+RF24 radio(7, 8); // CE, CSN
+const byte address[6] = "00002";
+
+int lastButton1 = 0;
+int lastButton2 = 0;
+
   
 char command;
 int requestedPos;
@@ -103,10 +113,52 @@ void setup() {
   rf_driver.send((uint8_t *)msg, strlen(msg));
   rf_driver.waitPacketSent();  
 
+  // 24g
+  pinMode(4, INPUT);
+  pinMode(5, INPUT);
+  Serial.begin(9600);
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
+  Serial.println("start");  
+
+  
+
 }
 
 void loop() {
   processCommand();
+  int button1 =  digitalRead(4);
+  int button2 =  digitalRead(5);
+  if (button1!=lastButton1){
+    lastButton1 = button1;
+    if (button1==0){
+      const char text[] = "zet1";
+      radio.write(&text, sizeof(text));
+      Serial.println("zet1");
+    }
+    else{
+      const char text[] = "pak1";
+      radio.write(&text, sizeof(text));
+      Serial.println("pak1");
+    }
+  }
+  if (button2!=lastButton2){
+    lastButton2 = button2;
+    if (button2==0){
+      const char text[] = "zet2";
+      radio.write(&text, sizeof(text));
+      Serial.println("zet2");
+    }
+    else{
+      const char text[] = "pak2";
+      radio.write(&text, sizeof(text));
+      Serial.println("pak2");
+    }
+    
+
+  }  
 }
 
 void sendData(){
@@ -185,12 +237,22 @@ void processCommand(){
 void hold(){
   Serial.print("clamp");
   analogWrite(pullMagneetPin, 255);
+
+      const char text[] = "pak1";
+      radio.write(&text, sizeof(text));
+      Serial.println("pak1");
+  
   command = '-';      
 }
 
 void drop(){
   Serial.print("clamp");
   analogWrite(pullMagneetPin, 0);
+
+      const char text[] = "zet1";
+      radio.write(&text, sizeof(text));
+      Serial.println("zet1");
+        
   command = '-';      
 }
 
