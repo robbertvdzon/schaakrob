@@ -180,7 +180,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun clamp() {
         log.info("start: pak ")
         arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+//        waitUntilReady(20)
         log.info("ready: pak ")
         try {
             val delay = getDelayNaPak()?.trim()
@@ -196,7 +196,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun release() {
         log.info("start: release ")
         arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+//        waitUntilReady(20)
         log.info("ready: release ")
         try {
             val delay = getDelayNaZet()?.trim()

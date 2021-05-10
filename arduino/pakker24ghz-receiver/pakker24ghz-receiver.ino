@@ -64,9 +64,24 @@ void setup() {
 
 }
 
-
+unsigned long lastGrapTime1 = 0;
+unsigned long lastGrapTime2 = 0;
+unsigned long currentTime = 0;
 
 void loop() {
+  currentTime =millis();
+  if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>10000){
+    // drop piece
+    digitalWrite(2, LOW);
+    lastGrapTime1 = -1;
+  }
+  if (lastGrapTime2!=-1 && (currentTime-lastGrapTime2)>10000){
+    // drop piece
+    digitalWrite(3, LOW);
+    lastGrapTime2 = -1;
+  }
+
+  
   if (radio.available()) {
     char text[32] = "";
     radio.read(&text, sizeof(text));
@@ -77,8 +92,7 @@ void loop() {
        digitalWrite(2, HIGH);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
- 
-    
+       lastGrapTime1 = millis();
     }
     if(strcmp(text, "zet1") == 0){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
@@ -87,7 +101,7 @@ void loop() {
        digitalWrite(2, LOW);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
-
+       lastGrapTime1 = -1;
     }
 
     if(strcmp(text, "pak2") == 0){
@@ -97,6 +111,7 @@ void loop() {
        digitalWrite(3, HIGH);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
+       lastGrapTime2 = millis();
     }
     if(strcmp(text, "zet2") == 0){
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
@@ -105,6 +120,7 @@ void loop() {
        digitalWrite(3, LOW);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
+       lastGrapTime2 = -1;
     }    
     if(strcmp(text, "") != 0){
       Serial.println(text);
