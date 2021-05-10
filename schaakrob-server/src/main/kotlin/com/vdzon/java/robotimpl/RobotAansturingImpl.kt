@@ -134,7 +134,7 @@ class RobotAansturingImpl : RobotAansturing {
         calcDelays(x, y)
         gotoPos(arm1, x, formattedDelayFactor1)
         gotoPos(arm2, y, formattedDelayFactor2)
-        waitUntilReady(20)
+        waitUntilReady(100)
     }
 
     override fun homeVert() {
