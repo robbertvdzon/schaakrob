@@ -81,34 +81,27 @@ void setup() {
 
 }
 
-int count = 0;
-
+unsigned long lastGrapTime1 = 0;
+unsigned long lastGrapTime2 = 0;
+unsigned long currentTime = 0;
 
 void loop() {
-  if (count==1){
-    Serial.print("h");
-    digitalWrite(2, HIGH);    
+  currentTime =millis();
+  if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>10000){
+    // drop piece
+    digitalWrite(2, LOW);
+    lastGrapTime1 = -1;
   }
-  if (count==10000){
-    Serial.print("l");
-    digitalWrite(2, LOW);    
+  if (lastGrapTime2!=-1 && (currentTime-lastGrapTime2)>10000){
+    // drop piece
+    digitalWrite(3, LOW);
+    lastGrapTime2 = -1;
   }
-  if (count==20000){
-    count=0;    
-  }
-  count++;
+
+
   if (radio.available()) {
     char text[32] = "";
     radio.read(&text, sizeof(text));
-
-    int c = 0;
-    while (c<6){
-      if (c%2==0) digitalWrite(2, HIGH); 
-      if (c%2==1) digitalWrite(2, LOW); 
-      delay(50);
-      c++;
-    }
-    
     if(strcmp(text, "pak1") == 0){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
@@ -116,8 +109,7 @@ void loop() {
        digitalWrite(2, HIGH);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
- 
-    
+       lastGrapTime1 = millis();
     }
     if(strcmp(text, "zet1") == 0){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
@@ -126,7 +118,7 @@ void loop() {
        digitalWrite(2, LOW);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
-
+       lastGrapTime1 = -1;
     }
 
     if(strcmp(text, "pak2") == 0){
@@ -136,6 +128,7 @@ void loop() {
        digitalWrite(3, HIGH);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
+       lastGrapTime2 = millis();
     }
     if(strcmp(text, "zet2") == 0){
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
@@ -144,7 +137,8 @@ void loop() {
        digitalWrite(3, LOW);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
-    }    
+       lastGrapTime2 = -1;
+    }
     if(strcmp(text, "") != 0){
       Serial.println(text);
     }

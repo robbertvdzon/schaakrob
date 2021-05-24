@@ -134,7 +134,7 @@ class RobotAansturingImpl : RobotAansturing {
         calcDelays(x, y)
         gotoPos(arm1, x, formattedDelayFactor1)
         gotoPos(arm2, y, formattedDelayFactor2)
-        waitUntilReady(20)
+        waitUntilReady(100)
     }
 
     override fun homeVert() {
@@ -180,7 +180,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun clamp1() {
         log.info("start: pak ")
         arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+//        waitUntilReady(20)
         log.info("ready: pak ")
         try {
             val delay = getDelayNaPak()?.trim()
@@ -196,7 +196,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun release1() {
         log.info("start: release ")
         arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+//        waitUntilReady(20)
         log.info("ready: release ")
         try {
             val delay = getDelayNaZet()?.trim()
