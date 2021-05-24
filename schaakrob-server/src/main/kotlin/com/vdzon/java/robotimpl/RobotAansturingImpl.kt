@@ -177,7 +177,7 @@ class RobotAansturingImpl : RobotAansturing {
         }
     }
 
-    override fun clamp() {
+    override fun clamp1() {
         log.info("start: pak ")
         arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
@@ -193,9 +193,41 @@ class RobotAansturingImpl : RobotAansturing {
         log.info("done: pak ")
     }
 
-    override fun release() {
+    override fun release1() {
         log.info("start: release ")
         arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
+        waitUntilReady(20)
+        log.info("ready: release ")
+        try {
+            val delay = getDelayNaZet()?.trim()
+            Thread.sleep(delay?.toLong()?:0L)
+
+        }
+        catch (e:Exception){
+            e.printStackTrace()
+        }
+        log.info("done: release ")
+    }
+
+    override fun clamp2() {
+        log.info("start: pak ")
+        arm3!!.writeI2c("^W0000000000000000".toByteArray(),"arm3")
+        waitUntilReady(20)
+        log.info("ready: pak ")
+        try {
+            val delay = getDelayNaPak()?.trim()
+            Thread.sleep(delay?.toLong()?:0L)
+
+        }
+        catch (e:Exception){
+            e.printStackTrace()
+        }
+        log.info("done: pak ")
+    }
+
+    override fun release2() {
+        log.info("start: release ")
+        arm3!!.writeI2c("^E0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
         log.info("ready: release ")
         try {
@@ -548,9 +580,9 @@ class RobotAansturingImpl : RobotAansturing {
                             movetoVlak(vlak)
                         }
                         if (row.trim { it <= ' ' }.startsWith("pak")) {
-                            clamp()
+                            clamp1()
                         } else if (row.trim { it <= ' ' }.startsWith("zet")) {
-                            release()
+                            release1()
                         } else if (row.trim { it <= ' ' }.startsWith("sleep")) {
                             sleep()
                         } else if (row.trim { it <= ' ' }.startsWith("home")) {

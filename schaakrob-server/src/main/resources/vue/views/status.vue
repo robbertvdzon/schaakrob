@@ -119,11 +119,11 @@ Vue.component("status", {
       .catch(() => alert("Error"));
     },
     clamp: function (event) {
-      fetch(`/api/clamp`)
+      fetch(`/api/clamp1`)
       .catch(() => alert("Error"));
     },
     release: function (event) {
-      fetch(`/api/release`)
+      fetch(`/api/release1`)
       .catch(() => alert("Error"));
     },
 

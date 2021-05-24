@@ -61,15 +61,54 @@ void setup() {
  pwm.setPWM(0, 0, SERVO_MIDDLE);
  pwm.setPWM(1, 0, SERVO_MIDDLE);
 
+// wacht
+ delay(1000);
+// test loop, remove this code!
+ pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
+ pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
+ delay(200);
+ digitalWrite(3, HIGH);
+ pwm.setPWM(2, 0, SERVO_MIDDLE);
+ pwm.setPWM(3, 0, SERVO_MIDDLE);
+ delay(400);
+ pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
+ pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
+ delay(200);
+ digitalWrite(3, LOW);
+ pwm.setPWM(2, 0, SERVO_MIDDLE);
+ pwm.setPWM(3, 0, SERVO_MIDDLE);
+
 
 }
 
+int count = 0;
 
 
 void loop() {
+  if (count==1){
+    Serial.print("h");
+    digitalWrite(2, HIGH);    
+  }
+  if (count==10000){
+    Serial.print("l");
+    digitalWrite(2, LOW);    
+  }
+  if (count==20000){
+    count=0;    
+  }
+  count++;
   if (radio.available()) {
     char text[32] = "";
     radio.read(&text, sizeof(text));
+
+    int c = 0;
+    while (c<6){
+      if (c%2==0) digitalWrite(2, HIGH); 
+      if (c%2==1) digitalWrite(2, LOW); 
+      delay(50);
+      c++;
+    }
+    
     if(strcmp(text, "pak1") == 0){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );

@@ -212,16 +212,15 @@ void parseCommand(){
 }
 
 void processCommand(){
- if (command == 'C') clamp();
- if (command == 'R') release();
+ if (command == 'C') clamp1();
+ if (command == 'R') release1();
  if (command == 'H') hold();
  if (command == 'D') drop();
  if (command == 'A') activateMagnet();
  if (command == 'I') deactivateMagnet();
- if (command == 'H') hold();
- if (command == 'D') drop();
- if (command == 'A') activateMagnet();
- if (command == 'I') deactivateMagnet();
+
+ if (command == 'W') clamp2();
+ if (command == 'E') release2();
 }
 
 void hold(){
@@ -248,45 +247,40 @@ void deactivateMagnet(){
   command = '-';      
 }
 
-void clamp(){
+void clamp1(){
   state = GRABBING;
   const char text[] = "pak1";
   radio.write(&text, sizeof(text));
   Serial.println("pak1");
-/*
-  
-  Serial.print("clamp");
-  analogWrite(magneetPin, 0);
-  analogWrite(pullMagneetPin, 255); 
-  delay(10);
-  analogWrite(magneetPin, 255); 
-  delay(100);
-  analogWrite(pullMagneetPin, 0); 
-  delay(20);
-  analogWrite(magneetPin, 150); 
-  Serial.println("RESET CURRENT COMMAND");
-  delay(50);
-  */
   state = READY;
   command = '-';
 }
 
-void release(){
+void release1(){
   state = RELEASING;
 
   const char text[] = "zet1";
   radio.write(&text, sizeof(text));
   Serial.println("zet1");
-/*  
-  Serial.print("release");
-  analogWrite(pullMagneetPin, 255); 
-  delay(40);
-  analogWrite(magneetPin, 0);
-  delay(120);
-  analogWrite(pullMagneetPin, 0); 
-  delay(50);
-  Serial.println("RESET CURRENT COMMAND");
-  */
+  state = READY;
+  command = '-';
+}
+
+void clamp2(){
+  state = GRABBING;
+  const char text[] = "pak2";
+  radio.write(&text, sizeof(text));
+  Serial.println("pak2");
+  state = READY;
+  command = '-';
+}
+
+void release2(){
+  state = RELEASING;
+
+  const char text[] = "zet2";
+  radio.write(&text, sizeof(text));
+  Serial.println("zet2");
   state = READY;
   command = '-';
 }

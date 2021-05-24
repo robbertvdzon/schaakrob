@@ -24,8 +24,10 @@
        </span>
       <br>
       <span>
-              <button type="submit" v-on:click="clamp">Pak</button>
-              <button type="submit" v-on:click="release">Laat los</button>
+              <button type="submit" v-on:click="clamp1">Pak1</button>
+              <button type="submit" v-on:click="release1">Laat los1</button>
+              <button type="submit" v-on:click="clamp2">Pak2</button>
+              <button type="submit" v-on:click="release2">Laat los2</button>
        </span>
       <br>
       <span>
@@ -185,12 +187,20 @@ Vue.component("manual", {
       .catch(() => alert("Error"));
     },
 
-    clamp: function (event) {
-      fetch(`/api/clamp`)
+    clamp1: function (event) {
+      fetch(`/api/clamp1`)
       .catch(() => alert("Error"));
     },
-    release: function (event) {
-      fetch(`/api/release`)
+    release1: function (event) {
+      fetch(`/api/release1`)
+      .catch(() => alert("Error"));
+    },
+    clamp2: function (event) {
+      fetch(`/api/clamp2`)
+      .catch(() => alert("Error"));
+    },
+    release2: function (event) {
+      fetch(`/api/release2`)
       .catch(() => alert("Error"));
     },
     bootsound: function (event) {

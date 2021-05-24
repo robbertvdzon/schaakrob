@@ -33,12 +33,20 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         get("$host/api/sleep")
     }
 
-    override fun clamp() {
-        get("$host/api/clamp")
+    override fun clamp1() {
+        get("$host/api/clamp1")
     }
 
-    override fun release() {
-        get("$host/api/release")
+    override fun release1() {
+        get("$host/api/release1")
+    }
+
+    override fun clamp2() {
+        get("$host/api/clamp2")
+    }
+
+    override fun release2() {
+        get("$host/api/release2")
     }
 
     override fun hold() {
