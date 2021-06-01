@@ -16,12 +16,22 @@ rand_marge_kleiner = 0.01;
 difference(){
 	union(){
 
-        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2,diepte/2+4,0]){
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2-25,diepte/2+4,0]){
             rotate([0,0,0]){
                 cylinder(h=20, r=6, $fn=100, center=false);
             }
         }        
-        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2,-diepte-lengte_ruimte_tussen_2_motoren-diepte/2-4,0]){
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2+25,diepte/2+4,0]){
+            rotate([0,0,0]){
+                cylinder(h=20, r=6, $fn=100, center=false);
+            }
+        }        
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2-25,-diepte-lengte_ruimte_tussen_2_motoren-diepte/2-4,0]){
+            rotate([0,0,0]){
+                cylinder(h=20, r=6, $fn=100, center=false);
+            }
+        }        
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2+25,-diepte-lengte_ruimte_tussen_2_motoren-diepte/2-4,0]){
             rotate([0,0,0]){
                 cylinder(h=20, r=6, $fn=100, center=false);
             }
@@ -42,66 +52,59 @@ difference(){
 
 	}
 	union() {
-        
-        // middengat
-        translate([hele_breedte/2+breedte_ruimte_tussen_2_motoren-lengte_ruimte_tussen_2_motoren/2,-diepte/2-lengte_ruimte_tussen_2_motoren/2,-1]){
-            rotate([0,0,0]){
-                cylinder(h=7, r=2, $fn=100, center=false);
-            }
-        }           
 
         // schroefgaten
-        translate([hele_breedte+hele_breedte/2+breedte_ruimte_tussen_2_motoren-2,diepte/2-3,-1]){
+        translate([hele_breedte+hele_breedte/2+breedte_ruimte_tussen_2_motoren-2,diepte/2-3-10,-1]){
             rotate([0,0,0]){
                 cylinder(h=7, r=1.2, $fn=100, center=false);
             }
         }           
-        translate([hele_breedte+hele_breedte/2+breedte_ruimte_tussen_2_motoren-lengte_ruimte_tussen_2_motoren,-diepte-2-diepte/2+3,-1]){
+        translate([hele_breedte+hele_breedte/2+breedte_ruimte_tussen_2_motoren-lengte_ruimte_tussen_2_motoren,-diepte-2-diepte/2+3+10,-1]){
             rotate([0,0,0]){
                 cylinder(h=7, r=1.2, $fn=100, center=false);
             }
         }           
 
-        translate([-hele_breedte/2+2,diepte/2-3,-1]){
+        translate([-hele_breedte/2+2,diepte/2-3-10,-1]){
             rotate([0,0,0]){
                 cylinder(h=7, r=1.2, $fn=100, center=false);
             }
         }           
-        translate([-hele_breedte/2+2,-diepte-2-diepte/2+3,-1]){
+        translate([-hele_breedte/2+2,-diepte-2-diepte/2+3+10,-1]){
             rotate([0,0,0]){
                 cylinder(h=7, r=1.2, $fn=100, center=false);
             }
         }           
         
 
-        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2,diepte/2+4,-1]){
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2-25,diepte/2+4,-1]){
             rotate([0,0,0]){
                 cylinder(h=30, r=4, $fn=100, center=false);
             }
         }        
-        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2,-diepte-lengte_ruimte_tussen_2_motoren-diepte/2-4,-1]){
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2+25,diepte/2+4,-1]){
+            rotate([0,0,0]){
+                cylinder(h=30, r=4, $fn=100, center=false);
+            }
+        }        
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2-25,-diepte-lengte_ruimte_tussen_2_motoren-diepte/2-4,-1]){
+            rotate([0,0,0]){
+                cylinder(h=30, r=4, $fn=100, center=false);
+            }
+        }        
+        translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2+25,-diepte-lengte_ruimte_tussen_2_motoren-diepte/2-4,-1]){
             rotate([0,0,0]){
                 cylinder(h=30, r=4, $fn=100, center=false);
             }
         }        
 
-        translate([0,0,2]){
-            rotate([0,0,0]){
-                include <servo-mal.scad>;                
-            }
-        }  
-        translate([breedte_ruimte_tussen_2_motoren+motor_breedte,0,2]){
+        translate([10,0,2]){
             rotate([0,0,0]){
                 include <servo-mal.scad>;                
             }
         }  
         
-        translate([breedte_ruimte_tussen_2_motoren+motor_breedte,-(lengte_ruimte_tussen_2_motoren+motor_lengte),2]){
-            rotate([0,0,180]){
-                include <servo-mal.scad>;                
-            }
-        }  
-        translate([0,-(lengte_ruimte_tussen_2_motoren+motor_lengte),2]){
+        translate([breedte_ruimte_tussen_2_motoren+motor_breedte-10,-(lengte_ruimte_tussen_2_motoren+motor_lengte),2]){
             rotate([0,0,180]){
                 include <servo-mal.scad>;                
             }

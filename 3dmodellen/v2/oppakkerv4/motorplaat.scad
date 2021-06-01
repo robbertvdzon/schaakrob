@@ -23,29 +23,29 @@ difference(){
         }       
 
 
-        translate([-motor_breedte/2+15,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+6,0]){
+        translate([-motor_breedte/2+9.5,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+6,0]){
             cube([
-            motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-30
+            motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-19
             ,4
             ,18], center=false);
         }       
 
-        translate([-motor_breedte/2+15,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+motor_lengte*2+lengte_ruimte_tussen_2_motoren*2-4-6,0]){
+        translate([-motor_breedte/2+9.5,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+motor_lengte*2+lengte_ruimte_tussen_2_motoren*2-4-7,0]){
             cube([
-            motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-30
+            motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-19
             ,4
             ,18], center=false);
         }       
 
 
-        translate([-motor_breedte/2+15,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+6,0]){
+        translate([-motor_breedte/2+9.5,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+6,0]){
             cube([
             4
             ,motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-24
             ,30], center=false);
         }       
 
-        translate([-motor_breedte/2+15+motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-30-4,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+6,0]){
+        translate([-motor_breedte/2+30+motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-30-4-9.5,-motor_lengte-motor_lengte/2-lengte_ruimte_tussen_2_motoren+6,0]){
             cube([
             4
             ,motor_breedte*2+breedte_ruimte_tussen_2_motoren*2-24
@@ -53,13 +53,45 @@ difference(){
         }       
 
 
+        // pal voor veer
+        translate([36,-13,0]){
+            rotate([0,0,0]){
+                cylinder(h=10, r=2, $fn=100, center=false);
+            }
+        }   
+        translate([25,-30,0]){
+            rotate([0,0,0]){
+                cylinder(h=8, r=2, $fn=100, center=false);
+            }
+        }   
 
-
-
-        
 
 	}
 	union() {
+
+        // gat voor veer
+        translate([36,-13,13]){
+            rotate([90,0,0]){
+                cylinder(h=100, r=1.2, $fn=100, center=false);
+            }
+        }   
+        translate([-25,-30,13]){
+            rotate([0,90,0]){
+                cylinder(h=40, r=1.2, $fn=100, center=false);
+            }
+        }   
+
+        // schroefgaten voor geleider
+        translate([-20,5-1.2-8,27]){
+            rotate([0,90,0]){
+                cylinder(h=100, r=1.2, $fn=100, center=false);
+            }
+        }           
+        translate([-20,-31-1.2+8,27]){
+            rotate([0,90,0]){
+                cylinder(h=100, r=1.2, $fn=100, center=false);
+            }
+        }       
 
         // ruimte voor assen
         translate([(hele_breedte+breedte_ruimte_tussen_2_motoren)/2,diepte/2+4,-1]){
@@ -74,12 +106,6 @@ difference(){
         }            
 
 
-        // middengat
-        translate([hele_breedte/2+breedte_ruimte_tussen_2_motoren-lengte_ruimte_tussen_2_motoren/2,-diepte/2-lengte_ruimte_tussen_2_motoren/2,-1]){
-            rotate([0,0,0]){
-                cylinder(h=7, r=2, $fn=100, center=false);
-            }
-        }           
 
         // schroefgaten
         translate([hele_breedte+hele_breedte/2+breedte_ruimte_tussen_2_motoren-2,diepte/2-3,-1]){
@@ -107,37 +133,13 @@ difference(){
         
         translate([-20.25,-19.5,28]){
             rotate([180,0,0]){      
-/*
-                // schuifcontact gaten
-                translate([-9.5+75/2,31,17.5]){
-                    rotate([0,0,90]){
-                        include <grafiethouder-reverse.scad>;                
-                    }
-                }  
-                translate([+9.5+75/2,31,17.5]){
-                    rotate([0,0,90]){
-                        include <grafiethouder-reverse.scad>;                
-                    }
-                }  
 
-                // schuifcontact gaten horizontale as
-                translate([4,-10+5,6.5]){
-                    rotate([0,0,0]){
-                        include <grafiethouder-reverse.scad>;                
-                    }
-                }  
-*/
                 // as gaten voor schuif assen        
-                translate([-9.5+75/2,50,17.5]){
+                translate([75/2,50,17.5]){
                     rotate([90,0,0]){
                         cylinder(h=200, r=4.1, $fn=100, center=false);
                     }
                 }
-                translate([9.5+75/2,50,17.5]){
-                    rotate([90,0,0]){
-                        cylinder(h=200, r=4.1, $fn=100, center=false);
-                    }
-                }        
                 translate([-10,-10+5,6.5]){
                     rotate([0,90,0]){
                        cylinder(h=200, r=4.1, $fn=100, center=false);
@@ -147,19 +149,7 @@ difference(){
     
                 
                 //lager kruizen
-                translate([-9.5+75/2,20,17.5]){
-                    rotate([90,0,0]){
-                        for (hoek =[0:45:360])
-                        rotate([0,0,hoek]){
-                            translate([-1,-6,-30]){
-                                rotate([0,0,0]){
-                                    cube([2,6,90], center=false);
-                                }
-                            }
-                        }
-                    }
-                }
-                translate([+9.5+75/2,20,17.5]){
+                translate([75/2,20,17.5]){
                     rotate([90,0,0]){
                         for (hoek =[0:45:360])
                         rotate([0,0,hoek]){
