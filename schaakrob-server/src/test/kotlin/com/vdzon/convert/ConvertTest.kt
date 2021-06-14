@@ -48,42 +48,42 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
 
 
         val blackStoreSquares = listOf<StoreSquare>(
-                StoreSquare("A21"),
-                StoreSquare("B21"),
-                StoreSquare("C21"),
-                StoreSquare("D21"),
-                StoreSquare("E21"),
-                StoreSquare("F21"),
-                StoreSquare("G21"),
-                StoreSquare("H21"),
-                StoreSquare("A20"),
-                StoreSquare("B20"),
-                StoreSquare("C20"),
-                StoreSquare("D20"),
-                StoreSquare("E20"),
-                StoreSquare("F20"),
-                StoreSquare("G20"),
-                StoreSquare("H20")
+            StoreSquare("A21"),
+            StoreSquare("B21"),
+            StoreSquare("C21"),
+            StoreSquare("D21"),
+            StoreSquare("E21"),
+            StoreSquare("F21"),
+            StoreSquare("G21"),
+            StoreSquare("H21"),
+            StoreSquare("A20"),
+            StoreSquare("B20"),
+            StoreSquare("C20"),
+            StoreSquare("D20"),
+            StoreSquare("E20"),
+            StoreSquare("F20"),
+            StoreSquare("G20"),
+            StoreSquare("H20")
         )
         val whiteStoreSquares = listOf<StoreSquare>(
-                StoreSquare("A11"),
-                StoreSquare("B11"),
-                StoreSquare("C11"),
-                StoreSquare("D11"),
-                StoreSquare("E11"),
-                StoreSquare("F11"),
-                StoreSquare("G11"),
-                StoreSquare("H11"),
-                StoreSquare("A10"),
-                StoreSquare("B10"),
-                StoreSquare("C10"),
-                StoreSquare("D10"),
-                StoreSquare("E10"),
-                StoreSquare("F10"),
-                StoreSquare("G10"),
-                StoreSquare("H10")
+            StoreSquare("A11"),
+            StoreSquare("B11"),
+            StoreSquare("C11"),
+            StoreSquare("D11"),
+            StoreSquare("E11"),
+            StoreSquare("F11"),
+            StoreSquare("G11"),
+            StoreSquare("H11"),
+            StoreSquare("A10"),
+            StoreSquare("B10"),
+            StoreSquare("C10"),
+            StoreSquare("D10"),
+            StoreSquare("E10"),
+            StoreSquare("F10"),
+            StoreSquare("G10"),
+            StoreSquare("H10")
         )
-        val myMoves = mutableListOf<ChessMove>()
+        val myMoves = mutableListOf<ChessMoveParent>()
 
 
 
@@ -98,55 +98,78 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
                 nr++
                 if (move.san.contains("x")) {
                     // slag!
+                    val armNr = if (whitesMove) 0 else 1
                     val storeSquare = if (whitesMove) {
                         whiteStoreSquares.filter { !it.occupied }.first()
                     } else {
                         blackStoreSquares.filter { !it.occupied }.first()
                     }
                     storeSquare.occupied = true;
+                    myMoves.add(ChessSlag(move.from.value(), move.to.value(), storeSquare.pos, armNr, nr))
                     myMoves.add(ChessMove(move.to.value(), storeSquare.pos, nr))
-                }
+                    myMoves.add(ChessMove(move.from.value(), move.to.value(), nr))
+                    board.doMove(move)
+                    whitesMove = !whitesMove;
 
-                if (move.san.equals("O-O-O")) {
+                } else if (move.san.equals("O-O-O")) {
                     if (move.from.value().equals("E8")) {
                         myMoves.add(ChessMove("A8", "D8", nr))
                     }
                     if (move.from.value().equals("E1")) {
                         myMoves.add(ChessMove("A1", "D1", nr))
                     }
-
-                }
-                if (move.san.equals("O-O") && move.from.equals("E1")) {
+                    myMoves.add(ChessMove(move.from.value(), move.to.value(), nr))
+                    board.doMove(move)
+                    whitesMove = !whitesMove;
+                } else if (move.san.equals("O-O") && move.from.equals("E1")) {
                     if (move.from.value().equals("E1")) {
                         myMoves.add(ChessMove("H1", "F1", nr))
                     }
                     if (move.from.value().equals("E8")) {
                         myMoves.add(ChessMove("H8", "F8", nr))
                     }
+                    myMoves.add(ChessMove(move.from.value(), move.to.value(), nr))
+                    board.doMove(move)
+                    whitesMove = !whitesMove;
+                } else {
+                    myMoves.add(ChessMove(move.from.value(), move.to.value(), nr))
+                    board.doMove(move)
+                    whitesMove = !whitesMove;
                 }
-
-
-                myMoves.add(ChessMove(move.from.value(), move.to.value(), nr))
-                board.doMove(move)
-                whitesMove = !whitesMove;
             }
         }
 
         val demo =
-                myMoves.map {
-                    toDemo(it)
-                }.joinToString("")
+            myMoves.map {
+                toDemo(it)
+            }.joinToString("")
         File("demo-kort2.txt").writeText(demo)
 
     }
 
-    private fun toDemo(it: ChessMove): String {
-        val moves = "@${it.from}#\n" +
-                "pak#\n" +
-                "@${it.to}#\n" +
-                "zet#\n"
-//        return if (it.nr % 5 == 0) "home#\n$moves" else moves
-        return moves
+    private fun toDemo(it: ChessMoveParent): String {
+        return when (it) {
+            is ChessMove -> {
+                "@${it.from} 0#\n" +
+                        "pak 0#\n" +
+                        "@${it.to} 0#\n" +
+                        "zet 0#\n"
+            }
+            is ChessSlag -> {
+                val pakkerNr = it.pakkerNr
+                val otherPakker = if (it.pakkerNr == 0) 1 else 0
+                "" +
+                        "@${it.from} $pakkerNr#\n" +
+                        "pak $pakkerNr#\n" +
+                        "@${it.to} $otherPakker#\n" +
+                        "pak $otherPakker#\n" +
+                        "@${it.to} $pakkerNr#\n" +
+                        "zet $pakkerNr#\n" +
+                        "@${it.slagTo} $otherPakker#\n" +
+                        "zet $otherPakker#\n"
+            }
+            else -> ""
+        }
     }
 
 
@@ -165,29 +188,32 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
     private fun runOnce(text: String?) {
         val split = text!!.split("#".toRegex()).toTypedArray()
         Arrays.asList(*split).forEach(
-                Consumer { row: String? ->
-                    if (row != null && !row.startsWith("#")) {
-                        if (row.trim { it <= ' ' }.startsWith("@")) {
-                            println("moveto:$row")
-                            println("ss:" + row.trim().replace("@", ""))
-                            val d = row.trim().replace("@", "")
-                            println("Moveto: " + d)
-                        }
-                        if (row.trim { it <= ' ' }.startsWith("pak")) {
-                            println("clamp")
-                        } else if (row.trim { it <= ' ' }.startsWith("zet")) {
-                            println("zet")
-                        } else if (row.trim { it <= ' ' }.startsWith("sleep")) {
-                            println("clamp")
-                        } else if (row.trim { it <= ' ' }.startsWith("home")) {
-                        } else {
-                            val splitWords = row.split(",".toRegex()).toTypedArray()
-                        }
+            Consumer { row: String? ->
+                if (row != null && !row.startsWith("#")) {
+                    if (row.trim { it <= ' ' }.startsWith("@")) {
+                        println("moveto:$row")
+                        println("ss:" + row.trim().replace("@", ""))
+                        val d = row.trim().replace("@", "")
+                        println("Moveto: " + d)
+                    }
+                    if (row.trim { it <= ' ' }.startsWith("pak")) {
+                        println("clamp")
+                    } else if (row.trim { it <= ' ' }.startsWith("zet")) {
+                        println("zet")
+                    } else if (row.trim { it <= ' ' }.startsWith("sleep")) {
+                        println("clamp")
+                    } else if (row.trim { it <= ' ' }.startsWith("home")) {
+                    } else {
+                        val splitWords = row.split(",".toRegex()).toTypedArray()
                     }
                 }
+            }
         )
     }
 }
 
 data class StoreSquare(val pos: String, var occupied: Boolean = false)
-data class ChessMove(val from: String, val to: String, val nr: Int)
+interface ChessMoveParent
+data class ChessMove(val from: String, val to: String, val nr: Int) : ChessMoveParent
+data class ChessSlag(val from: String, val to: String, val slagTo: String, val pakkerNr: Int, val nr: Int) :
+    ChessMoveParent
