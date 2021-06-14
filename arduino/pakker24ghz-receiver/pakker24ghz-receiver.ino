@@ -17,7 +17,7 @@ const byte address[6] = "00002";
 const int SERVOMIN = 120; // this is the 'minimum' pulse length count (out of 4096)
 const int SERVOMAX = 620; // this is the 'maximum' pulse length count (out of 4096)
 const int SERVO_MIDDLE = (SERVOMAX-SERVOMIN)/2+SERVOMIN;
-const int PULSES_DOWN = 120;
+const int PULSES_DOWN = 170;
 
 Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
 
@@ -77,6 +77,7 @@ void setup() {
  digitalWrite(3, LOW);
  pwm.setPWM(2, 0, SERVO_MIDDLE);
  pwm.setPWM(3, 0, SERVO_MIDDLE);
+
 
 
 }

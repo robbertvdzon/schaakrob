@@ -43,7 +43,7 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
         val d = File(".")
         println(d.canonicalPath)
 
-        val pgn = PgnHolder("game.pgn")
+        val pgn = PgnHolder("gamekort.pgn")
         pgn.loadPgn()
 
 
@@ -136,7 +136,7 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
                 myMoves.map {
                     toDemo(it)
                 }.joinToString("")
-        File("demo.txt").writeText(demo)
+        File("demo-kort2.txt").writeText(demo)
 
     }
 
