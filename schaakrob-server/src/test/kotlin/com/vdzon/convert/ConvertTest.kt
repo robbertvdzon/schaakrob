@@ -98,7 +98,7 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
                 nr++
                 if (move.san.contains("x")) {
                     // slag!
-                    val armNr = if (whitesMove) 0 else 1
+                    val armNr = if (whitesMove) 1 else 0
                     val storeSquare = if (whitesMove) {
                         whiteStoreSquares.filter { !it.occupied }.first()
                     } else {
@@ -106,8 +106,6 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
                     }
                     storeSquare.occupied = true;
                     myMoves.add(ChessSlag(move.from.value(), move.to.value(), storeSquare.pos, armNr, nr))
-                    myMoves.add(ChessMove(move.to.value(), storeSquare.pos, nr))
-                    myMoves.add(ChessMove(move.from.value(), move.to.value(), nr))
                     board.doMove(move)
                     whitesMove = !whitesMove;
 
