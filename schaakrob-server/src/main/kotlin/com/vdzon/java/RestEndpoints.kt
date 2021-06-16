@@ -9,7 +9,10 @@ class RestEndpoints {
     fun initRestEndpoints(app: Javalin?, robotAansturing: RobotAansturing) {
         this.robotAansturing = robotAansturing
         app!!.post("/api/move") { ctx: Context -> move(ctx.body()) }
-        app.post("/api/movevlak") { ctx: Context -> robotAansturing.movetoVlak(ctx.body()) }
+        app.post("/api/movevlak") { ctx: Context ->
+            val (vlak, arm) = ctx.body().split("")
+            robotAansturing.movetoVlak(vlak, arm.toInt())
+        }
         app["/api/rebuild", { ctx: Context? -> robotAansturing.rebuild() }]
         app["/api/restart", { ctx: Context? -> robotAansturing.restart() }]
         app["/api/home_vert", { ctx: Context? -> robotAansturing.homeVert() }]
@@ -39,6 +42,8 @@ class RestEndpoints {
         app.post("/api/h20") { ctx: Context -> robotAansturing.setH20(ctx.body()) }
         app["/api/snelheid", { ctx: Context -> ctx.result(robotAansturing.getSnelheid()!!) }]
         app.post("/api/snelheid") { ctx: Context -> robotAansturing.setSnelheid(ctx.body()) }
+        app["/api/pakkerhoogte", { ctx: Context -> ctx.result(robotAansturing.getPakkerHoogte()!!) }]
+        app.post("/api/pakkerhoogte") { ctx: Context -> robotAansturing.setPakkerHoogte(ctx.body()) }
         app["/api/delaynapak", { ctx: Context -> ctx.result(robotAansturing.getDelayNaPak()!!) }]
         app.post("/api/delaynapak") { ctx: Context -> robotAansturing.setDelayNaPak(ctx.body()) }
         app["/api/delaynazet", { ctx: Context -> ctx.result(robotAansturing.getDelayNaZet()!!) }]

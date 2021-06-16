@@ -6,8 +6,10 @@ import com.vdzon.java.robotclient.RobotAansturingClient
 import com.vdzon.java.robotimpl.RobotAansturingImpl
 import io.javalin.Javalin
 import io.javalin.core.JavalinConfig
+import io.javalin.plugin.rendering.vue.JavalinVue
 import io.javalin.plugin.rendering.vue.VueComponent
 import org.slf4j.LoggerFactory
+import java.nio.file.Path
 
 class MainWeb {
     private val log = LoggerFactory.getLogger(MainWeb::class.java)
@@ -28,7 +30,7 @@ class MainWeb {
         robotAansturing = if (schaakbord) {
             RobotAansturingImpl()
         } else {
-            RobotAansturingClient("http://192.168.178.48:8080")
+            RobotAansturingClient("http://192.168.178.50:8080")
         }
         RestEndpoints().initRestEndpoints(app, robotAansturing)
         log.info("Starting server")

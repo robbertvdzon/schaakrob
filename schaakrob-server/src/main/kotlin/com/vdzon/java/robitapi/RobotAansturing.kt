@@ -1,7 +1,7 @@
 package com.vdzon.java.robitapi
 
 interface RobotAansturing {
-    fun movetoVlak(vlak: String)
+    fun movetoVlak(vlak: String, arm: Int)
     fun moveto(x: Int, y: Int)
     fun homeVert()
     fun homeHor()
@@ -29,6 +29,8 @@ interface RobotAansturing {
     fun setH1(pos: String)
     fun setH10(pos: String)
     fun setH20(pos: String)
+    fun getPakkerHoogte(): String?
+    fun setPakkerHoogte(snelheid: String)
     fun getSnelheid(): String?
     fun setSnelheid(snelheid: String)
     fun getDelayNaPak(): String?

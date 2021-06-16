@@ -13,8 +13,8 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     private val log = LoggerFactory.getLogger(RobotAansturingClient::class.java)
     private val httpClient = HttpClients.createDefault()
     private var host = ""
-    override fun movetoVlak(vlak: String) {
-        post("$host/api/movevlak", vlak)
+    override fun movetoVlak(vlak: String, arm: Int) {
+        post("$host/api/movevlak", vlak+" "+arm)
     }
 
     override fun moveto(x: Int, y: Int) {
@@ -126,6 +126,13 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         post("$host/api/h20", pos)
     }
 
+    override fun getPakkerHoogte(): String? {
+        return get("$host/api/pakkerhoogte")
+    }
+
+    override fun setPakkerHoogte(snelheid: String) {
+        post("$host/api/pakkerhoogte", snelheid)
+    }
     override fun getSnelheid(): String? {
         return get("$host/api/snelheid")
     }

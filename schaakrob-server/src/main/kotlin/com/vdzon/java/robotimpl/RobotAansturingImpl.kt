@@ -72,7 +72,7 @@ class RobotAansturingImpl : RobotAansturing {
 
     }
 
-    override fun movetoVlak(vlak: String) {
+    override fun movetoVlak(vlak: String, arm: Int) {
         log.info("start: move to "+vlak)
         val posA8 = getA8()
         val posA11 = getA11()
@@ -125,6 +125,8 @@ class RobotAansturingImpl : RobotAansturing {
         if (y < 0) y = 0
         if (x > 13500) x = 13500
         if (x < 0) x = 0
+        if (arm==1) y = y+(getPakkerHoogte()?.toIntOrNull()?:0)
+
         moveto(y, x)
         log.info("done: move to "+vlak)
 
@@ -327,6 +329,14 @@ class RobotAansturingImpl : RobotAansturing {
 
     override fun setH20(pos: String) {
         saveToFile("/home/pi/h20.data", pos)
+    }
+
+    override fun getPakkerHoogte(): String? {
+        return loadFile("/home/pi/pakkerhoogte.data")
+    }
+
+    override fun setPakkerHoogte(pakkerhoogte: String) {
+        saveToFile("/home/pi/pakkerhoogte.data", pakkerhoogte)
     }
 
     override fun getSnelheid(): String? {
@@ -576,35 +586,41 @@ class RobotAansturingImpl : RobotAansturing {
                 Consumer { row: String? ->
                     if (row != null && !row.startsWith("#") && currentLoopThread!=null) {// check currentLoopThread: als die null is, dan is gevraagd op de demo te stoppen
                         if (row.trim { it <= ' ' }.startsWith("@")) {
-                            val vlak = row.trim().replace("@","")
-                            movetoVlak(vlak)
-                        }
-                        if (row.trim { it <= ' ' }.startsWith("pak")) {
+                            val regel = row.trim().replace("@","")
+                            val (vlak, armStr) = regel.split(" ")
+                            val arm = armStr.toInt()
+                            movetoVlak(vlak, arm)
+                        } else if (row.trim { it <= ' ' }.startsWith("pak 0")) {
                             clamp1()
-                        } else if (row.trim { it <= ' ' }.startsWith("zet")) {
+                        } else if (row.trim { it <= ' ' }.startsWith("pak 1")) {
+                            clamp2()
+                        } else if (row.trim { it <= ' ' }.startsWith("zet 0")) {
                             release1()
+                        } else if (row.trim { it <= ' ' }.startsWith("zet 1")) {
+                            release2()
                         } else if (row.trim { it <= ' ' }.startsWith("sleep")) {
                             sleep()
                         } else if (row.trim { it <= ' ' }.startsWith("home")) {
                             homeHor()
                             homeVert()
                             waitUntilReady(100)
-                        } else {
-                            val splitWords = row.split(",".toRegex()).toTypedArray()
-                            if (splitWords.size >= 3) {
-                                val posArm1 = splitWords[0].trim { it <= ' ' }
-                                val posArm2 = splitWords[1].trim { it <= ' ' }
-                                try {
-                                    val pos1 = posArm1.toInt()
-                                    val pos2 = posArm2.toInt()
-                                    calcDelays(pos1, pos2)
-                                    gotoPos(arm1, pos1, formattedDelayFactor1)
-                                    gotoPos(arm2, pos2, formattedDelayFactor2)
-                                } catch (ex: Exception) {
-                                    ex.printStackTrace()
-                                }
-                            }
                         }
+//                        } else {
+//                            val splitWords = row.split(",".toRegex()).toTypedArray()
+//                            if (splitWords.size >= 3) {
+//                                val posArm1 = splitWords[0].trim { it <= ' ' }
+//                                val posArm2 = splitWords[1].trim { it <= ' ' }
+//                                try {
+//                                    val pos1 = posArm1.toInt()
+//                                    val pos2 = posArm2.toInt()
+//                                    calcDelays(pos1, pos2)
+//                                    gotoPos(arm1, pos1, formattedDelayFactor1)
+//                                    gotoPos(arm2, pos2, formattedDelayFactor2)
+//                                } catch (ex: Exception) {
+//                                    ex.printStackTrace()
+//                                }
+//                            }
+//                        }
                     }
                 }
         )

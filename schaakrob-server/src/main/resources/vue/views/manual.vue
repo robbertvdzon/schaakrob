@@ -40,7 +40,8 @@
       <br>
       Naar vlak:
       <input v-model="vlak" >
-      <button type="submit" v-on:click="movevlak">naar vlak</button>
+      <button type="submit" v-on:click="movevlak1">naar vlak arm1</button>
+      <button type="submit" v-on:click="movevlak2">naar vlak arm2 </button>
       <br>
       <br>
       Manual pos:
@@ -71,6 +72,11 @@
       H20:
       <input v-model="h20pos" >
       <button type="submit" v-on:click="saveH20">Save</button>
+      <br>
+      Pakker hoogte:
+      <input v-model="pakkerhoogte" >
+      <button type="submit" v-on:click="savePakkerhoogte">Save</button>
+      <br>
       <br>
       Snelheid:
       <input v-model="snelheid" >
@@ -103,6 +109,7 @@ Vue.component("manual", {
     h10pos:"",
     h20pos:"",
     snelheid:"2.0",
+    pakkerhoogte: "",
     delaynapak:"2.0",
     delaynazet:"2.0",
     vlak:"A8"
@@ -138,6 +145,7 @@ Vue.component("manual", {
       .catch(() => alert("Error"));
 
       fetch(`/api/h20`)
+      fetch(`/api/h20`)
       .then(res => res.text())
       .then(text => this.h20pos=text)
       .catch(() => alert("Error"));
@@ -145,6 +153,11 @@ Vue.component("manual", {
       fetch(`/api/snelheid`)
       .then(res => res.text())
       .then(text => this.snelheid=text)
+      .catch(() => alert("Error"));
+
+      fetch(`/api/pakkerhoogte`)
+      .then(res => res.text())
+      .then(text => this.pakkerhoogte=text)
       .catch(() => alert("Error"));
 
       fetch(`/api/delaynapak`)
@@ -215,8 +228,16 @@ Vue.component("manual", {
         alert("Error")
       })
     },
-    movevlak: function (event) {
-      axios.post(`/api/movevlak`, this.vlak)
+    movevlak1: function (event) {
+      axios.post(`/api/movevlak`, this.vlak+" 0")
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
+    movevlak2: function (event) {
+      axios.post(`/api/movevlak`, this.vlak+" 1")
       .then(res => {
       })
       .catch(error => {
@@ -265,6 +286,14 @@ Vue.component("manual", {
     },
     saveH20: function (event) {
       axios.post(`/api/h20`, this.h20pos)
+      .then(res => {
+      })
+      .catch(error => {
+        alert("Error")
+      })
+    },
+    savePakkerhoogte: function (event) {
+      axios.post(`/api/pakkerhoogte`, this.pakkerhoogte)
       .then(res => {
       })
       .catch(error => {
