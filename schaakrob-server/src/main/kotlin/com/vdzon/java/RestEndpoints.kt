@@ -10,7 +10,7 @@ class RestEndpoints {
         this.robotAansturing = robotAansturing
         app!!.post("/api/move") { ctx: Context -> move(ctx.body()) }
         app.post("/api/movevlak") { ctx: Context ->
-            val (vlak, arm) = ctx.body().split("")
+            val (vlak, arm) = ctx.body().split(" ")
             robotAansturing.movetoVlak(vlak, arm.toInt())
         }
         app["/api/rebuild", { ctx: Context? -> robotAansturing.rebuild() }]
