@@ -45,7 +45,7 @@ send: state + pos
 #define FATAL_ERROR 7
 
 #define HOME_SPEED 120
-#define HOME_SPEED_SLOW 500
+#define HOME_SPEED_SLOW 240 //500
 
 #define dirPin 3
 #define stepPin 4 

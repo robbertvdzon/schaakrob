@@ -17,7 +17,8 @@ const byte address[6] = "00002";
 const int SERVOMIN = 120; // this is the 'minimum' pulse length count (out of 4096)
 const int SERVOMAX = 620; // this is the 'maximum' pulse length count (out of 4096)
 const int SERVO_MIDDLE = (SERVOMAX-SERVOMIN)/2+SERVOMIN;
-const int PULSES_DOWN = 170;
+const int PULSES_DOWN = 190;
+const int TIMEOUT_MAGNET = 20000;
 
 Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
 
@@ -88,12 +89,12 @@ unsigned long currentTime = 0;
 
 void loop() {
   currentTime =millis();
-  if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>10000){
+  if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>TIMEOUT_MAGNET){
     // drop piece
     digitalWrite(2, LOW);
     lastGrapTime1 = -1;
   }
-  if (lastGrapTime2!=-1 && (currentTime-lastGrapTime2)>10000){
+  if (lastGrapTime2!=-1 && (currentTime-lastGrapTime2)>TIMEOUT_MAGNET){
     // drop piece
     digitalWrite(3, LOW);
     lastGrapTime2 = -1;
