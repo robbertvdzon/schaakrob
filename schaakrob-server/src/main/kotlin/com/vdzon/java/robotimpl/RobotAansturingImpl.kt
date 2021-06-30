@@ -1,6 +1,10 @@
 package com.vdzon.java.robotimpl
 
 import com.pi4j.component.lcd.impl.I2CLcdDisplay
+import com.pi4j.io.gpio.GpioFactory
+import com.pi4j.io.gpio.PinPullResistance
+import com.pi4j.io.gpio.RaspiPin
+import com.pi4j.io.gpio.event.GpioPinListenerDigital
 import com.pi4j.io.i2c.I2CBus
 import com.pi4j.io.i2c.I2CDevice
 import com.pi4j.io.i2c.I2CFactory
@@ -34,6 +38,7 @@ class RobotAansturingImpl : RobotAansturing {
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
     private var arm3: I2CDevice? = null
+    private val display = OLEDDisplay()
 //    private var display: I2CDevice? = null
 
 
@@ -49,9 +54,43 @@ class RobotAansturingImpl : RobotAansturing {
         while (!initialized ) {
 
             try{
-                val display = OLEDDisplay()
-                display.drawStringCentered("Schaakrobot", Font.FONT_5X8, 25, true)
+                display.drawStringCentered("Schaakrob!", Font.FONT_5X8, 25, true)
                 display.update()
+            }
+            catch (e:Exception){
+                e.printStackTrace()
+            }
+            try{
+                println("<--Pi4J--> GPIO Listen Example ... started.")
+                val gpio = GpioFactory.getInstance()
+                val myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_05, PinPullResistance.PULL_DOWN)
+                myButton.setShutdownOptions(true)
+                myButton.addListener(GpioPinListenerDigital { event -> // display pin state on console
+                    println(" --> GPIO PIN STATE CHANGE (5): " + event.pin + " = " + event.state)
+                    try{
+                        display.drawStringCentered("5:"+event.state, Font.FONT_5X8, 25, true)
+                        display.update()
+                        println("Display updated")
+                    }
+                    catch (e:Exception){
+                        e.printStackTrace()
+                    }
+
+                })
+                val myButton2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_06, PinPullResistance.PULL_DOWN)
+                myButton2.setShutdownOptions(true)
+                myButton2.addListener(GpioPinListenerDigital { event -> // display pin state on console
+                    println(" --> GPIO PIN STATE CHANGE: (6)" + event.pin + " = " + event.state)
+                    try{
+                        display.drawStringCentered("6:"+event.state, Font.FONT_5X8, 25, true)
+                        display.update()
+                        println("Display updated")
+                    }
+                    catch (e:Exception){
+                        e.printStackTrace()
+                    }
+                })
+
             }
             catch (e:Exception){
                 e.printStackTrace()
