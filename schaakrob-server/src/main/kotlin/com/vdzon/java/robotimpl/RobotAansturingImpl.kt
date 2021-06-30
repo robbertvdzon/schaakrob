@@ -8,6 +8,8 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
+import de.pi3g.pi.oled.Font
+import de.pi3g.pi.oled.OLEDDisplay
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter
@@ -18,6 +20,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import java.util.function.Consumer
+
 
 private val log = LoggerFactory.getLogger(RobotAansturingImpl::class.java)
 
@@ -44,6 +47,16 @@ class RobotAansturingImpl : RobotAansturing {
 
         var initialized = false
         while (!initialized ) {
+
+            try{
+                val display = OLEDDisplay()
+                display.drawStringCentered("Schaakrobot", Font.FONT_5X8, 25, true)
+                display.update()
+            }
+            catch (e:Exception){
+                e.printStackTrace()
+            }
+
             try {
                 log.info("Open devices")
                 val i2c = I2CFactory.getInstance(I2CBus.BUS_1)

@@ -20,6 +20,11 @@ const int SERVO_MIDDLE = (SERVOMAX-SERVOMIN)/2+SERVOMIN;
 const int PULSES_DOWN = 190;
 const int TIMEOUT_MAGNET = 20000;
 
+const int MAGNET_OFF = 0;
+const int MAGNET_ON = 255;
+const int MAGNET_HOLD = 130;
+
+
 Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
 
 void setup() {
@@ -30,8 +35,8 @@ void setup() {
   pinMode(3, OUTPUT);
   pinMode(4, OUTPUT);
 
-  digitalWrite(2, LOW);
-  digitalWrite(3, LOW);
+  analogWrite(2, MAGNET_OFF);
+  analogWrite(3, MAGNET_OFF);
   
   pwm.begin();
   pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
@@ -44,21 +49,21 @@ void setup() {
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MIN);
   radio.startListening();
-  digitalWrite(2, LOW);  
+  analogWrite(2, MAGNET_OFF);  
   Serial.println("START");
 
 // test loop, remove this code!
  pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
  pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
  delay(200);
- digitalWrite(2, HIGH);
+ analogWrite(2, MAGNET_ON);
  pwm.setPWM(0, 0, SERVO_MIDDLE);
  pwm.setPWM(1, 0, SERVO_MIDDLE);
  delay(400);
  pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
  pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
  delay(200);
- digitalWrite(2, LOW);
+ analogWrite(2, MAGNET_OFF);
  pwm.setPWM(0, 0, SERVO_MIDDLE);
  pwm.setPWM(1, 0, SERVO_MIDDLE);
 
@@ -68,14 +73,14 @@ void setup() {
  pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
  pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
  delay(200);
- digitalWrite(3, HIGH);
+ analogWrite(3, MAGNET_ON);
  pwm.setPWM(2, 0, SERVO_MIDDLE);
  pwm.setPWM(3, 0, SERVO_MIDDLE);
  delay(400);
  pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
  pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
  delay(200);
- digitalWrite(3, LOW);
+ analogWrite(3, MAGNET_OFF);
  pwm.setPWM(2, 0, SERVO_MIDDLE);
  pwm.setPWM(3, 0, SERVO_MIDDLE);
 
@@ -91,12 +96,12 @@ void loop() {
   currentTime =millis();
   if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>TIMEOUT_MAGNET){
     // drop piece
-    digitalWrite(2, LOW);
+    analogWrite(2, MAGNET_OFF);
     lastGrapTime1 = -1;
   }
   if (lastGrapTime2!=-1 && (currentTime-lastGrapTime2)>TIMEOUT_MAGNET){
     // drop piece
-    digitalWrite(3, LOW);
+    analogWrite(3, MAGNET_OFF);
     lastGrapTime2 = -1;
   }
 
@@ -108,16 +113,18 @@ void loop() {
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
        delay(200);
-       digitalWrite(2, HIGH);
+       analogWrite(2, MAGNET_ON);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
+       delay(200);
+       analogWrite(2, MAGNET_HOLD);
        lastGrapTime1 = millis();
     }
     if(strcmp(text, "zet1") == 0){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
        delay(200);
-       digitalWrite(2, LOW);
+       analogWrite(2, MAGNET_OFF);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
        lastGrapTime1 = -1;
@@ -127,16 +134,18 @@ void loop() {
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
        pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
        delay(200);
-       digitalWrite(3, HIGH);
+       analogWrite(3, MAGNET_ON);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
+       delay(200);
+       analogWrite(3, MAGNET_HOLD);
        lastGrapTime2 = millis();
     }
     if(strcmp(text, "zet2") == 0){
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
        pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
        delay(200);
-       digitalWrite(3, LOW);
+       analogWrite(3, MAGNET_OFF);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
        lastGrapTime2 = -1;
