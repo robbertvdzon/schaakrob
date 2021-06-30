@@ -68,7 +68,8 @@ class RobotAansturingImpl : RobotAansturing {
                 myButton.addListener(GpioPinListenerDigital { event -> // display pin state on console
                     println(" --> GPIO PIN STATE CHANGE (5): " + event.pin + " = " + event.state)
                     try{
-                        display.drawStringCentered("5:"+event.state, Font.FONT_5X8, 25, true)
+                        display.clear()
+                        display.drawStringCentered("2:"+event.state, Font.FONT_5X8, 25, true)
                         display.update()
                         println("Display updated")
                     }
@@ -77,12 +78,13 @@ class RobotAansturingImpl : RobotAansturing {
                     }
 
                 })
-                val myButton2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_06, PinPullResistance.PULL_DOWN)
+                val myButton2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_03, PinPullResistance.PULL_DOWN)
                 myButton2.setShutdownOptions(true)
                 myButton2.addListener(GpioPinListenerDigital { event -> // display pin state on console
                     println(" --> GPIO PIN STATE CHANGE: (6)" + event.pin + " = " + event.state)
                     try{
-                        display.drawStringCentered("6:"+event.state, Font.FONT_5X8, 25, true)
+                        display.clear()
+                        display.drawStringCentered("3:"+event.state, Font.FONT_5X8, 25, true)
                         display.update()
                         println("Display updated")
                     }
