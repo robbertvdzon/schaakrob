@@ -63,7 +63,7 @@ class RobotAansturingImpl : RobotAansturing {
             try{
                 println("<--Pi4J--> GPIO Listen Example ... started.")
                 val gpio = GpioFactory.getInstance()
-                val myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_05, PinPullResistance.PULL_DOWN)
+                val myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02, PinPullResistance.PULL_DOWN)
                 myButton.setShutdownOptions(true)
                 myButton.addListener(GpioPinListenerDigital { event -> // display pin state on console
                     println(" --> GPIO PIN STATE CHANGE (5): " + event.pin + " = " + event.state)
