@@ -59,7 +59,7 @@ class Display(private val robotAansturing: RobotAansturing) {
     fun showPage(){
         val maxPages = 10
         when(pageNr % maxPages){
-            0-> displayText("192.168.999.999")
+            0-> displayText("192.168.123.123")
             1-> displayText("start demo")
             2-> displayText("stop demo")
             3-> displayText("home hor")
