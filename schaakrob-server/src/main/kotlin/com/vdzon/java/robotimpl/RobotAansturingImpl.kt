@@ -51,8 +51,8 @@ class RobotAansturingImpl : RobotAansturing {
 
         var initialized = false
         while (!initialized ) {
-
-            Display.startDisplay()
+            val display = Display(this)
+            display.startDisplay()
 
             try {
                 log.info("Open devices")
