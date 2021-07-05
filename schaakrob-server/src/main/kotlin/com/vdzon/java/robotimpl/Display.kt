@@ -2,28 +2,76 @@ package com.vdzon.java.robotimpl
 
 import com.pi4j.io.gpio.GpioFactory
 import com.pi4j.io.gpio.PinPullResistance
+import com.pi4j.io.gpio.PinState
 import com.pi4j.io.gpio.RaspiPin
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent
 import com.pi4j.io.gpio.event.GpioPinListenerDigital
+import com.vdzon.java.robitapi.RobotAansturing
 import de.pi3g.pi.oled.Font
 import de.pi3g.pi.oled.OLEDDisplay
 
-object Display {
+class Display(private val robotAansturing: RobotAansturing) {
     private val display = OLEDDisplay()
+    private var pageNr = 0
 
     fun button1(event: GpioPinDigitalStateChangeEvent){
-        displayText("11:"+event.state)
+//        displayText("11:"+event.state)
 
     }
     fun button2(event: GpioPinDigitalStateChangeEvent){
-        displayText("22:"+event.state)
+//        displayText("22:"+event.state)
+        if (event.state==PinState.HIGH) {
+            nextPage()
+            showPage()
+        }
     }
     fun button3(event: GpioPinDigitalStateChangeEvent){
-        displayText("33:"+event.state)
+//        displayText("33:"+event.state)
+        if (event.state==PinState.HIGH) {
+            prevPage()
+            showPage()
+        }
     }
     fun button4(event: GpioPinDigitalStateChangeEvent){
-        displayText("44:"+event.state)
+        val maxPages = 9
+        when(pageNr % maxPages){
+            1-> robotAansturing.runDemoOnce()
+            2-> robotAansturing.stopDemo()
+            3-> robotAansturing.homeHor()
+            4-> robotAansturing.homeVert()
+            5-> robotAansturing.clamp1()
+            6-> robotAansturing.release1()
+            7-> robotAansturing.clamp2()
+            8-> robotAansturing.release2()
+        }
+
     }
+
+    fun nextPage(){
+        pageNr++
+    }
+    fun prevPage(){
+        pageNr--
+    }
+
+
+    fun showPage(){
+        val maxPages = 9
+        when(pageNr % maxPages){
+            0-> displayText("192.168.999.999")
+            1-> displayText("start demo")
+            2-> displayText("stop demo")
+            3-> displayText("home hor")
+            4-> displayText("home ver")
+            5-> displayText("pak 1")
+            6-> displayText("release 1")
+            7-> displayText("pak 2")
+            8-> displayText("release 2")
+            else-> displayText("unknown!")
+        }
+    }
+
+
     fun displayText(text: String){
         try{
             display.clear()
