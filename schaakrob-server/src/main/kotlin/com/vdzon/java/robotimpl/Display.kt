@@ -33,7 +33,7 @@ class Display(private val robotAansturing: RobotAansturing) {
         }
     }
     fun button4(event: GpioPinDigitalStateChangeEvent){
-        val maxPages = 9
+        val maxPages = 10
         when(pageNr % maxPages){
             1-> robotAansturing.runDemoOnce()
             2-> robotAansturing.stopDemo()
@@ -43,6 +43,7 @@ class Display(private val robotAansturing: RobotAansturing) {
             6-> robotAansturing.release1()
             7-> robotAansturing.clamp2()
             8-> robotAansturing.release2()
+            9-> robotAansturing.rebuild()
         }
 
     }
@@ -56,7 +57,7 @@ class Display(private val robotAansturing: RobotAansturing) {
 
 
     fun showPage(){
-        val maxPages = 9
+        val maxPages = 10
         when(pageNr % maxPages){
             0-> displayText("192.168.999.999")
             1-> displayText("start demo")
@@ -67,6 +68,7 @@ class Display(private val robotAansturing: RobotAansturing) {
             6-> displayText("release 1")
             7-> displayText("pak 2")
             8-> displayText("release 2")
+            9-> displayText("rebuild")
             else-> displayText("unknown!")
         }
     }
