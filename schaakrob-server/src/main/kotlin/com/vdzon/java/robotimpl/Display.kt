@@ -9,6 +9,10 @@ import com.pi4j.io.gpio.event.GpioPinListenerDigital
 import com.vdzon.java.robitapi.RobotAansturing
 import de.pi3g.pi.oled.Font
 import de.pi3g.pi.oled.OLEDDisplay
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.net.UnknownHostException
+import java.util.*
 
 class Display(private val robotAansturing: RobotAansturing) {
     private val display = OLEDDisplay()
@@ -59,7 +63,7 @@ class Display(private val robotAansturing: RobotAansturing) {
     fun showPage(){
         val maxPages = 10
         when(pageNr % maxPages){
-            0-> displayText("192.168.123.123")
+            0-> displayText(localHostLANAddress().hostAddress)
             1-> displayText("start demo")
             2-> displayText("stop demo")
             3-> displayText("home hor")
@@ -70,6 +74,51 @@ class Display(private val robotAansturing: RobotAansturing) {
             8-> displayText("release 2")
             9-> displayText("rebuild")
             else-> displayText("unknown!")
+        }
+    }
+
+
+    fun localHostLANAddress(): InetAddress {
+        try {
+            var candidateAddress: InetAddress? = null
+            // Iterate all NICs (network interface cards)...
+            val ifaces: Enumeration<*> = NetworkInterface.getNetworkInterfaces()
+            while (ifaces.hasMoreElements()) {
+                val iface = ifaces.nextElement() as NetworkInterface
+                // Iterate all IP addresses assigned to each card...
+                val inetAddrs: Enumeration<*> = iface.inetAddresses
+                while (inetAddrs.hasMoreElements()) {
+                    val inetAddr = inetAddrs.nextElement() as InetAddress
+                    if (!inetAddr.isLoopbackAddress) {
+                        if (inetAddr.isSiteLocalAddress) {
+                            // Found non-loopback site-local address. Return it immediately...
+                            return inetAddr
+                        } else if (candidateAddress == null) {
+                            // Found non-loopback address, but not necessarily site-local.
+                            // Store it as a candidate to be returned if site-local address is not subsequently found...
+                            candidateAddress = inetAddr
+                            // Note that we don't repeatedly assign non-loopback non-site-local addresses as candidates,
+                            // only the first. For subsequent iterations, candidate will be non-null.
+                        }
+                    }
+                }
+            }
+            if (candidateAddress != null) {
+                // We did not find a site-local address, but we found some other non-loopback address.
+                // Server might have a non-site-local address assigned to its NIC (or it might be running
+                // IPv6 which deprecates the "site-local" concept).
+                // Return this non-loopback candidate address...
+                return candidateAddress
+            }
+            // At this point, we did not find a non-loopback address.
+            // Fall back to returning whatever InetAddress.getLocalHost() returns...
+            val jdkSuppliedAddress = InetAddress.getLocalHost()
+                ?: throw UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.")
+            return jdkSuppliedAddress
+        } catch (e: Exception) {
+            val unknownHostException = UnknownHostException("Failed to determine LAN address: $e")
+            unknownHostException.initCause(e)
+            throw unknownHostException
         }
     }
 
