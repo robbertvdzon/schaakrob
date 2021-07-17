@@ -38,12 +38,12 @@ $EndComp
 $Comp
 L Device:R R1
 U 1 1 60BC5078
-P 4350 5050
-F 0 "R1" H 4420 5096 50  0000 L CNN
-F 1 "10K" H 4420 5005 50  0000 L CNN
-F 2 "" V 4280 5050 50  0001 C CNN
-F 3 "~" H 4350 5050 50  0001 C CNN
-	1    4350 5050
+P 4700 5000
+F 0 "R1" H 4770 5046 50  0000 L CNN
+F 1 "10K" H 4770 4955 50  0000 L CNN
+F 2 "" V 4630 5000 50  0001 C CNN
+F 3 "~" H 4700 5000 50  0001 C CNN
+	1    4700 5000
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -118,7 +118,7 @@ Text GLabel 7650 4050 2    50   Input ~ 0
 Text GLabel 7650 4150 2    50   Input ~ 0
 GND
 Wire Wire Line
-	7150 4150 4000 4150
+	7150 4150 5650 4150
 Wire Wire Line
 	1600 4150 1600 3250
 Wire Wire Line
@@ -221,8 +221,6 @@ F 3 "~" H 5450 5350 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	5050 4600 4950 4600
-Wire Wire Line
-	4350 5200 4950 5200
 $Comp
 L Connector:Conn_01x02_Male J1
 U 1 1 60BD2766
@@ -248,12 +246,12 @@ $EndComp
 $Comp
 L Device:R R4
 U 1 1 60C22534
-P 5800 5050
-F 0 "R4" H 5870 5096 50  0000 L CNN
-F 1 "10K" H 5870 5005 50  0000 L CNN
-F 2 "" V 5730 5050 50  0001 C CNN
-F 3 "~" H 5800 5050 50  0001 C CNN
-	1    5800 5050
+P 6200 5000
+F 0 "R4" H 6270 5046 50  0000 L CNN
+F 1 "10K" H 6270 4955 50  0000 L CNN
+F 2 "" V 6130 5000 50  0001 C CNN
+F 3 "~" H 6200 5000 50  0001 C CNN
+	1    6200 5000
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -299,8 +297,6 @@ F 3 "~" H 6900 5350 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	6500 4600 6400 4600
-Wire Wire Line
-	5800 5200 6400 5200
 $Comp
 L Connector:Conn_01x02_Male J2
 U 1 1 60C22552
@@ -368,4 +364,32 @@ Wire Wire Line
 Connection ~ 5700 3950
 Wire Wire Line
 	5700 3950 7150 3950
+Wire Wire Line
+	4700 5150 4700 5200
+Wire Wire Line
+	6200 5150 6200 5200
+Wire Wire Line
+	4700 5200 4800 5200
+Wire Wire Line
+	6200 5200 6300 5200
+Connection ~ 4800 5200
+Wire Wire Line
+	4800 5200 4950 5200
+Connection ~ 6300 5200
+Wire Wire Line
+	6300 5200 6400 5200
+Wire Wire Line
+	4800 6250 5650 6250
+Wire Wire Line
+	4800 5200 4800 6250
+Wire Wire Line
+	6300 5200 6300 6250
+Wire Wire Line
+	5650 6250 5650 4150
+Connection ~ 5650 6250
+Wire Wire Line
+	5650 6250 6300 6250
+Connection ~ 5650 4150
+Wire Wire Line
+	5650 4150 4000 4150
 $EndSCHEMATC

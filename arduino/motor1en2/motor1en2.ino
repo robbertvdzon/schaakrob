@@ -463,16 +463,16 @@ void errorMessage(){
 }
 
 void beepLong(){
-    digitalWrite(errorPin, HIGH);
+    analogWrite(errorPin, 150);
     delay(300);
-    digitalWrite(errorPin, LOW);
+    analogWrite(errorPin, 0);
     delay(100);
 }
 
 void beep(){
-    digitalWrite(errorPin, HIGH);
+    analogWrite(errorPin, 150);
     delay(100);
-    digitalWrite(errorPin, LOW);
+    analogWrite(errorPin, 0);
     delay(100);
 }
 

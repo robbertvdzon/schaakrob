@@ -130,11 +130,6 @@ Wire Wire Line
 	950  4050 950  1900
 Wire Wire Line
 	950  1900 1600 1900
-Wire Wire Line
-	3600 1950 3600 1900
-Wire Wire Line
-	3600 1900 1600 1900
-Connection ~ 1600 1900
 $Comp
 L Connector:Conn_01x06_Male PCA9685
 U 1 1 60BE0DF4
@@ -174,7 +169,7 @@ Wire Wire Line
 Wire Wire Line
 	4100 5850 4100 3950
 Wire Wire Line
-	4100 3950 7150 3950
+	4100 3950 5700 3950
 Wire Wire Line
 	3800 5350 4000 5350
 Wire Wire Line
@@ -364,4 +359,13 @@ Wire Wire Line
 Wire Wire Line
 	2850 2650 3000 2650
 Connection ~ 5800 4850
+Wire Wire Line
+	3700 1950 3700 1800
+Wire Wire Line
+	3700 1800 5700 1800
+Wire Wire Line
+	5700 1800 5700 3950
+Connection ~ 5700 3950
+Wire Wire Line
+	5700 3950 7150 3950
 $EndSCHEMATC
