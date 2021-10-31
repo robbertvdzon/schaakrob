@@ -38,7 +38,6 @@ class RobotAansturingImpl : RobotAansturing {
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
     private var arm3: I2CDevice? = null
-//    private var display: I2CDevice? = null
 
 
 
@@ -51,8 +50,8 @@ class RobotAansturingImpl : RobotAansturing {
 
         var initialized = false
         while (!initialized ) {
-            val display = Display(this)
-            display.startDisplay()
+//            val display = Display(this)
+//            display.startDisplay()
 
             try {
                 log.info("Open devices")
@@ -76,8 +75,6 @@ class RobotAansturingImpl : RobotAansturing {
         }
 
         log.info("Devices found")
-//        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
-//        updateDisplayThread.start()
 
 
     }
