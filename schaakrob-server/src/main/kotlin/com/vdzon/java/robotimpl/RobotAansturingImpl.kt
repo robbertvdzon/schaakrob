@@ -38,7 +38,6 @@ class RobotAansturingImpl : RobotAansturing {
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
     private var arm3: I2CDevice? = null
-//    private var display: I2CDevice? = null
 
 
 
@@ -76,8 +75,6 @@ class RobotAansturingImpl : RobotAansturing {
         }
 
         log.info("Devices found")
-//        val updateDisplayThread = Thread(Runnable { startDisplayThread() })
-//        updateDisplayThread.start()
 
 
     }
@@ -656,8 +653,8 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     companion object {
-        private const val ARM1 = 0x8
-        private const val ARM2 = 0x6
+        private const val ARM1 = 0x6
+        private const val ARM2 = 0x7
         private const val ARM3 = 0x5
         private const val DISPLAY = 0x38
     }
