@@ -653,7 +653,7 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     companion object {
-        private const val ARM1 = 0x8
+        private const val ARM1 = 0x6
         private const val ARM2 = 0x7
         private const val ARM3 = 0x5
         private const val DISPLAY = 0x38
