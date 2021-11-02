@@ -108,12 +108,11 @@ void setup() {
   radio.openWritingPipe(address);
   radio.setPALevel(RF24_PA_MIN);
   radio.stopListening();
-  Serial.println("redio ready");
-
-
+  Serial.println("radio ready");
 }
 
 void loop() {
+      
   processCommand();
  // loop2();
 }

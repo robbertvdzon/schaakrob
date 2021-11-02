@@ -49,14 +49,14 @@ send: state + pos
 
 #define dirPin 3
 #define stepPin 4 
-#define stepPin2 12
+#define stepPin2 5
 #define stepsPerRevolution 2000
 #define arm1SensorPin 6
 #define arm2SensorPin 8
-#define enableMotorPin 5
+#define enableMotorPin 12
 #define errorPin 9
 #define adressPin1 10
-#define adressPin2 11
+#define fanPin 11
 #define encoderPin1 2
 #define encoderPin2 7
 
@@ -77,7 +77,7 @@ int turn = 0;
 int homeFinished = 0;
 bool error = 0;
 
-int SLAVE_ADDRESS = 5;
+int SLAVE_ADDRESS = 6;
 
 // onderstaande 3 consts in gegenereerd in java
 static const int delayList[] = {412,302,250,218,196,179,166,156,147,140,133,128,123,118,114,111,107,104,102,99,97,94,92,90,89,87,85,84,82,81,80,78,77,76,75,74,73,72,71,70,69,68,68,67,66,65,65,64,63,63,62,61,61,60,60,59,59,58,58,57,57,56,56,55,55,54,54,54,53,53,52,52,52,51,51,51,50,50,50,49,49,49,49,48,48,48,47,47,47,47,46,46,46,46,45,45,45,45,44,44,44,44,44,43,43,43,43,42,42,42,42,42,42,41,41,41,41,41,40,40,40,40,40,40};
@@ -92,19 +92,17 @@ void setup() {
   pinMode(errorPin, OUTPUT);
 
   pinMode(arm1SensorPin, INPUT);
-  pinMode(arm2SensorPin, INPUT);
+  pinMode(arm2SensorPin, INPUT);  pinMode(fanPin, OUTPUT);
+
   pinMode(adressPin1, INPUT);
-  pinMode(adressPin2, INPUT);
+//  pinMode(adressPin2, INPUT);
 
   pinMode(encoderPin1, INPUT);
   pinMode(encoderPin2, INPUT);
 
 
   boolean addr1 = digitalRead(adressPin1);
-  boolean addr2 = digitalRead(adressPin2);
-
   if (addr1) SLAVE_ADDRESS = SLAVE_ADDRESS+1;
-  if (addr2) SLAVE_ADDRESS = SLAVE_ADDRESS+2;
 
 
   Serial.begin(9600);
@@ -124,6 +122,15 @@ void setup() {
   digitalWrite(stepPin2, LOW);
   digitalWrite(enableMotorPin, HIGH);// motors uit bij starten
   digitalWrite(errorPin, LOW);
+
+// fan aan
+  digitalWrite(fanPin, HIGH);
+  delay(3000);
+  digitalWrite(fanPin, LOW);
+
+// test home
+//  home1(HOME_SPEED);  
+
 
 
 }
@@ -470,7 +477,7 @@ void beepLong(){
 }
 
 void beep(){
-    analogWrite(errorPin, 150);
+    analogWrite(errorPin, 5);
     delay(100);
     analogWrite(errorPin, 0);
     delay(100);
