@@ -137,7 +137,7 @@ void setup() {
 
 // test home
 //  home1(HOME_SPEED);  
-//    testAll();
+//testAll();
 
 
 }
@@ -146,7 +146,7 @@ void testAll(){
 
   digitalWrite(enableMotorPin, LOW);
   error = false;
-  digitalWrite(dirPin, HIGH);
+  digitalWrite(dirPin, LOW);
 
   
   
@@ -338,7 +338,7 @@ void checkError(){
 
 void moveUp(int reqPos){
   digitalWrite(enableMotorPin, LOW);
-  digitalWrite(dirPin, HIGH);
+  digitalWrite(dirPin, LOW);
   boolean succeeded = moveNrSteps(reqPos - currentPos, +1);
   if (!succeeded){
     Serial.println("HOME SLOW");  
@@ -346,7 +346,7 @@ void moveUp(int reqPos){
     home(HOME_SPEED_SLOW);
     Serial.println("FINISHED HOME, MOVE AGAIN");    
     state = MOVING;
-    digitalWrite(dirPin, HIGH);
+    digitalWrite(dirPin, LOW);
     succeeded = moveNrSteps(reqPos - currentPos, +1);
     if (!succeeded){
        Serial.println("FAILED AGAIN: FATAL ERROR");    
@@ -356,7 +356,7 @@ void moveUp(int reqPos){
 
 void moveDown(int reqPos){
   digitalWrite(enableMotorPin, LOW);
-  digitalWrite(dirPin, LOW);
+  digitalWrite(dirPin, HIGH);
   boolean succeeded = moveNrSteps(currentPos - reqPos, -1);
   if (!succeeded){
     Serial.println("HOME SLOW");    
@@ -364,7 +364,7 @@ void moveDown(int reqPos){
     home(HOME_SPEED_SLOW);
     Serial.println("FINISHED HOME, MOVE AGAIN");    
     state = MOVING;
-    digitalWrite(dirPin, HIGH);
+    digitalWrite(dirPin, LOW);
     succeeded = moveNrSteps(reqPos - currentPos, +1);
     if (!succeeded){
        Serial.println("FAILED AGAIN: FATAL ERROR");    
@@ -436,7 +436,7 @@ void home(int homeSpeed) {
 
 // omhoog tot beide schakelaars uit zijn
   Serial.println("\t move slow up until not high");
-  digitalWrite(dirPin, HIGH);
+  digitalWrite(dirPin, LOW);
   int p1 = -1;
   int p2 = -1;
   while (digitalRead(arm1SensorPin) || digitalRead(arm2SensorPin)){
@@ -448,7 +448,7 @@ void home(int homeSpeed) {
 
 // omlaag tot beide schakelaars uit zijn
   Serial.println("\t move slow down until high");
-  digitalWrite(dirPin, LOW);
+  digitalWrite(dirPin, HIGH);
   while ((!digitalRead(arm1SensorPin)) || (!digitalRead(arm2SensorPin))){
     if (!digitalRead(arm1SensorPin)) p1 = stepPin; else p1 = -1;
     if (!digitalRead(arm2SensorPin)) p2 = stepPin2; else p2 = -1;
@@ -474,7 +474,7 @@ void sleeping() {
 
   // move down until high
   Serial.println("\t move fast down until high");
-  digitalWrite(dirPin, LOW);
+  digitalWrite(dirPin, HIGH);
 
   int delayIndex = 0;
   double delay = 0;
