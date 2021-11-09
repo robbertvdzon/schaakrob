@@ -92,13 +92,20 @@ void setup() {
   pinMode(errorPin, OUTPUT);
 
   pinMode(arm1SensorPin, INPUT);
-  pinMode(arm2SensorPin, INPUT);  pinMode(fanPin, OUTPUT);
+  pinMode(arm2SensorPin, INPUT);  
+  pinMode(fanPin, OUTPUT);
 
   pinMode(adressPin1, INPUT);
 //  pinMode(adressPin2, INPUT);
 
   pinMode(encoderPin1, INPUT);
   pinMode(encoderPin2, INPUT);
+
+  
+  digitalWrite(arm1SensorPin, HIGH); // turn on pull-up
+  digitalWrite(arm2SensorPin, HIGH); // turn on pull-up
+  digitalWrite(encoderPin1, HIGH); // turn on pull-up
+  digitalWrite(encoderPin2, HIGH); // turn on pull-up
 
 
   boolean addr1 = digitalRead(adressPin1);
@@ -130,9 +137,46 @@ void setup() {
 
 // test home
 //  home1(HOME_SPEED);  
+//    testAll();
 
 
+}
 
+void testAll(){
+
+  digitalWrite(enableMotorPin, LOW);
+  error = false;
+  digitalWrite(dirPin, HIGH);
+
+  
+  
+  beepLong();
+  Serial.print("test move side1");
+  for (int i = 0; i < 8000; i++) {
+    pulse(stepPin, -1, 120);    
+  }
+  beepLong();
+  Serial.print("test move side2");
+  for (int i = 0; i < 8000; i++) {
+    pulse(-1, stepPin2, 120);    
+  }
+  beepLong();
+  
+  Serial.print("read");
+  while (true){
+    boolean s1 = digitalRead(arm1SensorPin);
+    boolean s2 = digitalRead(arm2SensorPin);
+    boolean s3 = digitalRead(encoderPin1);
+    boolean s4 = digitalRead(encoderPin2);
+    Serial.print(s1);
+    Serial.print(s2);
+    Serial.print(s3);
+    Serial.println(s4);
+    delay(200);
+  }
+
+  
+  
 }
 
 void loop() {

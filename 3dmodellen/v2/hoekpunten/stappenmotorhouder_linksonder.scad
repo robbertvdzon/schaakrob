@@ -55,7 +55,7 @@ difference(){
                cylinder(h=12, r=4, $fn=20, center=false);
             }
         }
-        translate([72,51,34]){
+        translate([72,51+14,34]){
             rotate([90,0,0]){
                cylinder(h=12, r=4, $fn=20, center=false);
             }
@@ -71,6 +71,12 @@ difference(){
         translate([74,65.5,0]){
            cube([10,12,6], center=false);
         }
+        
+        // muur voor lat
+        translate([74-12,-12,0]){
+           cube([3,52,10], center=false);
+        }        
+        
         
       
 	}
@@ -180,7 +186,7 @@ difference(){
                cylinder(h=15, r=1.5, $fn=20, center=false);
             }
         }
-        translate([72,50,44-10]){
+        translate([72,50+16,44-10]){
             rotate([90,0,0]){
                cylinder(h=12, r=1.5, $fn=20, center=false);
             }
@@ -188,7 +194,7 @@ difference(){
         
 
          // schroefgaten
-        translate([65,10,-1]){
+        translate([55,10,-1]){
             rotate([0,0,90]){
                cylinder(h=50, r=3, $fn=20, center=false);
             }
@@ -218,7 +224,7 @@ difference(){
 
         // gaten in de vloer
         translate([7,-5,-1]){
-           cube([45,25,10], center=false);
+           cube([40,25,10], center=false);
         }        
         translate([7,50,-1]){
            cube([25,55,10], center=false);
@@ -230,6 +236,9 @@ difference(){
            cube([15,30,10], center=false);
         }        
         
+        translate([74-9,-20,-1]){
+           cube([40,59,10], center=false);
+        }        
         
 
 	}
