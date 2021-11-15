@@ -3,8 +3,8 @@ difference(){
 	union(){
 
 
-        translate([0,0,0]){
-           cube([26.5,36,2], center=false);
+        translate([0,-4,0]){
+           cube([26.5,44,2], center=false);
         }        
 
         

@@ -327,6 +327,19 @@ void checkError(){
   else if (!error){
     Serial.print("Entering error mode while in state:");
     Serial.println(state);
+
+    Serial.print("homeSensorOn=");
+    Serial.println(homeSensorOn);
+    Serial.print("topSensorOn=");
+    Serial.println(topSensorOn);
+    Serial.print("sensor1=");
+    Serial.println(digitalRead(arm1SensorPin));
+    Serial.print("sensor2=");
+    Serial.println(digitalRead(arm2SensorPin));
+    Serial.print("currentPos=");
+    Serial.println(digitalRead(currentPos));
+
+    
     error = true;
     state = HOMING_NEEDED;
     digitalWrite(enableMotorPin, HIGH);
@@ -337,8 +350,9 @@ void checkError(){
 }
 
 void moveUp(int reqPos){
+  Serial.println("MOVE UP");    
   digitalWrite(enableMotorPin, LOW);
-  digitalWrite(dirPin, LOW);
+  digitalWrite(dirPin, HIGH);
   boolean succeeded = moveNrSteps(reqPos - currentPos, +1);
   if (!succeeded){
     Serial.println("HOME SLOW");  
@@ -355,8 +369,9 @@ void moveUp(int reqPos){
   }}
 
 void moveDown(int reqPos){
+  Serial.println("MOVE DOWN");
   digitalWrite(enableMotorPin, LOW);
-  digitalWrite(dirPin, HIGH);
+  digitalWrite(dirPin, LOW);
   boolean succeeded = moveNrSteps(currentPos - reqPos, -1);
   if (!succeeded){
     Serial.println("HOME SLOW");    
@@ -401,7 +416,10 @@ bool moveNrSteps(int totalSteps, int direction){
     }
     diffBetweenPulses = pulsesCounted1 - pulsesCounted2;
     if (diffBetweenPulses<-3 || diffBetweenPulses>3) {
-         Serial.println("ERROR");
+         Serial.print("ERROR, too much difference: ");
+         Serial.print(pulsesCounted1);
+         Serial.print("/");
+         Serial.println(pulsesCounted2);
         return false;// error status
     }
     remainingSteps = totalSteps - i;
@@ -454,6 +472,7 @@ void home(int homeSpeed) {
     if (!digitalRead(arm2SensorPin)) p2 = stepPin2; else p2 = -1;
     pulse(p1, p2, homeSpeed);
   }
+  
 
   Serial.println("\t homing finished");
   currentPos = 00;
