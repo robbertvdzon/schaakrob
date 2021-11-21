@@ -137,7 +137,7 @@ void setup() {
 
 // test home
 //  home1(HOME_SPEED);  
-//testAll();
+   // testAll();
 
 
 }
@@ -148,20 +148,20 @@ void testAll(){
   error = false;
   digitalWrite(dirPin, LOW);
 
-  
-  
+
+
   beepLong();
   Serial.print("test move side1");
   for (int i = 0; i < 8000; i++) {
-    pulse(stepPin, -1, 120);    
+    pulse(stepPin, -1, 120);
   }
   beepLong();
   Serial.print("test move side2");
   for (int i = 0; i < 8000; i++) {
-    pulse(-1, stepPin2, 120);    
+    pulse(-1, stepPin2, 120);
   }
   beepLong();
-  
+
   Serial.print("read");
   while (true){
     boolean s1 = digitalRead(arm1SensorPin);
@@ -175,8 +175,8 @@ void testAll(){
     delay(200);
   }
 
-  
-  
+
+
 }
 
 void loop() {
@@ -189,7 +189,7 @@ void loop() {
   Serial.println("");
       delay(300);
       */
-  
+
   processCommand();
   checkError();
 }
@@ -315,8 +315,8 @@ void checkError(){
   if (state == SLEEPING) return;
   if (state == FATAL_ERROR) return;
 
-  boolean homeSensorOn = digitalRead(arm1SensorPin)==1 && currentPos>100;
-  boolean topSensorOn = digitalRead(arm2SensorPin)==1 && currentPos>100;
+  boolean homeSensorOn = digitalRead(arm1SensorPin)==0 && currentPos>100;
+  boolean topSensorOn = digitalRead(arm2SensorPin)==0 && currentPos>100;
 
   if (!homeSensorOn && !topSensorOn){
     if (error){
@@ -339,7 +339,7 @@ void checkError(){
     Serial.print("currentPos=");
     Serial.println(digitalRead(currentPos));
 
-    
+
     error = true;
     state = HOMING_NEEDED;
     digitalWrite(enableMotorPin, HIGH);
@@ -350,20 +350,20 @@ void checkError(){
 }
 
 void moveUp(int reqPos){
-  Serial.println("MOVE UP");    
+  Serial.println("MOVE UP");
   digitalWrite(enableMotorPin, LOW);
   digitalWrite(dirPin, HIGH);
   boolean succeeded = moveNrSteps(reqPos - currentPos, +1);
   if (!succeeded){
-    Serial.println("HOME SLOW");  
+    Serial.println("HOME SLOW");
     state = HOMING;
     home(HOME_SPEED_SLOW);
-    Serial.println("FINISHED HOME, MOVE AGAIN");    
+    Serial.println("FINISHED HOME, MOVE AGAIN");
     state = MOVING;
-    digitalWrite(dirPin, LOW);
+    digitalWrite(dirPin, HIGH);
     succeeded = moveNrSteps(reqPos - currentPos, +1);
     if (!succeeded){
-       Serial.println("FAILED AGAIN: FATAL ERROR");    
+       Serial.println("FAILED AGAIN: FATAL ERROR");
        state = FATAL_ERROR;
     }
   }}
@@ -374,15 +374,15 @@ void moveDown(int reqPos){
   digitalWrite(dirPin, LOW);
   boolean succeeded = moveNrSteps(currentPos - reqPos, -1);
   if (!succeeded){
-    Serial.println("HOME SLOW");    
+    Serial.println("HOME SLOW");
     state = HOMING;
     home(HOME_SPEED_SLOW);
-    Serial.println("FINISHED HOME, MOVE AGAIN");    
+    Serial.println("FINISHED HOME, MOVE AGAIN");
     state = MOVING;
-    digitalWrite(dirPin, LOW);
+    digitalWrite(dirPin, HIGH);
     succeeded = moveNrSteps(reqPos - currentPos, +1);
     if (!succeeded){
-       Serial.println("FAILED AGAIN: FATAL ERROR");    
+       Serial.println("FAILED AGAIN: FATAL ERROR");
        state = FATAL_ERROR;
     }
   }
@@ -404,7 +404,7 @@ bool moveNrSteps(int totalSteps, int direction){
   for (int i = 0; i < totalSteps; i++) {
     bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
     bool currentEncodeSensorState2 = digitalRead(encoderPin2); // altijd sensor lezen (om de motor soepeler te laten lopen)
-    if (i%10==0){
+    if (i%30==0){
       if (currentEncodeSensorState1!=lastEncodeSensorState1){
         pulsesCounted1++;
         lastEncodeSensorState1=currentEncodeSensorState1;
@@ -415,13 +415,15 @@ bool moveNrSteps(int totalSteps, int direction){
       }
     }
     diffBetweenPulses = pulsesCounted1 - pulsesCounted2;
+
     if (diffBetweenPulses<-3 || diffBetweenPulses>3) {
          Serial.print("ERROR, too much difference: ");
          Serial.print(pulsesCounted1);
          Serial.print("/");
          Serial.println(pulsesCounted2);
-        return false;// error status
+         return false;// error status 
     }
+    
     remainingSteps = totalSteps - i;
     delayIndex = i/indexSteps;
     remainingDelayIndex = remainingSteps/indexSteps;
@@ -441,6 +443,7 @@ bool moveNrSteps(int totalSteps, int direction){
   Serial.println(pulsesCounted1);
   Serial.print("Count2:");
   Serial.println(pulsesCounted2);
+  analogWrite(errorPin, 0);          
   return true;
 }
 
@@ -448,31 +451,30 @@ void home(int homeSpeed) {
   digitalWrite(enableMotorPin, LOW);
   error = false;
 
-  arm1State = digitalRead(arm1SensorPin); 
+  arm1State = digitalRead(arm1SensorPin)==0;
   Serial.println("\t start homing");
 
 
 // omhoog tot beide schakelaars uit zijn
   Serial.println("\t move slow up until not high");
-  digitalWrite(dirPin, LOW);
+  digitalWrite(dirPin, HIGH);
   int p1 = -1;
   int p2 = -1;
-  while (digitalRead(arm1SensorPin) || digitalRead(arm2SensorPin)){
-    if (digitalRead(arm1SensorPin)) p1 = stepPin; else p1 = -1;
-    if (digitalRead(arm2SensorPin)) p2 = stepPin2; else p2 = -1;
+  while (digitalRead(arm1SensorPin)==0 || digitalRead(arm2SensorPin)==0){
+    if (digitalRead(arm1SensorPin)==0) p1 = stepPin; else p1 = -1;
+    if (digitalRead(arm2SensorPin)==0) p2 = stepPin2; else p2 = -1;
     pulse(p1, p2, homeSpeed);
 
   }
 
 // omlaag tot beide schakelaars uit zijn
   Serial.println("\t move slow down until high");
-  digitalWrite(dirPin, HIGH);
-  while ((!digitalRead(arm1SensorPin)) || (!digitalRead(arm2SensorPin))){
-    if (!digitalRead(arm1SensorPin)) p1 = stepPin; else p1 = -1;
-    if (!digitalRead(arm2SensorPin)) p2 = stepPin2; else p2 = -1;
+  digitalWrite(dirPin, LOW);
+  while ((!digitalRead(arm1SensorPin)==0) || (!digitalRead(arm2SensorPin)==0)){
+    if (!digitalRead(arm1SensorPin)==0) p1 = stepPin; else p1 = -1;
+    if (!digitalRead(arm2SensorPin)==0) p2 = stepPin2; else p2 = -1;
     pulse(p1, p2, homeSpeed);
   }
-  
 
   Serial.println("\t homing finished");
   currentPos = 00;
@@ -487,19 +489,19 @@ void sleeping() {
   digitalWrite(enableMotorPin, LOW);
   error = false;
 
-  arm1State = digitalRead(arm1SensorPin);
+  arm1State = digitalRead(arm1SensorPin)==0;
   Serial.println("\t start sleeping");
   Serial.println(vertraginsfactor);
 
   // move down until high
   Serial.println("\t move fast down until high");
-  digitalWrite(dirPin, HIGH);
+  digitalWrite(dirPin, LOW);
 
   int delayIndex = 0;
   double delay = 0;
   double calculatedDelay = 0;
   int i = 0;
-  while (!digitalRead(arm1SensorPin)){
+  while (!digitalRead(arm1SensorPin)==0){
     delayIndex = i/indexSteps;
     if (i==0 || i%indexSteps==0){
       if (delayIndex<delayArraySize) delay = delayList[delayIndex];
