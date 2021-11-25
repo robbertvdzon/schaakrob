@@ -5,8 +5,11 @@ difference(){
         translate([-8,4.5,10]){
             cube([15,3,5], center=false);
         }         
-        translate([-20,4.5,0]){
-            cube([10,3,15], center=false);
+        translate([-20,4.5,20]){
+            cube([10,3,5], center=false);
+        }         
+        translate([-10,4.5,10]){
+            cube([5,3,15], center=false);
         }         
 
 
