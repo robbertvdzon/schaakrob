@@ -99,6 +99,10 @@ Vue.component("play", {
   },
   methods: {
     load: function (event) {
+      fetch(`/api/game/load`)
+          .then(res => res.text())
+          .then(text => this.updateBoard(JSON.parse(text)))
+          .catch(() => alert("Error"));
     },
     prev: function (event) {
       window.location.href = "/status";

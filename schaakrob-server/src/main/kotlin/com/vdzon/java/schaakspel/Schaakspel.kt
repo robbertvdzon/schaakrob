@@ -11,12 +11,20 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     private var board = Board()
     private var player = "w"
+    private var possibleRestPlaces = mutableListOf("A20","B20","C20", "D20")
 
     fun reset(): ChessBoard {
         board = Board()
         player = "w"
+        possibleRestPlaces = mutableListOf("A20","B20","C20", "D20")
         println(board.getFen())
         printBoard()
+        robotAansturing.homeHor()
+        robotAansturing.homeVert()
+        return toBoard()
+    }
+
+    fun load(): ChessBoard {
         return toBoard()
     }
 
@@ -24,6 +32,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         println("Coputer move")
         println(board.getFen())
         val move = ComputerPlayer.getMove(board.getFen())
+        robotMove(move.from.value(), move.to.value())
         board.doMove(move)
         printBoard()
         changePlayer()
@@ -35,7 +44,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
         val fromValue = Square.fromValue(van)
         val naarValue = Square.fromValue(naar)
-//        board.doMove(Move(Square.E2, Square.E4))
+        robotMove(van, naar)
         board.doMove(Move(fromValue, naarValue))
         changePlayer()
         println(board.getFen())
@@ -43,6 +52,26 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
         toBoard()
         return toBoard()
+    }
+
+    private fun robotMove(van: String, to:String){
+        println("robot from:$van to:$to")
+
+        val toPiece = board.getPiece(Square.fromValue(to))
+        if (toPiece!=Piece.NONE){
+            robotAansturing.movetoVlak(to,0)
+            robotAansturing.clamp1()
+            val restPlace = possibleRestPlaces.first()
+            possibleRestPlaces.remove(restPlace)
+            robotAansturing.movetoVlak(restPlace,0)
+            robotAansturing.release1()
+        }
+        // A20
+
+        robotAansturing.movetoVlak(van,0)
+        robotAansturing.clamp1()
+        robotAansturing.movetoVlak(to,0)
+        robotAansturing.release1()
     }
 
     private fun toBoard(): ChessBoard {
@@ -95,6 +124,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         else
             player = "w"
     }
+
+
 
 
 }
