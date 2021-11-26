@@ -15,8 +15,6 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     fun reset(): ChessBoard {
         board = Board()
         player = "w"
-        println("Reset board")
-//        board.doMove(Move(Square.E2, Square.E4))
         println(board.getFen())
         printBoard()
         return toBoard()
@@ -25,6 +23,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     fun computermove(): ChessBoard {
         println("Coputer move")
         println(board.getFen())
+        val move = ComputerPlayer.getMove(board.getFen())
+        board.doMove(move)
         printBoard()
         changePlayer()
         return toBoard()
