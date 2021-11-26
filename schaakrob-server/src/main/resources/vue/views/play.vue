@@ -1,4 +1,4 @@
-<template id="status">
+<template id="play">
   <app-frame>
 
     <div>
@@ -29,14 +29,11 @@
       <hr>
       <br>
       <span>
-              <button type="submit" v-on:click="clamp">Pak</button>
-              <button type="submit" v-on:click="release">Laat los</button>
-       </span>
-      <hr>
-      <span>
-              <button type="submit" v-on:click="home_vert">home vertical</button>
-              <button type="submit" v-on:click="home_hor">home horizontal</button>
-              <button type="submit" v-on:click="sleeping">Sleep</button>
+              <button type="submit" v-on:click="reset">Reset board</button>
+              <button type="submit" v-on:click="ownMove">Eigen zet</button>
+              <button type="submit" v-on:click="computerMove">Computer zet</button>
+                    van: <input v-model="van" >
+                    naar: <input v-model="naar" >
        </span>
       <br>
 
@@ -47,10 +44,12 @@
 
 
 
-Vue.component("status", {
-  template: "#status",
+Vue.component("play", {
+  template: "#play",
   data: () => ({
     status: null,
+    van:  "" ,
+    naar: "",
     rows: [
       { id:21 },
       { id:20 },
@@ -93,47 +92,43 @@ Vue.component("status", {
     load: function (event) {
     },
     prev: function (event) {
-      window.location.href = "/manual";
+      window.location.href = "/status";
     },
     next: function (event) {
-      window.location.href = "/play";
+      window.location.href = "/demo";
+    },
+    reset: function (event) {
+      fetch(`/api/game/reset`)
+      .catch(() => alert("Error"));
+    },
+    computerMove: function (event) {
+      fetch(`/api/game/computermove`)
+      .catch(() => alert("Error"));
+    },
+    ownMove: function (event) {
+      fetch(`/api/game/ownmove/`+this.van+'/'+this.naar)
+      .catch(() => alert("Error"));
     },
     move: function (vlak) {
-      axios.post(`/api/movevlak`, vlak)
-      .then(res => {
-      })
-      .catch(error => {
-        alert("Error")
-      })
+      if (this.van==""){
+        this.van = vlak
+      }
+      else{
+        if (this.naar==""){
+          this.naar = vlak
+        }
+        else{
+          this.van = vlak
+          this.naar = ""
+        }
+      }
     },
-    home_vert: function (event) {
-      fetch(`/api/home_vert`)
-      .catch(() => alert("Error"));
-    },
-    home_hor: function (event) {
-      fetch(`/api/home_hor`)
-      .catch(() => alert("Error"));
-    },
-    sleeping: function (event) {
-      fetch(`/api/sleep`)
-      .catch(() => alert("Error"));
-    },
-    clamp: function (event) {
-      fetch(`/api/clamp1`)
-      .catch(() => alert("Error"));
-    },
-    release: function (event) {
-      fetch(`/api/release1`)
-      .catch(() => alert("Error"));
-    },
-
-
   }
 });
 
 $(document).ready(function () {
   $("#statusPrev").click(function () {
-    window.location.href = "/manual";
+    window.location.href = "/status";
   });
   $("#statusNext").click(function () {
     window.location.href = "/demo";

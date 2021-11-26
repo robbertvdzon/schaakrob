@@ -13,6 +13,10 @@ class RestEndpoints {
             val (vlak, arm) = ctx.body().split(" ")
             robotAansturing.movetoVlak(vlak, arm.toInt())
         }
+        app["/api/game/reset", { ctx: Context? -> println("RESET") }]
+        app["/api/game/computermove", { ctx: Context? -> println("COMPUTER MOVE") }]
+        app.get("/api/game/ownmove/:van/:naar", { ctx: Context? -> println("OWN_MOVE "+ctx?.pathParam("van") +"->" +ctx?.pathParam("naar")) })
+
         app["/api/rebuild", { ctx: Context? -> robotAansturing.rebuild() }]
         app["/api/restart", { ctx: Context? -> robotAansturing.restart() }]
         app["/api/home_vert", { ctx: Context? -> robotAansturing.homeVert() }]

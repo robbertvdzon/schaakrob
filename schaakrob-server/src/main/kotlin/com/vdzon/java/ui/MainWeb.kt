@@ -23,6 +23,7 @@ class MainWeb {
         }
         app!!.get("/", VueComponent("<status></status>"))
         app!!.get("/demo", VueComponent("<demo></demo>"))
+        app!!.get("/play", VueComponent("<play></play>"))
         app!!.get("/status", VueComponent("<status></status>"))
         app!!.get("/manual", VueComponent("<manual></manual>"))
         app!!.get("/rebuild", VueComponent("<rebuild></rebuild>"))

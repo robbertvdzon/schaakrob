@@ -67,7 +67,7 @@ Vue.component("demo", {
 
 $(document).ready(function () {
   $("#demoPrev").click(function () {
-    window.location.href = "/status";
+    window.location.href = "/play";
   });
   $("#demoNext").click(function () {
     window.location.href = "/rebuild";
