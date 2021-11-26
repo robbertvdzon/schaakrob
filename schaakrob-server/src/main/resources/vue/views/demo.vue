@@ -70,7 +70,7 @@ $(document).ready(function () {
     window.location.href = "/play";
   });
   $("#demoNext").click(function () {
-    window.location.href = "/rebuild";
+    window.location.href = "/manual";
   });
 });
 

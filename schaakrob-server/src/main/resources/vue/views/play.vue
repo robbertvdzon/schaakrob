@@ -5,8 +5,8 @@
 
       <nav>
         <ul class="nav nav-pills pull-right">
-          <li role="presentation"><a href="#" id="statusPrev"><</a></li>
-          <li role="presentation"><a href="#" id="statusNext">></a></li>
+          <li role="presentation"><a href="#" id="playPrev"><</a></li>
+          <li role="presentation"><a href="#" id="playNext">></a></li>
         </ul>
       </nav>
       <nettoets-header activebutton="operationallog" title="Speelbord"></nettoets-header>
@@ -104,12 +104,12 @@ Vue.component("play", {
           .then(text => this.updateBoard(JSON.parse(text)))
           .catch(() => alert("Error"));
     },
-    prev: function (event) {
-      window.location.href = "/status";
-    },
-    next: function (event) {
-      window.location.href = "/demo";
-    },
+    // prev: function (event) {
+    //   window.location.href = "/manual";
+    // },
+    // next: function (event) {
+    //   window.location.href = "/demo";
+    // },
     reset: function (event) {
       fetch(`/api/game/reset`)
           .then(res => res.text())
@@ -186,10 +186,10 @@ Vue.component("play", {
 });
 
 $(document).ready(function () {
-  $("#statusPrev").click(function () {
-    window.location.href = "/status";
+  $("#playPrev").click(function () {
+    window.location.href = "/manual";
   });
-  $("#statusNext").click(function () {
+  $("#playNext").click(function () {
     window.location.href = "/demo";
   });
 });

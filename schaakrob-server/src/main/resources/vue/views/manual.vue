@@ -84,6 +84,7 @@
       <br>
       <br>
       Delay na pak:
+      Delay na pak:
       <input v-model="delaynapak" >
       <button type="submit" v-on:click="saveDelayNaPak">Save</button>
       <br>
@@ -92,6 +93,9 @@
       <input v-model="delaynazet" >
       <button type="submit" v-on:click="saveDelayNaZet">Save</button>
       <br>
+      <hr>
+      <button type="submit" v-on:click="rebuildapp">rebuild application</button>
+
 
     </div>
   </app-frame>
@@ -324,16 +328,20 @@ Vue.component("manual", {
         alert("Error")
       })
     },
+    rebuildapp: function (event) {
+      fetch(`/api/rebuild`)
+          .catch(() => alert("Error while rebuilding"));
+    }
 
   }
 });
 
 $(document).ready(function () {
   $("#manualPrev").click(function () {
-    window.location.href = "/rebuild";
+    window.location.href = "/demo";
   });
   $("#manualNext").click(function () {
-    window.location.href = "/status";
+    window.location.href = "/play";
   });
 });
 

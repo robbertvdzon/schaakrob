@@ -22,10 +22,10 @@ class MainWeb {
             config.enableWebjars()
             config.addStaticFiles("/html")
         }
-        app!!.get("/", VueComponent("<status></status>"))
+        app!!.get("/", VueComponent("<play></play>"))
         app!!.get("/demo", VueComponent("<demo></demo>"))
         app!!.get("/play", VueComponent("<play></play>"))
-        app!!.get("/status", VueComponent("<status></status>"))
+//        app!!.get("/status", VueComponent("<status></status>"))
         app!!.get("/manual", VueComponent("<manual></manual>"))
         app!!.get("/rebuild", VueComponent("<rebuild></rebuild>"))
         var robotAansturing: RobotAansturing? = null
