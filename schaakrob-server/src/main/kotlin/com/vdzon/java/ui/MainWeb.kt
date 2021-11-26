@@ -4,6 +4,7 @@ import com.vdzon.java.RestEndpoints
 import com.vdzon.java.robitapi.RobotAansturing
 import com.vdzon.java.robotclient.RobotAansturingClient
 import com.vdzon.java.robotimpl.RobotAansturingImpl
+import com.vdzon.java.schaakspel.Schaakspel
 import io.javalin.Javalin
 import io.javalin.core.JavalinConfig
 import io.javalin.plugin.rendering.vue.JavalinVue
@@ -33,7 +34,8 @@ class MainWeb {
         } else {
             RobotAansturingClient("http://192.168.178.50:8080")
         }
-        RestEndpoints().initRestEndpoints(app, robotAansturing)
+        val schaakspel = Schaakspel(robotAansturing)
+        RestEndpoints().initRestEndpoints(app, robotAansturing, schaakspel)
         log.info("Starting server")
         robotAansturing.bootsound()
         app!!.start(8080)

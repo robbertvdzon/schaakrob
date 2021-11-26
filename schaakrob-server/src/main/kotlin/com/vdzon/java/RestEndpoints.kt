@@ -1,21 +1,23 @@
 package com.vdzon.java
 
 import com.vdzon.java.robitapi.RobotAansturing
+import com.vdzon.java.schaakspel.Schaakspel
 import io.javalin.Javalin
 import io.javalin.http.Context
 
 class RestEndpoints {
     private var robotAansturing: RobotAansturing? = null
-    fun initRestEndpoints(app: Javalin?, robotAansturing: RobotAansturing) {
+
+    fun initRestEndpoints(app: Javalin?, robotAansturing: RobotAansturing, schaakspel: Schaakspel) {
         this.robotAansturing = robotAansturing
         app!!.post("/api/move") { ctx: Context -> move(ctx.body()) }
         app.post("/api/movevlak") { ctx: Context ->
             val (vlak, arm) = ctx.body().split(" ")
             robotAansturing.movetoVlak(vlak, arm.toInt())
         }
-        app["/api/game/reset", { ctx: Context? -> println("RESET") }]
-        app["/api/game/computermove", { ctx: Context? -> println("COMPUTER MOVE") }]
-        app.get("/api/game/ownmove/:van/:naar", { ctx: Context? -> println("OWN_MOVE "+ctx?.pathParam("van") +"->" +ctx?.pathParam("naar")) })
+        app["/api/game/reset", { ctx: Context? -> ctx?.json(schaakspel.reset()) }]
+        app["/api/game/computermove", { ctx: Context? -> ctx?.json(schaakspel.computermove()) }]
+        app.get("/api/game/ownmove/:van/:naar", { ctx: Context? -> ctx?.json(schaakspel.ownmove(ctx?.pathParam("van")?:"",ctx?.pathParam("naar")?:"")) })
 
         app["/api/rebuild", { ctx: Context? -> robotAansturing.rebuild() }]
         app["/api/restart", { ctx: Context? -> robotAansturing.restart() }]
