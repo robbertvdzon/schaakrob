@@ -31,8 +31,8 @@
       <br>
       <span>
               <button type="submit" v-on:click="reset">Reset board</button>
-              <button type="submit" v-on:click="ownMove">Eigen zet</button>
               <button type="submit" v-on:click="computerMove">Computer zet</button>
+              <button type="submit" v-on:click="again">Opnieuw</button>
                     van: <input v-model="van">
                     naar: <input v-model="naar">
        </span>
@@ -118,23 +118,30 @@ Vue.component("play", {
           .then(text => this.updateBoard(JSON.parse(text)))
           .catch(() => alert("Error"));
     },
-    ownMove: function (event) {
-      fetch(`/api/game/ownmove/` + this.van + '/' + this.naar)
-          .then(res => res.text())
-          .then(text => this.updateBoard(JSON.parse(text)))
-          .catch(() => alert("Error"));
-    },
     move: function (vlak) {
       if (this.van == "") {
         this.van = vlak
       } else {
         if (this.naar == "") {
           this.naar = vlak
+          fetch(`/api/game/ownmove/` + this.van + '/' + this.naar)
+              .then(res => res.text())
+              .then(text => this.updateBoard(JSON.parse(text)))
+              .then(text => this.computerMove())
+              .catch(() => alert("Error"));
+          this.naar = ""
+          this.van = ""
+
+
         } else {
           this.van = vlak
           this.naar = ""
         }
       }
+    },
+    again: function () {
+      this.naar = ""
+      this.van = ""
     },
     updateBoard: function (newBoard) {
 

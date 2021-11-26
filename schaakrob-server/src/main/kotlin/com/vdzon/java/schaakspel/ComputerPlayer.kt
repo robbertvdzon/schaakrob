@@ -7,8 +7,9 @@ import java.util.concurrent.TimeUnit
 
 object ComputerPlayer {
     fun getMove(fen: String): Move{
+        createFile(fen)
 
-        val cmd: List<String> = listOf("/usr/bin/sh","-c","/home/robbert/Downloads/stockfish_14.1_linux_x64/calc.sh $fen")
+        val cmd: List<String> = listOf("/usr/bin/expect","/tmp/chess.dat")
         val res = runCommand(cmd=cmd)
         println(res)
         val bestMove = res?.substringAfterLast("bestmove")?.trim()?.toUpperCase()?:""
@@ -20,6 +21,24 @@ object ComputerPlayer {
         println("from="+Square.fromValue(from))
         println("to="+Square.fromValue(to))
         return Move(Square.fromValue(from), Square.fromValue(to))
+    }
+
+    fun createFile(fen: String){
+        val file ="""
+            #!/usr/bin/expect
+            spawn /home/robbert/Downloads/stockfish_14.1_linux_x64/stockfish_14.1_linux_x64
+            expect -timeout 1000  Stockfish
+            send "uci \r"
+            expect -timeout 1000  uciok
+            send "isready\r"
+            expect -timeout 1000  readyok
+            send "ucinewgame\r"
+            send "position fen $fen\r"
+            send "go movetime 1000\r"
+            expect bestmove            
+        """.trimIndent()
+        File("/tmp/chess.dat").writeText(file)
+
     }
 
     fun runCommand(
