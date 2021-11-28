@@ -27,14 +27,20 @@
         </tbody>
       </table>
       <br>
-      <hr>
-      <br>
       <span>
-              <button type="submit" v-on:click="reset">Reset board</button>
-              <button type="submit" v-on:click="computerMove">Computer zet</button>
-              <button type="submit" v-on:click="again">Opnieuw</button>
                     van: <input v-model="van">
                     naar: <input v-model="naar">
+              <button type="submit" v-on:click="again">Opnieuw</button>
+       </span>
+      <br>
+      <br>
+      <br>
+      <hr>
+      <span>
+              <button type="submit" v-on:click="reset">Reset board</button>
+              <button type="submit" v-on:click="sleep">Sleep</button>
+              <button type="submit" v-on:click="home">Home</button>
+              <button type="submit" v-on:click="computerMove">Computer zet</button>
        </span>
       <br>
         <input v-model="board">
@@ -114,6 +120,16 @@ Vue.component("play", {
       fetch(`/api/game/reset`)
           .then(res => res.text())
           .then(text => this.updateBoard(JSON.parse(text)))
+          .catch(() => alert("Error"));
+    },
+    sleep: function (event) {
+      fetch(`/api/game/sleep`)
+          .then(res => res.text())
+          .catch(() => alert("Error"));
+    },
+    home: function (event) {
+      fetch(`/api/game/home`)
+          .then(res => res.text())
           .catch(() => alert("Error"));
     },
     computerMove: function (event) {

@@ -6,11 +6,13 @@ import com.github.bhlangonijr.chesslib.Side
 import com.github.bhlangonijr.chesslib.Square
 import com.github.bhlangonijr.chesslib.move.Move
 import com.vdzon.java.robitapi.RobotAansturing
+import java.lang.RuntimeException
 
 
 class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     private var board = Board()
+    private var targetBoard = Board()
     private var player = "w"
 
 
@@ -58,6 +60,15 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         whiteStoreSquares.forEach{it.occupied = false}
         println(board.getFen())
         printBoard()
+        return toBoard()
+    }
+
+    fun sleep(): ChessBoard {
+        robotAansturing.sleep()
+        return toBoard()
+    }
+
+    fun home(): ChessBoard {
         robotAansturing.homeHor()
         robotAansturing.homeVert()
         return toBoard()
@@ -78,17 +89,37 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         return toBoard()
     }
 
+//    fun setTargetBoard(board: Board){
+//
+//    }
+//    fun newMoveToGetToTargetBoard(): ChessBoard{
+//        // 1 stap voor terug naar tarhet pos
+//        val (van, naar) = bepaalMoveForTargetBoard()
+//        return ownmove(van, naar)
+//
+//
+//    }
+
     fun ownmove(van: String, naar: String): ChessBoard {
         println("SCHAAK: " + van + " ->" + naar)
 
-        val fromValue = Square.fromValue(van)
-        val naarValue = Square.fromValue(naar)
-        robotMove(van, naar)
-        board.doMove(Move(fromValue, naarValue))
-        changePlayer()
+//        if (positieBuitenBord(van)){
+//            if (getPiece(naar)!=Piece.NONE) throw RuntimeException("Zet van buitenbord kan alleen naar lege plek")
+//            robotMove(van, naar)
+//            val naarValue = Square.fromValue(naar)
+//            val pieceToMove:Piece = getPiece(van)
+//            board.setPiece(pieceToMove, naarValue)
+//        }
+//        else {
+            val fromValue: Square = Square.fromValue(van)
+            val naarValue = Square.fromValue(naar)
+            robotMove(van, naar)
+            board.doMove(Move(fromValue, naarValue))
+            changePlayer()
+//        }
+
         println(board.getFen())
         printBoard()
-
         toBoard()
         return toBoard()
     }
