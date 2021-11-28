@@ -56,8 +56,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     fun reset(): ChessBoard {
         board = Board()
         player = "w"
-        blackStoreSquares.forEach{it.occupied = false}
-        whiteStoreSquares.forEach{it.occupied = false}
+        blackStoreSquares.forEach{it.piece = Piece.NONE}
+        whiteStoreSquares.forEach{it.piece = Piece.NONE}
         println(board.getFen())
         printBoard()
         return toBoard()
@@ -128,25 +128,12 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         println("robot from:$van to:$to")
 
         val toPiece = board.getPiece(Square.fromValue(to))
-/*
-                    // slag!
-                    val armNr = if (whitesMove) 1 else 0
-                    val storeSquare = if (whitesMove) {
-                        whiteStoreSquares.filter { !it.occupied }.first()
-                    } else {
-                        blackStoreSquares.filter { !it.occupied }.first()
-                    }
-                    storeSquare.occupied = true;
-                    myMoves.add(ChessSlag(move.from.value(), move.to.value(), storeSquare.pos, armNr, nr))
-                    board.doMove(move)
-                    whitesMove = !whitesMove;
 
- */
         if (toPiece!=Piece.NONE){
             // slaan
             if (toPiece.pieceSide==Side.BLACK){
-                val storeSquare: StoreSquare = blackStoreSquares.filter { !it.occupied }.first()
-                storeSquare.occupied = true;
+                val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE }.first()
+                storeSquare.piece = toPiece
                 robotAansturing.movetoVlak(van, 0)
                 robotAansturing.clamp1()
 
@@ -160,8 +147,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.release2()
             }
             else{
-                val storeSquare: StoreSquare = whiteStoreSquares.filter { !it.occupied }.first()
-                storeSquare.occupied = true;
+                val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE }.first()
+                storeSquare.piece = toPiece
                 robotAansturing.movetoVlak(van, 1)
                 robotAansturing.clamp2()
 
@@ -239,4 +226,4 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
 }
 
-data class StoreSquare(val pos: String, var occupied: Boolean = false)
+data class StoreSquare(val pos: String, var piece: Piece = Piece.NONE)
