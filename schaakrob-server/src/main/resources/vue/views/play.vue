@@ -42,6 +42,11 @@
               <button type="submit" v-on:click="home">Home</button>
               <button type="submit" v-on:click="computerMove">Computer zet</button>
        </span>
+      <hr>
+      <span>
+              <button type="submit" v-on:click="toBase">toBase</button>
+              <button type="submit" v-on:click="loadfen">loadFen</button>
+       </span>
       <br>
         <input v-model="board">
 
@@ -129,6 +134,16 @@ Vue.component("play", {
     },
     home: function (event) {
       fetch(`/api/game/home`)
+          .then(res => res.text())
+          .catch(() => alert("Error"));
+    },
+    toBase: function (event) {
+      fetch(`/api/game/restoreboard`)
+          .then(res => res.text())
+          .catch(() => alert("Error"));
+    },
+    loadfen: function (event) {
+      fetch(`/api/game/loadfen`)
           .then(res => res.text())
           .catch(() => alert("Error"));
     },
