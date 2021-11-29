@@ -20,7 +20,9 @@ class BuildBoardThread(private val schaakspel: Schaakspel) {
 
     fun loadFen(){
         val board = Board()
-        board.loadFromFen("r5rk/5p1p/5R2/4B3/8/8/7P/7K w")
+//        board.loadFromFen("r5rk/5p1p/5R2/4B3/8/8/7P/7K w")
+//        board.loadFromFen("r1bqkb1r/pp1ppp1p/5np1/8/8/2P5/PP2PPPP/RNnQKBNR b KQkq - 0 5")
+        board.loadFromFen("r1bq2r1/b4pk1/p1pp1p2/1p2pP2/1P2P1PB/3P4/1PPQ2P1/R3K2R w")
         schaakspel.setTargetBoard(board)
         enabled = true
     }

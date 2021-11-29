@@ -6,8 +6,13 @@ import com.github.bhlangonijr.chesslib.Side
 import com.github.bhlangonijr.chesslib.Square
 import com.github.bhlangonijr.chesslib.move.Move
 import com.vdzon.java.robitapi.RobotAansturing
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import java.io.File
 import java.lang.RuntimeException
-
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
 
 class Schaakspel(private val robotAansturing: RobotAansturing) {
 
@@ -16,53 +21,65 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     private var player = "w"
     private var buildBoardThread = BuildBoardThread(this)
 
+    var initialBlackStoreSquares: List<StoreSquare>
+    var initialWhiteStoreSquares: List<StoreSquare>
+    lateinit var  blackStoreSquares : List<StoreSquare>
+    lateinit var whiteStoreSquares: List<StoreSquare>
+
     init{
+
+        initialBlackStoreSquares = listOf<StoreSquare>(
+            StoreSquare("A21"),
+            StoreSquare("B21"),
+            StoreSquare("C21"),
+            StoreSquare("D21"),
+            StoreSquare("E21"),
+            StoreSquare("F21"),
+            StoreSquare("G21"),
+            StoreSquare("H21"),
+            StoreSquare("A20"),
+            StoreSquare("B20"),
+            StoreSquare("C20"),
+            StoreSquare("D20"),
+            StoreSquare("E20"),
+            StoreSquare("F20"),
+            StoreSquare("G20"),
+            StoreSquare("H20")
+        )
+        initialWhiteStoreSquares = listOf<StoreSquare>(
+            StoreSquare("A11"),
+            StoreSquare("B11"),
+            StoreSquare("C11"),
+            StoreSquare("D11"),
+            StoreSquare("E11"),
+            StoreSquare("F11"),
+            StoreSquare("G11"),
+            StoreSquare("H11"),
+            StoreSquare("A10"),
+            StoreSquare("B10"),
+            StoreSquare("C10"),
+            StoreSquare("D10"),
+            StoreSquare("E10"),
+            StoreSquare("F10"),
+            StoreSquare("G10"),
+            StoreSquare("H10")
+        )
+
         buildBoardThread.startThread()
+        loadBoard()
     }
 
 
-    val blackStoreSquares = listOf<StoreSquare>(
-        StoreSquare("A21"),
-        StoreSquare("B21"),
-        StoreSquare("C21"),
-        StoreSquare("D21"),
-        StoreSquare("E21"),
-        StoreSquare("F21"),
-        StoreSquare("G21"),
-        StoreSquare("H21"),
-        StoreSquare("A20"),
-        StoreSquare("B20"),
-        StoreSquare("C20"),
-        StoreSquare("D20"),
-        StoreSquare("E20"),
-        StoreSquare("F20"),
-        StoreSquare("G20"),
-        StoreSquare("H20")
-    )
-    val whiteStoreSquares = listOf<StoreSquare>(
-        StoreSquare("A11"),
-        StoreSquare("B11"),
-        StoreSquare("C11"),
-        StoreSquare("D11"),
-        StoreSquare("E11"),
-        StoreSquare("F11"),
-        StoreSquare("G11"),
-        StoreSquare("H11"),
-        StoreSquare("A10"),
-        StoreSquare("B10"),
-        StoreSquare("C10"),
-        StoreSquare("D10"),
-        StoreSquare("E10"),
-        StoreSquare("F10"),
-        StoreSquare("G10"),
-        StoreSquare("H10")
-    )
+
+
+
 
     fun reset(): ChessBoard {
         board = Board()
         player = "w"
         blackStoreSquares.forEach{it.piece = Piece.NONE}
         whiteStoreSquares.forEach{it.piece = Piece.NONE}
+        saveBoard()
 //        println(board.getFen())
 //        printBoard()
         return toBoard()
@@ -89,6 +106,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         val move = ComputerPlayer.getMove(board.getFen())
         robotMove(move.from.value(), move.to.value())
         board.doMove(move)
+        saveBoard()
 //        printBoard()
         changePlayer()
         return toBoard()
@@ -128,6 +146,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 val square = Square.valueOf(pos)
                 val pieceNow = board.getPiece(square)
                 val pieceWanted = targetBoard.getPiece(square)
+                saveBoard()
+
 
                 if (pieceNow==Piece.NONE && pieceWanted!=Piece.NONE){
                     val from= findPieceToRestore(pieceWanted)
@@ -136,6 +156,29 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 }
             }
         }
+
+        // maak lege plekken
+        for (row in "ABCDEFGH"){
+            for (col in "12345678"){
+                val pos = "$row$col"
+                val square = Square.valueOf(pos)
+                val pieceNow = board.getPiece(square)
+                val pieceWanted = targetBoard.getPiece(square)
+
+                if (pieceNow!=Piece.NONE && pieceWanted==Piece.NONE){
+                    if (pieceNow.pieceSide==Side.WHITE){
+                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE }.first()
+                        return Pair(pos,storeSquare.pos)
+                    }
+                    else{
+                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE }.first()
+
+                        return Pair(pos,storeSquare.pos)
+                    }
+                }
+            }
+        }
+
 
         return null
     }
@@ -207,16 +250,39 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             robotMove(van, naar)
             println("board.setPiece: " + pieceToMove + " ->" + naarValue)
             board.setPiece(pieceToMove, naarValue)
+            saveBoard()
+
         }
         else {
-            val fromValue: Square = Square.fromValue(van)
-            val naarValue = Square.fromValue(naar)
-            robotMove(van, naar)
-            board.doMove(Move(fromValue, naarValue))
-            changePlayer()
+            if (positieBuitenBord(naar)){
+                val fromValue: Square = Square.fromValue(van)
+//                val naarValue = Square.fromValue(naar)
+                robotMove(van, naar)
+                println("board.setPiece: " + fromValue + " ->" + Piece.NONE)
+                board.unsetPiece(board.getPiece(fromValue), fromValue)
+                saveBoard()
+
+                changePlayer()
+
+            }
+            else{
+                val fromValue: Square = Square.fromValue(van)
+                val naarValue = Square.fromValue(naar)
+                robotMove(van, naar)
+                if (!board.doMove(Move(fromValue, naarValue))){
+                    // not valid
+                    // do it anyway
+                    val piece = board.getPiece(fromValue)
+                    board.setPiece(piece, naarValue)
+                    board.unsetPiece(piece, fromValue)
+                }
+                saveBoard()
+
+                changePlayer()
+            }
         }
 
-//        println(board.getFen())
+        println(board.getFen())
 //        printBoard()
         toBoard()
         return toBoard()
@@ -226,7 +292,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     private fun robotMove(van: String, to:String){
         println("robot from:$van to:$to")
 
-        val toPiece = board.getPiece(Square.fromValue(to))
+        val toPiece = if (positieBuitenBord(to)) Piece.NONE else board.getPiece(Square.fromValue(to))
 
         if (toPiece!=Piece.NONE){
             // slaan
@@ -262,7 +328,14 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             }
         }
         else {
-            if (van.endsWith("21") ) {// bovenste rij
+            if (positieBuitenBord(to)){
+                val storeSquareBlack = blackStoreSquares.filter { it.pos== to }.firstOrNull()
+                val storeSquareWhite = whiteStoreSquares.filter { it.pos== to }.firstOrNull()
+                storeSquareBlack?.piece = board.getPiece(Square.fromValue(van))
+                storeSquareWhite?.piece = board.getPiece(Square.fromValue(van))
+            }
+
+            if (van.endsWith("21") || to.endsWith("21")) {// bovenste rij
                 robotAansturing.movetoVlak(van, 1)
                 robotAansturing.clamp2()
                 robotAansturing.movetoVlak(to, 1)
@@ -334,8 +407,33 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
 
+    private fun loadBoard(){
+        try {
+            val fen = File("chessboard.dat").readText()
+            board.loadFromFen(fen)
+
+            val blackJson = File("chessboard-blackstore.dat").readText()
+            blackStoreSquares = Json.decodeFromString(blackJson)
+            val whiteJson = File("chessboard-whitekstore.dat").readText()
+            whiteStoreSquares = Json.decodeFromString(whiteJson)
+
+        }
+        catch (e:Exception){
+            println("Error loading fen: "+e.message)
+        }
+        if (blackStoreSquares==null || blackStoreSquares.size==0) blackStoreSquares =initialBlackStoreSquares
+        if (whiteStoreSquares==null || whiteStoreSquares.size==0) whiteStoreSquares =initialWhiteStoreSquares
+        println(blackStoreSquares)
+
+    }
+    private fun saveBoard(){
+        File("chessboard.dat").writeText(board.getFen())
+        File("chessboard-blackstore.dat").writeText(Json.encodeToString(blackStoreSquares))
+        File("chessboard-whitekstore.dat").writeText(Json.encodeToString(whiteStoreSquares))
+
+    }
 
 
 }
-
+@Serializable
 data class StoreSquare(val pos: String, var piece: Piece = Piece.NONE)
