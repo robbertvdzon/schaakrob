@@ -24,6 +24,8 @@
         </span>
       </div>
 
+      Aan zet: {{board.player}}
+
       <table>
         <tbody>
         <tr v-for="row in rows">
@@ -93,7 +95,9 @@ Vue.component("play", {
       {boardcol: ["?", "?", "?", "?", "?", "?", "?", "p"]},
       {boardcol: ["?", "?", "?", "?", "?", "?", "?", "t"]},
     ],
-    board: {},
+    board: {
+      player: "?"
+    },
     rows: [
       {id: 8},
       {id: 7},
@@ -172,6 +176,9 @@ Vue.component("play", {
           .catch(() => alert("Error"));
     },
     move: function (vlak) {
+      if (this.userdata.role=='SPECTATOR') return
+
+
       if (this.van == "") {
         this.van = vlak
       } else {
