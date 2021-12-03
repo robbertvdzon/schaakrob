@@ -2,6 +2,7 @@ package com.vdzon.java
 
 import com.vdzon.java.robitapi.RobotAansturing
 import com.vdzon.java.schaakspel.Schaakspel
+import com.vdzon.java.ui.RouteRole
 import io.javalin.Javalin
 import io.javalin.http.Context
 
@@ -22,7 +23,8 @@ class RestEndpoints {
         app["/api/game/loadfen", { ctx: Context? -> ctx?.json(schaakspel.loadFen()) }]
         app["/api/game/reset", { ctx: Context? -> ctx?.json(schaakspel.reset()) }]
         app["/api/game/computermove", { ctx: Context? -> ctx?.json(schaakspel.computermove()) }]
-        app.get("/api/game/ownmove/:van/:naar", { ctx: Context? -> ctx?.json(schaakspel.ownmove(ctx?.pathParam("van")?:"",ctx?.pathParam("naar")?:"")) })
+        app.get("/api/game/ownmove/:van/:naar", { ctx: Context? -> ctx?.json(schaakspel.ownmove(ctx?.pathParam("van")?:"",ctx?.pathParam("naar")?:"")) }, setOf(
+            RouteRole.ADMIN, RouteRole.PLAYER))
 
         app["/api/rebuild", { ctx: Context? -> robotAansturing.rebuild() }]
         app["/api/restart", { ctx: Context? -> robotAansturing.restart() }]

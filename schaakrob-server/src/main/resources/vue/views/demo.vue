@@ -2,10 +2,12 @@
   <app-frame>
     <div>
 
+
       <nav>
         <ul class="nav nav-pills pull-right">
-          <li role="presentation"><a href="#" id="demoPrev"><</a></li>
-          <li role="presentation"><a href="#" id="demoNext">></a></li>
+          <li role="presentation">
+            <button type="submit" v-on:click="close">close</button>
+          </li>
         </ul>
       </nav>
 
@@ -61,18 +63,13 @@ Vue.component("demo", {
     stopDemo: function (event) {
       fetch(`/api/stopdemo`)
       .catch(() => alert("Error"));
+    },
+    close: function (event) {
+      window.location.href = "/play";
     }
   }
 });
 
-$(document).ready(function () {
-  $("#demoPrev").click(function () {
-    window.location.href = "/play";
-  });
-  $("#demoNext").click(function () {
-    window.location.href = "/manual";
-  });
-});
 
 </script>
 <style scoped>

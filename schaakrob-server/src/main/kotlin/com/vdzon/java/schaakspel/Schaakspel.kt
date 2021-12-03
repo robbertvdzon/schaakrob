@@ -1,18 +1,15 @@
 package com.vdzon.java.schaakspel
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.bhlangonijr.chesslib.Board
 import com.github.bhlangonijr.chesslib.Piece
 import com.github.bhlangonijr.chesslib.Side
 import com.github.bhlangonijr.chesslib.Square
 import com.github.bhlangonijr.chesslib.move.Move
 import com.vdzon.java.robitapi.RobotAansturing
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import java.io.File
 import java.lang.RuntimeException
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
 
 class Schaakspel(private val robotAansturing: RobotAansturing) {
 
@@ -20,6 +17,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     private var targetBoard = Board()
     private var player = "w"
     private var buildBoardThread = BuildBoardThread(this)
+    private val mapper = jacksonObjectMapper()
 
     var initialBlackStoreSquares: List<StoreSquare>
     var initialWhiteStoreSquares: List<StoreSquare>
@@ -66,7 +64,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         )
 
         buildBoardThread.startThread()
-        loadBoard()
+        loadBoard(initialBlackStoreSquares, initialWhiteStoreSquares)
     }
 
 
@@ -77,8 +75,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     fun reset(): ChessBoard {
         board = Board()
         player = "w"
-        blackStoreSquares.forEach{it.piece = Piece.NONE}
-        whiteStoreSquares.forEach{it.piece = Piece.NONE}
+        blackStoreSquares.forEach{it.piece = Piece.NONE.name}
+        whiteStoreSquares.forEach{it.piece = Piece.NONE.name}
         saveBoard()
 //        println(board.getFen())
 //        printBoard()
@@ -167,11 +165,11 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
                 if (pieceNow!=Piece.NONE && pieceWanted==Piece.NONE){
                     if (pieceNow.pieceSide==Side.WHITE){
-                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE }.first()
+                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE.name }.first()
                         return Pair(pos,storeSquare.pos)
                     }
                     else{
-                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE }.first()
+                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE.name }.first()
 
                         return Pair(pos,storeSquare.pos)
                     }
@@ -213,10 +211,10 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos}
         val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos}
         if (blackStoreSquare!=null){
-            blackStoreSquare.piece = Piece.NONE
+            blackStoreSquare.piece = Piece.NONE.name
         }
         if (whiteStoreSquare!=null){
-            whiteStoreSquare.piece = Piece.NONE
+            whiteStoreSquare.piece = Piece.NONE.name
         }
     }
 
@@ -225,10 +223,10 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos}
         val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos}
         if (blackStoreSquare!=null){
-            return blackStoreSquare.piece
+            return Piece.fromValue(blackStoreSquare.piece)
         }
         if (whiteStoreSquare!=null){
-            return whiteStoreSquare.piece
+            return Piece.fromValue(whiteStoreSquare.piece)
         }
         return board.getPiece(Square.fromValue(pos))
     }
@@ -297,8 +295,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         if (toPiece!=Piece.NONE){
             // slaan
             if (toPiece.pieceSide==Side.BLACK){
-                val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE }.first()
-                storeSquare.piece = toPiece
+                val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE.name }.first()
+                storeSquare.piece = toPiece.name
                 robotAansturing.movetoVlak(van, 0)
                 robotAansturing.clamp1()
 
@@ -312,8 +310,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.release2()
             }
             else{
-                val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE }.first()
-                storeSquare.piece = toPiece
+                val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE.name }.first()
+                storeSquare.piece = toPiece.name
                 robotAansturing.movetoVlak(van, 1)
                 robotAansturing.clamp2()
 
@@ -331,8 +329,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             if (positieBuitenBord(to)){
                 val storeSquareBlack = blackStoreSquares.filter { it.pos== to }.firstOrNull()
                 val storeSquareWhite = whiteStoreSquares.filter { it.pos== to }.firstOrNull()
-                storeSquareBlack?.piece = board.getPiece(Square.fromValue(van))
-                storeSquareWhite?.piece = board.getPiece(Square.fromValue(van))
+                storeSquareBlack?.piece = board.getPiece(Square.fromValue(van)).name
+                storeSquareWhite?.piece = board.getPiece(Square.fromValue(van)).name
             }
 
             if (van.endsWith("21") || to.endsWith("21")) {// bovenste rij
@@ -364,7 +362,14 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 list.add(SquareField(sq,s.toLetter()))
             }
         }
-        return ChessBoard(list, player)
+        println("het logal moves 1")
+        val moves: List<Move> = board.legalMoves()
+        println("het logal moves 2")
+        val mate = board.isMated
+        val draw = board.isDraw
+        val side = board.sideToMove
+        println("het logal moves 3")
+        return ChessBoard(list, side.value(), moves.toChessMoves(), draw, mate)
     }
 
     private fun printBoard(boardToPrint: Board) {
@@ -407,33 +412,35 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
 
-    private fun loadBoard(){
+    private fun loadBoard(initialBlackStoreSquares: List<StoreSquare>, initialWhiteStoreSquares: List<StoreSquare>) {
         try {
+            blackStoreSquares= emptyList()
+            whiteStoreSquares=emptyList()
+
             val fen = File("chessboard.dat").readText()
             board.loadFromFen(fen)
 
             val blackJson = File("chessboard-blackstore.dat").readText()
-            blackStoreSquares = Json.decodeFromString(blackJson)
+            blackStoreSquares = mapper.readValue(blackJson)
             val whiteJson = File("chessboard-whitekstore.dat").readText()
-            whiteStoreSquares = Json.decodeFromString(whiteJson)
+            whiteStoreSquares = mapper.readValue(whiteJson)
 
         }
         catch (e:Exception){
             println("Error loading fen: "+e.message)
         }
-        if (blackStoreSquares==null || blackStoreSquares.size==0) blackStoreSquares =initialBlackStoreSquares
-        if (whiteStoreSquares==null || whiteStoreSquares.size==0) whiteStoreSquares =initialWhiteStoreSquares
+        if (blackStoreSquares==null || blackStoreSquares.size==0) blackStoreSquares = initialBlackStoreSquares
+        if (whiteStoreSquares==null || whiteStoreSquares.size==0) whiteStoreSquares = initialWhiteStoreSquares
         println(blackStoreSquares)
 
     }
     private fun saveBoard(){
         File("chessboard.dat").writeText(board.getFen())
-        File("chessboard-blackstore.dat").writeText(Json.encodeToString(blackStoreSquares))
-        File("chessboard-whitekstore.dat").writeText(Json.encodeToString(whiteStoreSquares))
+        File("chessboard-blackstore.dat").writeText(mapper.writeValueAsString(blackStoreSquares))
+        File("chessboard-whitekstore.dat").writeText(mapper.writeValueAsString(whiteStoreSquares))
 
     }
 
 
 }
-@Serializable
-data class StoreSquare(val pos: String, var piece: Piece = Piece.NONE)
+data class StoreSquare(val pos: String, var piece: String = Piece.NONE.name): java.io.Serializable

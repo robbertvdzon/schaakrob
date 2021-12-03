@@ -5,8 +5,9 @@
 
       <nav>
         <ul class="nav nav-pills pull-right">
-          <li role="presentation"><a href="#" id="manualPrev"><</a></li>
-          <li role="presentation"><a href="#" id="manualNext">></a></li>
+          <li role="presentation">
+            <button type="submit" v-on:click="close">close</button>
+          </li>
         </ul>
       </nav>
 
@@ -331,18 +332,11 @@ Vue.component("manual", {
     rebuildapp: function (event) {
       fetch(`/api/rebuild`)
           .catch(() => alert("Error while rebuilding"));
+    },
+    close: function (event) {
+      window.location.href = "/play";
     }
-
   }
-});
-
-$(document).ready(function () {
-  $("#manualPrev").click(function () {
-    window.location.href = "/demo";
-  });
-  $("#manualNext").click(function () {
-    window.location.href = "/play";
-  });
 });
 
 </script>

@@ -11,7 +11,15 @@
       </nav>
       <nettoets-header activebutton="operationallog" title="Speelbord"></nettoets-header>
       <div class="myBorder">
-        Speelbord
+        Game ({{ userdata.role }})
+        <span v-if="userdata.role=='SPECTATOR'">
+          <button type="submit" v-on:click="login">Login</button>
+        </span>
+        <span v-if="userdata.role!='SPECTATOR'">
+          <button type="submit" v-on:click="logout">Logout</button>
+      </span>
+
+
         <span>
         </span>
       </div>
@@ -20,60 +28,72 @@
         <tbody>
         <tr v-for="row in rows">
           <td v-for="col in cols">
-            <button type="submit" class="schaakbtn" v-on:click="move(col.id+row.id)">{{boardrow[row.id-1] .boardcol[col.index]}}</button>
+            <button type="submit" class="schaakbtn" v-on:click="move(col.id+row.id)">
+              {{ boardrow[row.id - 1].boardcol[col.index] }}
+            </button>
 
           </td>
         </tr>
         </tbody>
       </table>
       <br>
-      <span>
-                    van: <input v-model="van">
-                    naar: <input v-model="naar">
-              <button type="submit" v-on:click="again">Opnieuw</button>
+
+      <span v-if="userdata.role!='SPECTATOR'">
+              <button type="submit" v-on:click="toBase">Bord terugzetten</button>
+          <span>
+                        van: <input v-model="van">
+                        naar: <input v-model="naar">
+                  <button type="submit" v-on:click="again">Opnieuw</button>
+           </span>
+        <br>
+          <!--
+                <iframe width="640" height="480" src="https://rtsp.me/embed/8HkH3QT8/" frameborder="0" allowfullscreen></iframe>
+          -->
+        <br>
+        <br>
+        <hr>
        </span>
-      <br>
-      <br>
-      <br>
       <hr>
-      <span>
+      <span v-if="userdata.role=='ADMIN'">
               <button type="submit" v-on:click="reset">Reset board</button>
               <button type="submit" v-on:click="sleep">Sleep</button>
               <button type="submit" v-on:click="home">Home</button>
               <button type="submit" v-on:click="computerMove">Computer zet</button>
-       </span>
-      <hr>
-      <span>
-              <button type="submit" v-on:click="toBase">toBase</button>
               <button type="submit" v-on:click="loadfen">loadFen</button>
+              <button type="submit" v-on:click="demo">demo</button>
+              <button type="submit" v-on:click="manual">manual</button>
        </span>
+
       <br>
-        <input v-model="board">
+      <input v-model="board">
 
     </div>
   </app-frame>
 </template>
 <script>
 
-
 Vue.component("play", {
   template: "#play",
   data: () => ({
     status: null,
+    userdata: {
+      username: "",
+      role: ""
+    },
     van: "",
     naar: "",
-    testfield: {"s":"dd"},
+    testfield: {"s": "dd"},
     boardrow: [
-      {boardcol: ["?","?","?","?","?","?","?","?"]},
-      {boardcol: ["?","?","?","?","?","?","?","?"]},
-      {boardcol: ["?","?","?","?","?","?","?","?"]},
-      {boardcol: ["?","?","?","?","?","?","?","?"]},
-      {boardcol: ["?","?","?","?","?","?","?","?"]},
-      {boardcol: ["?","?","?","?","?","?","?","?"]},
-      {boardcol: ["?","?","?","?","?","?","?","p"]},
-      {boardcol: ["?","?","?","?","?","?","?","t"]},
-        ],
-    board: {    },
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "p"]},
+      {boardcol: ["?", "?", "?", "?", "?", "?", "?", "t"]},
+    ],
+    board: {},
     rows: [
       {id: 8},
       {id: 7},
@@ -86,14 +106,14 @@ Vue.component("play", {
     ],
 
     cols: [
-      {id: 'A', index:0},
-      {id: 'B', index:1},
-      {id: 'C', index:2},
-      {id: 'D', index:3},
-      {id: 'E', index:4},
-      {id: 'F', index:5},
-      {id: 'G', index:6},
-      {id: 'H', index:7},
+      {id: 'A', index: 0},
+      {id: 'B', index: 1},
+      {id: 'C', index: 2},
+      {id: 'D', index: 3},
+      {id: 'E', index: 4},
+      {id: 'F', index: 5},
+      {id: 'G', index: 6},
+      {id: 'H', index: 7},
     ]
   }),
   computed: {
@@ -113,14 +133,12 @@ Vue.component("play", {
       fetch(`/api/game/load`)
           .then(res => res.text())
           .then(text => this.updateBoard(JSON.parse(text)))
+          .catch(err => alert(err));
+      fetch(`/api/userdata`)
+          .then(res => res.text())
+          .then(text => this.userdata = JSON.parse(text))
           .catch(() => alert("Error"));
     },
-    // prev: function (event) {
-    //   window.location.href = "/manual";
-    // },
-    // next: function (event) {
-    //   window.location.href = "/demo";
-    // },
     reset: function (event) {
       fetch(`/api/game/reset`)
           .then(res => res.text())
@@ -174,19 +192,33 @@ Vue.component("play", {
         }
       }
     },
+    logout: function (event) {
+      fetch(`/api/logout`)
+          .catch(() => alert("Error"))
+          .then(text => window.location.href = "/play");
+    },
+    login: function (event) {
+      window.location.href = "/login";
+    },
+    demo: function (event) {
+      window.location.href = "/demo";
+    },
+    manual: function (event) {
+      window.location.href = "/manual";
+    },
     again: function () {
       this.naar = ""
       this.van = ""
     },
     updateBoard: function (newBoard) {
-
+      console.info(newBoard)
       this.board = newBoard
 
 
       console.log(this.board);
       rows2 = this.rows
       // console.log("t2");
-      squares =  this.board.squares
+      squares = this.board.squares
       // console.log("t3");
       boardrow = this.boardrow
       // console.log("t4");
@@ -194,19 +226,19 @@ Vue.component("play", {
       this.cols.forEach(function (col, index) {
         // console.log("t5");
         rows2.forEach(function (row, index2) {
-          sq = col.id+""+row.id
+          sq = col.id + "" + row.id
           // console.log("t6");
-           squares.forEach(function (item, index3) {
-             if (item.field==sq) {
-               boardrow[7-index2].boardcol[index] = item.piece
-             }
-           });
+          squares.forEach(function (item, index3) {
+            if (item.field == sq) {
+              boardrow[7 - index2].boardcol[index] = item.piece
+            }
+          });
         });
       });
 
 
-        // this.board.squares.forEach(function (item, index) {
-        // console.log(item, index);
+      // this.board.squares.forEach(function (item, index) {
+      // console.log(item, index);
       // });
       // this.boardrow = boardrow
       // this.boardrow[1].boardcol[1] = "QQ"
