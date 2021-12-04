@@ -25,6 +25,54 @@
       </div>
 
       Aan zet: {{board.player}}
+      <table width="100%">
+        <tbody>
+        <tr v-for="row in rows">
+          <td v-for="col in cols" v-on:click="move(col.id+row.id)">
+
+            <div class="blacksquare" v-if="(row.id+col.index)%2==0" v-bind:id="col.id+row.id">
+
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='b'" src="/icons/png/stukken/not_selected/loper_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='q'" src="/icons/png/stukken/not_selected/dame_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='k'" src="/icons/png/stukken/not_selected/koning_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+
+
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='P'" src="/icons/png/stukken/not_selected/pion_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='R'" src="/icons/png/stukken/not_selected/toren_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='N'" src="/icons/png/stukken/selected/paard_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='B'" src="/icons/png/stukken/not_selected/loper_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='Q'" src="/icons/png/stukken/not_selected/dame_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='K'" src="/icons/png/stukken/not_selected/koning_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+
+            </div>
+            <div class="whitesquare" v-if="(row.id+col.index)%2==1" v-bind:id="col.id+row.id">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='b'" src="/icons/png/stukken/not_selected/loper_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='q'" src="/icons/png/stukken/not_selected/dame_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='k'" src="/icons/png/stukken/not_selected/koning_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+
+
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='P'" src="/icons/png/stukken/not_selected/pion_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='R'" src="/icons/png/stukken/not_selected/toren_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='N'" src="/icons/png/stukken/selected/paard_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='B'" src="/icons/png/stukken/not_selected/loper_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='Q'" src="/icons/png/stukken/not_selected/dame_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='K'" src="/icons/png/stukken/not_selected/koning_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+
+              <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
 
       <table>
         <tbody>
@@ -72,6 +120,59 @@
     </div>
   </app-frame>
 </template>
+
+<style>
+.blacksquare{
+  /*width: 120px;*/
+  /*height: 120px;*/
+
+  background-image: url("/icons/png/vlakken/zwart.png");
+  object-fit: contain;
+  background-size: contain;
+
+  /*background-color: #ff6900;*/
+}
+.whitesquare{
+  background-image: url("/icons/png/vlakken/wit.png");
+  object-fit: contain;
+  background-size: contain;
+  /*width: 120px;*/
+  /*height: 120px;*/
+  /*background-color: #555555;*/
+}
+.blacksquare2{
+  /*border:1px solid black;*/
+  /*border:2px solid black;*/
+  box-shadow: inset 0px 0px 10px rgba(255,255,255,1);
+  /*box-shadow: 0 0 30px #719ECE;*/
+  /*border:5px solid black;*/
+  /*width: 120px;*/
+  /*height: 120px;*/
+  background-color: #ff6900;
+}
+.whitesquare2{
+  box-shadow: inset 0px 0px 10px rgba(255,255,255,0.9);
+  /*border:2px solid black;*/
+  /*box-shadow: 0 0 10px #719ECE;*/
+  /*outline: none !important;*/
+  /*box-shadow: 0 0 5px rgba(81, 203, 238, 1);*/
+  /*box-shadow: 0 0 5px #ffffff;*/
+  /*width: 120px;*/
+  /*height: 120px;*/
+  background-color: #555555;
+}
+.stukhightlight{
+  opacity: 1;
+  /*background-color: white;*/
+  /*display: inline-block;*/
+}
+.stukdefault{
+  opacity: 1;
+  /*background-color: white;*/
+  /*display: inline-block;*/
+}
+</style>
+
 <script>
 
 Vue.component("play", {
@@ -176,6 +277,16 @@ Vue.component("play", {
           .catch(() => alert("Error"));
     },
     move: function (vlak) {
+
+      $( "#B2" ).addClass('blacksquare2')
+      $( "#C2" ).addClass('whitesquare2')
+      $( "#B3" ).addClass('blacksquare2')
+      $( "#C3" ).addClass('whitesquare2')
+
+      $("#"+vlak+"img").attr("src",'/empty.png');
+
+      $("#E3img").addClass('stukhightlight').removeClass('stukdefault')
+
       if (this.userdata.role=='SPECTATOR') return
 
 
@@ -272,8 +383,8 @@ $(document).ready(function () {
 }
 
 .schaakbtn {
-  width: 40px;
-  height: 40px;
-  min-width: w0px;
+  width: 30px;
+  height: 30px;
+  min-width: 0px;
 }
 </style>
