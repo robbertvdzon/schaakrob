@@ -28,25 +28,28 @@
       <table width="100%">
         <tbody>
         <tr v-for="row in rows">
-          <td v-for="col in cols" v-on:click="move(col.id+row.id)">
+          <td v-for="col in cols" v-on:click="move(col.id+row.id)" v-bind:class="checkSquareClass(row.id, col.index)">
+<!--            <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
 
-            <div v-bind:class="checkSquareClass(row.id, col.index)"  v-bind:id="col.id+row.id">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='b'" src="/icons/png/stukken/not_selected/loper_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='q'" src="/icons/png/stukken/not_selected/dame_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='k'" src="/icons/png/stukken/not_selected/koning_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+            <div v-bind:class="getPieceImage(row.id, col.index)"  v-bind:id="col.id+row.id+'img'">
+              <img src="/icons/png/stukken/empty.png">
+
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='b'" src="/icons/png/stukken/not_selected/loper_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='q'" src="/icons/png/stukken/not_selected/dame_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='k'" src="/icons/png/stukken/not_selected/koning_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
 
 
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='P'" src="/icons/png/stukken/not_selected/pion_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='R'" src="/icons/png/stukken/not_selected/toren_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='N'" src="/icons/png/stukken/selected/paard_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='B'" src="/icons/png/stukken/not_selected/loper_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='Q'" src="/icons/png/stukken/not_selected/dame_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='K'" src="/icons/png/stukken/not_selected/koning_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='P'" src="/icons/png/stukken/not_selected/pion_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='R'" src="/icons/png/stukken/not_selected/toren_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='N'" src="/icons/png/stukken/selected/paard_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='B'" src="/icons/png/stukken/not_selected/loper_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='Q'" src="/icons/png/stukken/not_selected/dame_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='K'" src="/icons/png/stukken/not_selected/koning_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
 
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
+<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
 
             </div>
           </td>
@@ -104,9 +107,6 @@
 
 <style>
 .blacksquare{
-  /*width: 120px;*/
-  /*height: 120px;*/
-
   background-image: url("/icons/png/vlakken/zwart.png");
   object-fit: contain;
   background-size: contain;
@@ -117,10 +117,162 @@
   background-image: url("/icons/png/vlakken/wit.png");
   object-fit: contain;
   background-size: contain;
-  /*width: 120px;*/
-  /*height: 120px;*/
-  /*background-color: #555555;*/
 }
+
+
+.not_selected_pion_wit{
+  background-image: url("/icons/png/stukken/not_selected/pion_wit.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_toren_wit{
+  background-image: url("/icons/png/stukken/not_selected/toren_wit.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_paard_wit{
+  background-image: url("/icons/png/stukken/not_selected/paard_wit.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_loper_wit{
+  background-image: url("/icons/png/stukken/not_selected/loper_wit.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_dame_wit{
+  background-image: url("/icons/png/stukken/not_selected/dame_wit.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_koning_wit{
+  background-image: url("/icons/png/stukken/not_selected/koning_wit.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_pion_zwart{
+  background-image: url("/icons/png/stukken/not_selected/pion_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_toren_zwart{
+  background-image: url("/icons/png/stukken/not_selected/toren_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_paard_zwart{
+  background-image: url("/icons/png/stukken/not_selected/paard_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_loper_zwart{
+  background-image: url("/icons/png/stukken/not_selected/loper_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_dame_zwart{
+  background-image: url("/icons/png/stukken/not_selected/dame_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.not_selected_koning_zwart{
+  background-image: url("/icons/png/stukken/not_selected/koning_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+
+
+
+
+.selected_pion_wit{
+  background-image: url("/icons/png/stukken/selected/pion_wit.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_toren_wit{
+  background-image: url("/icons/png/stukken/selected/toren_wit.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_paard_wit{
+  background-image: url("/icons/png/stukken/selected/paard_wit.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_loper_wit{
+  background-image: url("/icons/png/stukken/selected/loper_wit.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_dame_wit{
+  background-image: url("/icons/png/stukken/selected/dame_wit.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_koning_wit{
+  background-image: url("/icons/png/stukken/selected/koning_wit.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_pion_zwart{
+  background-image: url("/icons/png/stukken/selected/pion_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_toren_zwart{
+  background-image: url("/icons/png/stukken/selected/toren_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_paard_zwart{
+  background-image: url("/icons/png/stukken/selected/paard_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_loper_zwart{
+  background-image: url("/icons/png/stukken/selected/loper_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_dame_zwart{
+  background-image: url("/icons/png/stukken/selected/dame_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+.selected_koning_zwart{
+  background-image: url("/icons/png/stukken/selected/koning_zwart.png");
+
+  object-fit: contain;
+  background-size: contain;
+}
+
+
+
+.empty{
+  background-image: url("/icons/png/stukken/empty.png");
+  object-fit: contain;
+  background-size: contain;
+}
+
+
+
 .blacksquare2{
   /*border:1px solid black;*/
   /*border:2px solid black;*/
@@ -328,7 +480,7 @@ Vue.component("play", {
           sq = col.id + "" + row.id
           // console.log("t6");
           squares.forEach(function (item, index3) {
-            if (item.field == sq) {
+            if (item.field === sq) {
               boardrow[7 - index2].boardcol[index] = item.piece
             }
           });
@@ -345,13 +497,31 @@ Vue.component("play", {
 
     },
     checkSquareClass: function (row,col){
-      if ((row+col)%2==1) return "blacksquare"
-      if ((row+col)%2==0) return "whitesquare"
+      if ((row+col)%2===1) return "blacksquare"
+      if ((row+col)%2===0) return "whitesquare"
 
     },
     getPieceImage: function (row,col){
-      if ((row+col)%2==1) return "blacksquare"
-      if ((row+col)%2==0) return "whitesquare"
+
+      // if ()
+      //
+      // if ((row+col)%2==1) return "blacksquare"
+      // if ((row+col)%2==0) return "whitesquare"
+
+      if (this.boardrow[row - 1].boardcol[col]=='p') return "not_selected_pion_wit";
+      if (this.boardrow[row - 1].boardcol[col]=='r') return "not_selected_toren_wit";
+      if (this.boardrow[row - 1].boardcol[col]=='n') return "not_selected_paard_wit";
+      if (this.boardrow[row - 1].boardcol[col]=='b') return "not_selected_loper_wit";
+      if (this.boardrow[row - 1].boardcol[col]=='q') return "not_selected_dame_wit";
+      if (this.boardrow[row - 1].boardcol[col]=='k') return "not_selected_koning_wit";
+      if (this.boardrow[row - 1].boardcol[col]=='P') return "not_selected_pion_zwart";
+      if (this.boardrow[row - 1].boardcol[col]=='R') return "not_selected_toren_zwart";
+      if (this.boardrow[row - 1].boardcol[col]=='N') return "not_selected_paard_zwart";
+      if (this.boardrow[row - 1].boardcol[col]=='B') return "not_selected_loper_zwart";
+      if (this.boardrow[row - 1].boardcol[col]=='Q') return "not_selected_dame_zwart";
+      if (this.boardrow[row - 1].boardcol[col]=='K') return "not_selected_koning_zwart";
+      if (this.boardrow[row - 1].boardcol[col]==' ') return "empty";
+
 
     }
 
