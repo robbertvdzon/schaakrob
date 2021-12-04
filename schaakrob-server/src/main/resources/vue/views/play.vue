@@ -30,8 +30,7 @@
         <tr v-for="row in rows">
           <td v-for="col in cols" v-on:click="move(col.id+row.id)">
 
-            <div class="blacksquare" v-if="(row.id+col.index)%2==1" v-bind:id="col.id+row.id">
-
+            <div v-bind:class="checkSquareClass(row.id, col.index)"  v-bind:id="col.id+row.id">
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
@@ -49,24 +48,6 @@
 
               <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
 
-            </div>
-            <div class="whitesquare" v-if="(row.id+col.index)%2==0" v-bind:id="col.id+row.id">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='b'" src="/icons/png/stukken/not_selected/loper_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='q'" src="/icons/png/stukken/not_selected/dame_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='k'" src="/icons/png/stukken/not_selected/koning_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-
-
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='P'" src="/icons/png/stukken/not_selected/pion_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='R'" src="/icons/png/stukken/not_selected/toren_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='N'" src="/icons/png/stukken/selected/paard_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='B'" src="/icons/png/stukken/not_selected/loper_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='Q'" src="/icons/png/stukken/not_selected/dame_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='K'" src="/icons/png/stukken/not_selected/koning_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
-
-              <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
             </div>
           </td>
         </tr>
@@ -362,7 +343,18 @@ Vue.component("play", {
       // this.boardrow[1].boardcol[1] = "QQ"
       this.testfield = "jj"
 
+    },
+    checkSquareClass: function (row,col){
+      if ((row+col)%2==1) return "blacksquare"
+      if ((row+col)%2==0) return "whitesquare"
+
+    },
+    getPieceImage: function (row,col){
+      if ((row+col)%2==1) return "blacksquare"
+      if ((row+col)%2==0) return "whitesquare"
+
     }
+
   }
 });
 
