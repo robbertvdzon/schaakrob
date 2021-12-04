@@ -29,28 +29,8 @@
         <tbody>
         <tr v-for="row in rows">
           <td v-for="col in cols" v-on:click="move(col.id+row.id)" v-bind:class="checkSquareClass(row.id, col.index)">
-<!--            <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-
-            <div v-bind:class="getPieceImage(row.id, col.index)"  v-bind:id="col.id+row.id+'img'">
+            <div v-bind:class="getPieceImage(row, col)"  v-bind:id="col.id+row.id+'img'">
               <img src="/icons/png/stukken/empty.png">
-
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='b'" src="/icons/png/stukken/not_selected/loper_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='q'" src="/icons/png/stukken/not_selected/dame_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='k'" src="/icons/png/stukken/not_selected/koning_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-
-
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='P'" src="/icons/png/stukken/not_selected/pion_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='R'" src="/icons/png/stukken/not_selected/toren_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='N'" src="/icons/png/stukken/selected/paard_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='B'" src="/icons/png/stukken/not_selected/loper_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='Q'" src="/icons/png/stukken/not_selected/dame_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]=='K'" src="/icons/png/stukken/not_selected/koning_zwart.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-
-<!--              <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">-->
-
             </div>
           </td>
         </tr>
@@ -410,16 +390,6 @@ Vue.component("play", {
           .catch(() => alert("Error"));
     },
     move: function (vlak) {
-
-      $( "#B2" ).addClass('blacksquare2')
-      $( "#C2" ).addClass('whitesquare2')
-      $( "#B3" ).addClass('blacksquare2')
-      $( "#C3" ).addClass('whitesquare2')
-
-      $("#"+vlak+"img").attr("src",'/empty.png');
-
-      $("#E3img").addClass('stukhightlight').removeClass('stukdefault')
-
       if (this.userdata.role=='SPECTATOR') return
 
 
@@ -488,11 +458,6 @@ Vue.component("play", {
       });
 
 
-      // this.board.squares.forEach(function (item, index) {
-      // console.log(item, index);
-      // });
-      // this.boardrow = boardrow
-      // this.boardrow[1].boardcol[1] = "QQ"
       this.testfield = "jj"
 
     },
@@ -502,30 +467,32 @@ Vue.component("play", {
 
     },
     getPieceImage: function (row,col){
+      var vlak = col.id+row.id
+      var prefix = "not_"
+      if (this.selectedVlak(vlak)){
+        prefix=""
+      }
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='p') return prefix+"selected_pion_wit";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='r') return prefix+"selected_toren_wit";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='n') return prefix+"selected_paard_wit";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='b') return prefix+"selected_loper_wit";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='q') return prefix+"selected_dame_wit";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='k') return prefix+"selected_koning_wit";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='P') return prefix+"selected_pion_zwart";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='R') return prefix+"selected_toren_zwart";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='N') return prefix+"selected_paard_zwart";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='B') return prefix+"selected_loper_zwart";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='Q') return prefix+"selected_dame_zwart";
+      if (this.boardrow[row.id - 1].boardcol[col.index]=='K') return prefix+"selected_koning_zwart";
+      if (this.boardrow[row.id - 1].boardcol[col.index]==' ') return "empty";
+    },
+    selectedVlak: function (vlak){
+      return vlak==this.van;
+    }
 
-      // if ()
-      //
-      // if ((row+col)%2==1) return "blacksquare"
-      // if ((row+col)%2==0) return "whitesquare"
-
-      if (this.boardrow[row - 1].boardcol[col]=='p') return "not_selected_pion_wit";
-      if (this.boardrow[row - 1].boardcol[col]=='r') return "not_selected_toren_wit";
-      if (this.boardrow[row - 1].boardcol[col]=='n') return "not_selected_paard_wit";
-      if (this.boardrow[row - 1].boardcol[col]=='b') return "not_selected_loper_wit";
-      if (this.boardrow[row - 1].boardcol[col]=='q') return "not_selected_dame_wit";
-      if (this.boardrow[row - 1].boardcol[col]=='k') return "not_selected_koning_wit";
-      if (this.boardrow[row - 1].boardcol[col]=='P') return "not_selected_pion_zwart";
-      if (this.boardrow[row - 1].boardcol[col]=='R') return "not_selected_toren_zwart";
-      if (this.boardrow[row - 1].boardcol[col]=='N') return "not_selected_paard_zwart";
-      if (this.boardrow[row - 1].boardcol[col]=='B') return "not_selected_loper_zwart";
-      if (this.boardrow[row - 1].boardcol[col]=='Q') return "not_selected_dame_zwart";
-      if (this.boardrow[row - 1].boardcol[col]=='K') return "not_selected_koning_zwart";
-      if (this.boardrow[row - 1].boardcol[col]==' ') return "empty";
 
 
     }
-
-  }
 });
 
 $(document).ready(function () {
