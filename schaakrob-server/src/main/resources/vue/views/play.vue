@@ -169,10 +169,6 @@
   object-fit: contain;
   background-size: contain;
 }
-
-
-
-
 .selected_pion_wit{
   background-image: url("/icons/png/stukken/selected/pion_wit.png");
   object-fit: contain;
@@ -242,9 +238,6 @@
   object-fit: contain;
   background-size: contain;
 }
-
-
-
 .empty{
   background-image: url("/icons/png/stukken/empty.png");
   object-fit: contain;
@@ -253,37 +246,6 @@
 
 
 
-.blacksquare2{
-  /*border:1px solid black;*/
-  /*border:2px solid black;*/
-  box-shadow: inset 0px 0px 10px rgba(255,255,255,1);
-  /*box-shadow: 0 0 30px #719ECE;*/
-  /*border:5px solid black;*/
-  /*width: 120px;*/
-  /*height: 120px;*/
-  background-color: #ff6900;
-}
-.whitesquare2{
-  box-shadow: inset 0px 0px 10px rgba(255,255,255,0.9);
-  /*border:2px solid black;*/
-  /*box-shadow: 0 0 10px #719ECE;*/
-  /*outline: none !important;*/
-  /*box-shadow: 0 0 5px rgba(81, 203, 238, 1);*/
-  /*box-shadow: 0 0 5px #ffffff;*/
-  /*width: 120px;*/
-  /*height: 120px;*/
-  background-color: #555555;
-}
-.stukhightlight{
-  opacity: 1;
-  /*background-color: white;*/
-  /*display: inline-block;*/
-}
-.stukdefault{
-  opacity: 1;
-  /*background-color: white;*/
-  /*display: inline-block;*/
-}
 </style>
 
 <script>
