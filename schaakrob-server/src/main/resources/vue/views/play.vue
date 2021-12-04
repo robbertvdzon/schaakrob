@@ -80,6 +80,8 @@
 
       <br>
       <input v-model="board">
+      <input v-model="possible_tos">
+      <input v-model="board.availableMoves">
 
     </div>
   </app-frame>
@@ -278,7 +280,7 @@ Vue.component("play", {
     },
     van: "",
     naar: "",
-    possible_tos: ["C3","C4","C5","C2"],
+    possible_tos: [],
     testfield: {"s": "dd"},
     boardrow: [
       {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
@@ -291,7 +293,8 @@ Vue.component("play", {
       {boardcol: ["?", "?", "?", "?", "?", "?", "?", "t"]},
     ],
     board: {
-      player: "?"
+      player: "",
+      availableMoves: []
     },
     rows: [
       {id: 8},
@@ -374,6 +377,38 @@ Vue.component("play", {
       if (this.userdata.role=='SPECTATOR') return
 
 
+      // if this is the second selection
+      if (this.van != "") {
+        if (this.possible_tos.includes(vlak)){
+          // ok!
+        }
+        else{
+          // not ok! pretent like this is the first move
+          this.van = ""
+        }
+      }
+
+
+      // if first selected
+      if (this.van == "") {
+        this.possible_tos = []
+        this.board.availableMoves.forEach(
+            element => {
+              if (vlak == element.from) {
+                this.possible_tos.push(element.to)
+              }
+            }
+        );
+
+        if (this.possible_tos.length === 0) {
+          // not valid
+          this.van = ""
+          return
+        }
+      }
+
+
+
       if (this.van == "") {
         this.van = vlak
       } else {
@@ -386,9 +421,8 @@ Vue.component("play", {
               .catch(() => alert("Error"));
           this.naar = ""
           this.van = ""
-
-
-        } else {
+          this.possible_tos = []
+       } else {
           this.van = vlak
           this.naar = ""
         }
