@@ -6,25 +6,30 @@
 
       <div class="headerBorder">
 
-        <table width = 100%>
+        <table width="100%">
           <tr>
-            <td>
-              Mode:{{ userdata.role }} , Aan zet: {{ board.player }}
-            </td>
-            <td align="right">
+            <td></td>
+            <td width="90%">
+
+              <table width=100%>
+                <tr height="50px">
+                  <td>
+                    Mode:{{ userdata.role }} , Aan zet: {{ board.player }}
+                  </td>
+                  <td align="right">
               <span v-if="userdata.role=='SPECTATOR'">
-                <button type="submit" v-on:click="login">Login</button>
+                <button type="submit" v-on:click="login" class="button">Login</button>
               </span>
-              <span v-if="userdata.role!='SPECTATOR'">
-                <button v-on:click="toBase">Opnieuw spelen</button>
-                <button v-on:click="logout">Logout</button>
+                    <span v-if="userdata.role!='SPECTATOR'">
+                <button v-on:click="toBase" class="button">Opnieuw spelen</button>
+                <button v-on:click="logout" class="button">Logout</button>
               </span>
-
-
-
+                  </td>
+                </tr>
+              </table>
             </td>
+            <td></td>
           </tr>
-
         </table>
 
       </div>
@@ -32,7 +37,7 @@
       <table width="100%">
         <tr>
           <td></td>
-          <td width="90%" >
+          <td width="90%">
             <table>
               <tbody>
               <tr v-for="row in rows">
@@ -277,6 +282,17 @@
   background-size: contain;
 }
 
+
+.button {
+  border: none;
+  background-color: white; /* Green */
+  color: black;
+  padding: 5px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
 
 </style>
 
