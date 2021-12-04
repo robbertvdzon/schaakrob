@@ -37,38 +37,16 @@
         </tbody>
       </table>
 
-
-      <table>
-        <tbody>
-        <tr v-for="row in rows">
-          <td v-for="col in cols">
-            <button type="submit" class="schaakbtn" v-on:click="move(col.id+row.id)">
-              {{ boardrow[row.id - 1].boardcol[col.index] }}
-            </button>
-
-          </td>
-        </tr>
-        </tbody>
-      </table>
       <br>
 
       <span v-if="userdata.role!='SPECTATOR'">
-              <button type="submit" v-on:click="toBase">Bord terugzetten</button>
-          <span>
-                        van: <input v-model="van">
-                        naar: <input v-model="naar">
-                  <button type="submit" v-on:click="again">Opnieuw</button>
-           </span>
-        <br>
+              <button type="submit" v-on:click="toBase">Opnieuw spelen</button>
           <!--
                 <iframe width="640" height="480" src="https://rtsp.me/embed/8HkH3QT8/" frameborder="0" allowfullscreen></iframe>
           -->
-        <br>
-        <br>
-        <hr>
        </span>
-      <hr>
       <span v-if="userdata.role=='ADMIN'">
+            <hr>
               <button type="submit" v-on:click="reset">Reset board</button>
               <button type="submit" v-on:click="sleep">Sleep</button>
               <button type="submit" v-on:click="home">Home</button>
@@ -79,10 +57,6 @@
        </span>
 
       <br>
-      <input v-model="board">
-      <input v-model="possible_tos">
-      <input v-model="board.availableMoves">
-
     </div>
   </app-frame>
 </template>
