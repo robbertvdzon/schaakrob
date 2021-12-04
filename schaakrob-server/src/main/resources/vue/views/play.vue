@@ -28,7 +28,7 @@
       <table width="100%">
         <tbody>
         <tr v-for="row in rows">
-          <td v-for="col in cols" v-on:click="move(col.id+row.id)" v-bind:class="checkSquareClass(row.id, col.index)">
+          <td v-for="col in cols" v-on:click="move(col.id+row.id)" v-bind:class="checkSquareClass(row, col)">
             <div v-bind:class="getPieceImage(row, col)"  v-bind:id="col.id+row.id+'img'">
               <img src="/icons/png/stukken/empty.png">
             </div>
@@ -90,11 +90,29 @@
   background-image: url("/icons/png/vlakken/zwart.png");
   object-fit: contain;
   background-size: contain;
-
-  /*background-color: #ff6900;*/
 }
 .whitesquare{
   background-image: url("/icons/png/vlakken/wit.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.blacksquare_dot{
+  background-image: url("/icons/png/vlakken/zwart-punt.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.whitesquare_dot{
+  background-image: url("/icons/png/vlakken/wit-punt.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.blacksquare_circle{
+  background-image: url("/icons/png/vlakken/zwart-circel.png");
+  object-fit: contain;
+  background-size: contain;
+}
+.whitesquare_circle{
+  background-image: url("/icons/png/vlakken/wit-circel.png");
   object-fit: contain;
   background-size: contain;
 }
@@ -260,6 +278,7 @@ Vue.component("play", {
     },
     van: "",
     naar: "",
+    possible_tos: ["C3","C4","C5","C2"],
     testfield: {"s": "dd"},
     boardrow: [
       {boardcol: ["?", "?", "?", "?", "?", "?", "?", "?"]},
@@ -424,8 +443,17 @@ Vue.component("play", {
 
     },
     checkSquareClass: function (row,col){
-      if ((row+col)%2===1) return "blacksquare"
-      if ((row+col)%2===0) return "whitesquare"
+      var vlak = col.id+row.id
+      var postfix = ""
+      if (this.possible_tos.includes(vlak)){
+        if (this.boardrow[row.id - 1].boardcol[col.index]==' ')
+          postfix = "_dot"
+        else
+          postfix = "_circle"
+      }
+
+      if ((row.id+col.index)%2===1) return "blacksquare"+postfix;
+      if ((row.id+col.index)%2===0) return "whitesquare"+postfix;
 
     },
     getPieceImage: function (row,col){
