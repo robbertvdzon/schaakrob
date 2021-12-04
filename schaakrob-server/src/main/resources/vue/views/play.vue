@@ -30,7 +30,7 @@
         <tr v-for="row in rows">
           <td v-for="col in cols" v-on:click="move(col.id+row.id)">
 
-            <div class="blacksquare" v-if="(row.id+col.index)%2==0" v-bind:id="col.id+row.id">
+            <div class="blacksquare" v-if="(row.id+col.index)%2==1" v-bind:id="col.id+row.id">
 
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
@@ -50,7 +50,7 @@
               <img v-if="boardrow[row.id - 1].boardcol[col.index]==' '" src="/icons/png/stukken/empty.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
 
             </div>
-            <div class="whitesquare" v-if="(row.id+col.index)%2==1" v-bind:id="col.id+row.id">
+            <div class="whitesquare" v-if="(row.id+col.index)%2==0" v-bind:id="col.id+row.id">
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='p'" src="/icons/png/stukken/not_selected/pion_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='r'" src="/icons/png/stukken/not_selected/toren_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
               <img v-if="boardrow[row.id - 1].boardcol[col.index]=='n'" src="/icons/png/stukken/selected/paard_wit.png" v-bind:id="col.id+row.id+'img'" class="stukdefault">
