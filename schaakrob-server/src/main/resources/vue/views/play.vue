@@ -16,8 +16,8 @@
                 <button type="submit" v-on:click="login">Login</button>
               </span>
               <span v-if="userdata.role!='SPECTATOR'">
-                <button type="submit" v-on:click="toBase">Opnieuw spelen</button>
-                <button type="submit" v-on:click="logout">Logout</button>
+                <button v-on:click="toBase">Opnieuw spelen</button>
+                <button v-on:click="logout">Logout</button>
               </span>
 
 
