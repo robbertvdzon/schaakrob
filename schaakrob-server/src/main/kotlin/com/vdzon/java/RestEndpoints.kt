@@ -20,7 +20,7 @@ class RestEndpoints {
         app["/api/game/sleep", { ctx: Context? -> ctx?.json(schaakspel.sleep()) }]
         app["/api/game/home", { ctx: Context? -> ctx?.json(schaakspel.home()) }]
         app["/api/game/restoreboard", { ctx: Context? -> ctx?.json(schaakspel.restoreBoard()) }]
-        app["/api/game/loadfen", { ctx: Context? -> ctx?.json(schaakspel.loadFen()) }]
+        app.post("/api/game/loadfen", { ctx: Context? -> ctx?.json(schaakspel.loadFen(ctx.body())) })
         app["/api/game/reset", { ctx: Context? -> ctx?.json(schaakspel.reset()) }]
         app["/api/game/computermove", { ctx: Context? -> ctx?.json(schaakspel.computermove()) }]
         app.get("/api/game/ownmove/:van/:naar", { ctx: Context? -> ctx?.json(schaakspel.ownmove(ctx?.pathParam("van")?:"",ctx?.pathParam("naar")?:"")) }, setOf(
@@ -73,4 +73,5 @@ class RestEndpoints {
         val split = body.split(",".toRegex()).toTypedArray()
         robotAansturing!!.moveto(Integer.valueOf(split[0]), Integer.valueOf(split[1]))
     }
+
 }

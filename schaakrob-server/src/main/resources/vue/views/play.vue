@@ -5,33 +5,14 @@
 
 
       <div class="headerBorder">
-
-        <table width="100%">
-          <tr>
-            <td></td>
-            <td width="90%">
-
-              <table width=100%>
-                <tr height="50px">
-                  <td>
-                    Mode:{{ userdata.role }} , Aan zet: {{ board.player }}
-                  </td>
-                  <td align="right">
-              <span v-if="userdata.role=='SPECTATOR'">
-                <button type="submit" v-on:click="login" class="button">Login</button>
-              </span>
-                    <span v-if="userdata.role!='SPECTATOR'">
-                <button v-on:click="toBase" class="button">Opnieuw spelen</button>
-                <button v-on:click="logout" class="button">Logout</button>
-              </span>
-                  </td>
-                </tr>
-              </table>
+        <table width=100%>
+          <tr height="50px">
+            <td>
+              &nbsp;
+              Mode:{{ userdata.role }} , Aan zet: {{ board.player }}
             </td>
-            <td></td>
           </tr>
         </table>
-
       </div>
 
       <table width="100%">
@@ -55,6 +36,25 @@
         </tr>
       </table>
 
+      <div class="headerBorder">
+        <table width=100%>
+          <tr height="50px">
+            <td>
+              &nbsp;
+              <span v-if="userdata.role=='SPECTATOR'">
+                <button type="submit" v-on:click="login" class="button">Login</button>
+              </span>
+        <span v-if="userdata.role!='SPECTATOR'">
+                <button v-on:click="toBase" class="button">Opnieuw spelen</button>
+                <button v-on:click="logout" class="button">Logout</button>
+              </span>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+
+
       <br>
 
       <!--
@@ -66,7 +66,6 @@
               <button type="submit" v-on:click="sleep">Sleep</button>
               <button type="submit" v-on:click="home">Home</button>
               <button type="submit" v-on:click="computerMove">Computer zet</button>
-              <button type="submit" v-on:click="loadfen">loadFen</button>
               <button type="submit" v-on:click="demo">demo</button>
               <button type="submit" v-on:click="manual">manual</button>
        </span>
@@ -385,13 +384,11 @@ Vue.component("play", {
           .then(res => res.text())
           .catch(() => alert("Error"));
     },
+    moveAway: function (event) {
+      axios.post(`/api/move`, "100,100")
+    },
     toBase: function (event) {
       fetch(`/api/game/restoreboard`)
-          .then(res => res.text())
-          .catch(() => alert("Error"));
-    },
-    loadfen: function (event) {
-      fetch(`/api/game/loadfen`)
           .then(res => res.text())
           .catch(() => alert("Error"));
     },
@@ -399,6 +396,7 @@ Vue.component("play", {
       fetch(`/api/game/computermove`)
           .then(res => res.text())
           .then(text => this.updateBoard(JSON.parse(text)))
+          .then(text => this.moveAway())
           .catch(() => alert("Error"));
     },
     move: function (vlak) {

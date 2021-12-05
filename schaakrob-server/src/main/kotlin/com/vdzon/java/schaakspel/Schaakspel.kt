@@ -15,7 +15,6 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     private var board = Board()
     private var targetBoard = Board()
-    private var player = "w"
     private var buildBoardThread = BuildBoardThread(this)
     private val mapper = jacksonObjectMapper()
 
@@ -74,12 +73,15 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     fun reset(): ChessBoard {
         board = Board()
-        player = "w"
         blackStoreSquares.forEach{it.piece = Piece.NONE.name}
         whiteStoreSquares.forEach{it.piece = Piece.NONE.name}
         saveBoard()
-//        println(board.getFen())
-//        printBoard()
+        return toBoard()
+    }
+
+    fun resetTo(newBoard: Board): ChessBoard {
+        board = newBoard
+        saveBoard()
         return toBoard()
     }
 
@@ -98,15 +100,36 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         return toBoard()
     }
 
+    fun moveExtraWhenCastle(move: Move){
+        val side= board.getPiece(move.from).pieceSide
+        val isKingSideCastle = board.context.isKingSideCastle(move)
+        val isQueenSideCastle = board.context.isQueenSideCastle(move)
+
+        val extraMove: Pair<String, String> ?= when {
+            side==Side.WHITE && isKingSideCastle -> Pair("H1","F1")
+            side==Side.WHITE && isQueenSideCastle -> Pair("A1","D1")
+            side==Side.BLACK && isKingSideCastle -> Pair("H8","F8")
+            side==Side.BLACK && isQueenSideCastle ->  Pair("A8","D8")
+            else -> null
+        }
+        if (extraMove!=null) {
+            println("EXTRA MOVE:"+extraMove)
+            robotMove(extraMove.first, extraMove.second)
+        }
+
+    }
+
     fun computermove(): ChessBoard {
         println("Coputer move")
 //        println(board.getFen())
         val move = ComputerPlayer.getMove(board.getFen())
+
         robotMove(move.from.value(), move.to.value())
+        moveExtraWhenCastle(move)
+
         board.doMove(move)
         saveBoard()
 //        printBoard()
-        changePlayer()
         return toBoard()
     }
 
@@ -114,13 +137,17 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         buildBoardThread.restoreBoard()
     }
 
-    fun loadFen(){
-        buildBoardThread.loadFen()
+    fun loadFen(fen: String){
+        buildBoardThread.loadFen(fen)
     }
 
     fun setTargetBoard(board: Board){
         targetBoard = board
         printBoard(targetBoard)
+    }
+
+    fun getTargetBoard(): Board{
+        return targetBoard
     }
 
 
@@ -254,19 +281,16 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         else {
             if (positieBuitenBord(naar)){
                 val fromValue: Square = Square.fromValue(van)
-//                val naarValue = Square.fromValue(naar)
                 robotMove(van, naar)
                 println("board.setPiece: " + fromValue + " ->" + Piece.NONE)
                 board.unsetPiece(board.getPiece(fromValue), fromValue)
                 saveBoard()
-
-                changePlayer()
-
             }
             else{
                 val fromValue: Square = Square.fromValue(van)
                 val naarValue = Square.fromValue(naar)
                 robotMove(van, naar)
+                moveExtraWhenCastle(Move(fromValue, naarValue))
                 if (!board.doMove(Move(fromValue, naarValue))){
                     // not valid
                     // do it anyway
@@ -275,8 +299,6 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                     board.unsetPiece(piece, fromValue)
                 }
                 saveBoard()
-
-                changePlayer()
             }
         }
 
@@ -402,15 +424,6 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             Piece.NONE -> " "
         }
     }
-
-    fun changePlayer(){
-        if (player=="w"){
-            player = "b"
-        }
-        else
-            player = "w"
-    }
-
 
     private fun loadBoard(initialBlackStoreSquares: List<StoreSquare>, initialWhiteStoreSquares: List<StoreSquare>) {
         try {
