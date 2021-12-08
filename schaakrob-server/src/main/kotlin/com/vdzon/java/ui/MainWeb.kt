@@ -90,8 +90,8 @@ class MainWeb {
         } ?: RouteRole.SPECTATOR
 
     private val userRoleMap = hashMapOf(
-        "admin" to RouteRole.ADMIN,
-        "bob" to RouteRole.PLAYER
+        "1961" to RouteRole.ADMIN,
+        "1974" to RouteRole.PLAYER
     )
 
 

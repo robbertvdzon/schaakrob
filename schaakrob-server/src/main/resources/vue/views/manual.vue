@@ -4,19 +4,11 @@
     <div>
 
       <nav>
-        <ul class="nav nav-pills pull-right">
-          <li role="presentation">
-            <button type="submit" v-on:click="close">close</button>
-          </li>
-        </ul>
+            <button type="submit" v-on:click="close">Terug</button>
       </nav>
 
-      <nettoets-header activebutton="operationallog" title="Manual"></nettoets-header>
-      <div class="myBorder">
-        Manual actions
-        <span>
-        </span>
-      </div>
+      <br>
+
       <span>
               <button type="submit" v-on:click="home_vert">home vertical</button>
               <button type="submit" v-on:click="home_hor">home horizontal</button>
@@ -41,7 +33,7 @@
       <br>
       <table>
         <tr>
-          <td>
+          <td class="label">
             Naar vlak:
           </td>
           <td>
@@ -54,7 +46,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             Manual pos:
           </td>
           <td>
@@ -66,7 +58,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             A8:
           </td>
           <td>
@@ -78,7 +70,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             H1:
           </td>
           <td>
@@ -90,7 +82,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             A11:
           </td>
           <td>
@@ -102,7 +94,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             H10:
           </td>
           <td>
@@ -114,7 +106,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             A21:
           </td>
           <td>
@@ -126,7 +118,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             H20:
           </td>
           <td>
@@ -138,7 +130,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             Pakker hoogte:
           </td>
           <td>
@@ -150,7 +142,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             Snelheid:
           </td>
           <td>
@@ -162,7 +154,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             Delay na pak:
           </td>
           <td>
@@ -174,7 +166,7 @@
         </tr>
 
         <tr>
-          <td>
+          <td class="label">
             Delay na zet:
           </td>
           <td>
@@ -185,7 +177,10 @@
           </td>
         </tr>
       </table>
+      <br>
+      <br>
       <button type="submit" v-on:click="rebuildapp">rebuild application</button>
+      <br>
       <br>
       <input v-model="fen_to_load">
       <button type="submit" v-on:click="loadFen">Load FEN</button>
@@ -448,6 +443,9 @@ Vue.component("manual", {
 .myBorder {
   color: white;
   background-color: #4d6b85;
+}
+.label {
+  color: white;
 }
 
 </style>

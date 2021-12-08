@@ -9,7 +9,8 @@ data class ChessBoard(
     val player: String,
     val availableMoves: List<ChessMove>,
     val draw: Boolean,
-    val mate: Boolean
+    val mate: Boolean,
+    val kingAttached: Boolean
 )
 
 @Serializable

@@ -10,11 +10,21 @@
             <td>
               &nbsp;
               Mode:{{ userdata.role }} , Aan zet: {{ board.player }}
+              <span v-if="board.mate" class="schaakmat">
+                <br>
+                Spel afgelopen: SCHAAKMAT!
+              </span>
+              <span v-if="board.draw">
+                <br>
+                Spel afgelopen: DRAW!
+              </span>
+              <span v-if="board.kingAttached && !board.mate">
+                : SCHAAK!
+              </span>
             </td>
           </tr>
         </table>
       </div>
-
       <table width="100%">
         <tr>
           <td></td>
@@ -556,6 +566,9 @@ $(document).ready(function () {
 .headerBorder {
   color: white;
   background-color: #663d00;
+}
+.schaakmat {
+  font-size: 38px;
 }
 
 </style>

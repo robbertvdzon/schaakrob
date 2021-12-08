@@ -1,23 +1,24 @@
 <template id="login">
   <app-frame>
 
-    <div>
-      <nettoets-header activebutton="operationallog" title="Login"></nettoets-header>
+    <span>
+      <span class="loginBorder">
+          <br>
+          &nbsp;access code:
+      </span>
+      <br>
+      <input v-on:keyup.enter="login" v-model="accesscode" autofocus>
+      <button type="submit" v-on:click="login" class="button">Login</button>
+    </span>
 
-      access code:
-      <input v-on:keyup.enter="login"  v-model="accesscode" autofocus>
-      <button type="submit" v-on:click="login">Login</button>
 
-
-
-    </div>
   </app-frame>
 </template>
 <script>
 Vue.component("login", {
   template: "#login",
   data: () => ({
-      accesscode: "",
+    accesscode: "",
   }),
   created() {
     this.load()
@@ -27,17 +28,19 @@ Vue.component("login", {
     },
     login: function (event) {
       axios.post(`/api/login`, this.accesscode)
-     .then(text => window.location.href = "/play")
-      .catch(() => alert("Error"));
+          .then(text => window.location.href = "/play")
+          .catch(() => alert("Error"));
     },
   }
 });
 
 </script>
 <style scoped>
-.myBorder {
+
+
+.loginBorder {
   color: white;
-  background-color: #4d6b85;
 }
+
 
 </style>
