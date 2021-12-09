@@ -114,6 +114,7 @@ void loop() {
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
        delay(200);
        analogWrite(2, MAGNET_ON);
+       delay(200);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
        delay(200);
@@ -135,6 +136,7 @@ void loop() {
        pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
        delay(200);
        analogWrite(3, MAGNET_ON);
+       delay(200);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
        delay(200);

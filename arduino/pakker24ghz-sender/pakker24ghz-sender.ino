@@ -26,10 +26,10 @@ send: state + pos
 
 */
 
-#include <Wire.h>// kan dit weg?
-#include <SPI.h> // kan dit weg?
-//#include <nRF24L01.h>// kan dit weg?
-#include <RF24.h>  // for documentation: https://nrf24.github.io/RF24/classRF24.html
+#include <Wire.h>
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
 #define NR_OF_BYTES_TO_READ 12
 
@@ -37,20 +37,20 @@ send: state + pos
 #define GRABBING 2
 #define RELEASING 3
 
-// #define HOME_SPEED 120
-//
-// #define magneetPin 3
-// #define pullMagneetPin 5
-// #define magneet2PinA 4
-// #define magneet2PinB 2
+#define HOME_SPEED 120
+
+#define magneetPin 3
+#define pullMagneetPin 5
+#define magneet2PinA 4
+#define magneet2PinB 2
 #define beepPin 9
 
-// #define adressPin1 10
-// #define adressPin2 11
+#define adressPin1 10
+#define adressPin2 11
 
 char command;
-// int requestedPos;
-// int vertraginsfactor;
+int requestedPos;
+int vertraginsfactor;
 char number[50];
 int state = READY;
 int readPos = 0;
@@ -59,25 +59,25 @@ int SLAVE_ADDRESS = 5;
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00002";
 
-// int lastButton1 = 0;
-// int lastButton2 = 0;
+int lastButton1 = 0;
+int lastButton2 = 0;
 
 void setup() {
 
-  TCCR2B = TCCR2B & B11111000 | B00000001; // kan dit weg?
+  TCCR2B = TCCR2B & B11111000 | B00000001; // for PWM frequency of 31372.55 Hz
 
-//   pinMode(pullMagneetPin, OUTPUT);
-//   pinMode(magneetPin, OUTPUT);
-//   pinMode(magneet2PinB, OUTPUT);
-//   pinMode(magneet2PinA, OUTPUT);
+  pinMode(pullMagneetPin, OUTPUT);
+  pinMode(magneetPin, OUTPUT);
+  pinMode(magneet2PinB, OUTPUT);
+  pinMode(magneet2PinA, OUTPUT);
   pinMode(beepPin, OUTPUT);
 
 
-//  pinMode(adressPin1, INPUT);
-//  pinMode(adressPin1, INPUT);
+  pinMode(adressPin1, INPUT);
+  pinMode(adressPin1, INPUT);
 
-//  boolean addr1 = digitalRead(adressPin1);
-//  boolean addr2 = digitalRead(adressPin2);
+  boolean addr1 = digitalRead(adressPin1);
+  boolean addr2 = digitalRead(adressPin2);
 
 //  if (addr1) SLAVE_ADDRESS = SLAVE_ADDRESS+1;
 //  if (addr2) SLAVE_ADDRESS = SLAVE_ADDRESS+2;
@@ -88,27 +88,26 @@ void setup() {
   Serial.print("Slave on adress:");
   Serial.println(SLAVE_ADDRESS);
 
-//  Wire.begin(SLAVE_ADDRESS); // OUDE LIB? REMOVE?
-//  Wire.onReceive(receiveData); // OUDE LIB? REMOVE?
-//  Wire.onRequest(sendData); // OUDE LIB? REMOVE?
+  Wire.begin(SLAVE_ADDRESS);
+  Wire.onReceive(receiveData);
+  Wire.onRequest(sendData);
 
   // show that we have been restarted
   bootSeq();
 
 
   digitalWrite(beepPin, LOW);
-//   analogWrite(magneetPin, 0);
-//   analogWrite(pullMagneetPin, 0);
+  analogWrite(magneetPin, 0);
+  analogWrite(pullMagneetPin, 0);
   
   
 // new
-//   pinMode(4, INPUT);
-//   pinMode(5, INPUT);
+  pinMode(4, INPUT);
+  pinMode(5, INPUT);
   radio.begin();
   radio.openWritingPipe(address);
   radio.setPALevel(RF24_PA_MIN);
   radio.stopListening();
-
   Serial.println("radio ready");
 }
 
@@ -117,7 +116,7 @@ void loop() {
   processCommand();
  // loop2();
 }
-/*
+
 void loop2() {
   int button1 =  digitalRead(4);
   int button2 =  digitalRead(5);
@@ -150,17 +149,16 @@ void loop2() {
 
   }
 }
-*/
-//
-// void sendData(){
-//    Wire.write(state);
-// }
-//
-// void receiveData(int byteCount){
-//   while(Wire.available()) {
-//     processCharRead(Wire.read());
-//   }
-// }
+
+void sendData(){
+   Wire.write(state);
+}
+
+void receiveData(int byteCount){
+  while(Wire.available()) {
+    processCharRead(Wire.read());
+  }
+}
 
 void processCharRead(char c){
   if (c == '^'){
@@ -195,21 +193,21 @@ void parseCommand(){
   int toPos = atoi(buffer);
 
   buffer[0] = number[8];
-  buffer[1] = snumber[9];
+  buffer[1] = number[9];
   buffer[2] = number[10];
   buffer[3] = number[11];
   buffer[4] = '\0';
-//  vertraginsfactor = atoi(buffer);
-//  if (vertraginsfactor<10){
-//    vertraginsfactor = 10;
-//  }
+  vertraginsfactor = atoi(buffer);
+  if (vertraginsfactor<10){
+    vertraginsfactor = 10;
+  }
 
 
-//  requestedPos = toPos;
+  requestedPos = toPos;
   command = number[1];
 
   Serial.print("- cmd:");Serial.println(command);
-//  Serial.print("- pos:");Serial.println(requestedPos);
+  Serial.print("- pos:");Serial.println(requestedPos);
 }
 
 void processCommand(){
