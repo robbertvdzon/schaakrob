@@ -24,9 +24,16 @@ object ComputerPlayer {
     }
 
     fun createFile(fen: String){
+
+        val exe1 = File("/home/robbert/Downloads/stockfish_14.1_linux_x64/stockfish_14.1_linux_x64")
+        val exe2 = File("/usr/games/stockfish")
+        var exeName = if (exe2.isFile) "/usr/games/stockfish" else if (exe1.isFile) "/home/robbert/Downloads/stockfish_14.1_linux_x64/stockfish_14.1_linux_x64" else throw RuntimeException("Stockfish not found")
+        println("use stockfish:"+exeName)
+
+
         val file ="""
             #!/usr/bin/expect
-            spawn /home/robbert/Downloads/stockfish_14.1_linux_x64/stockfish_14.1_linux_x64
+            spawn $exeName
             expect -timeout 1000  Stockfish
             send "uci \r"
             expect -timeout 1000  uciok

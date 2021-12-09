@@ -27,8 +27,8 @@ states:
 #define GRABBING 2
 #define RELEASING 3
 #define beepPin 9
-#define WAIT_TIME_AFTER_GRAB 2700
-#define WAIT_TIME_AFTER_RELEASE 2400
+#define WAIT_TIME_AFTER_GRAB 700
+#define WAIT_TIME_AFTER_RELEASE 400
 
 
 char command;
