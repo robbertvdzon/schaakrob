@@ -189,32 +189,32 @@ class RobotAansturingImpl : RobotAansturing {
     override fun clamp1() {
         log.info("start: pak ")
         arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
-//        waitUntilReady(20)
-        log.info("ready: pak ")
-        try {
-            val delay = getDelayNaPak()?.trim()
-            Thread.sleep(delay?.toLong()?:0L)
-
-        }
-        catch (e:Exception){
-            e.printStackTrace()
-        }
+        waitUntilReady(20)
+//        log.info("ready: pak ")
+//        try {
+//            val delay = getDelayNaPak()?.trim()
+//            Thread.sleep(delay?.toLong()?:0L)
+//
+//        }
+//        catch (e:Exception){
+//            e.printStackTrace()
+//        }
         log.info("done: pak ")
     }
 
     override fun release1() {
         log.info("start: release ")
         arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
-//        waitUntilReady(20)
-        log.info("ready: release ")
-        try {
-            val delay = getDelayNaZet()?.trim()
-            Thread.sleep(delay?.toLong()?:0L)
-
-        }
-        catch (e:Exception){
-            e.printStackTrace()
-        }
+        waitUntilReady(20)
+//        log.info("ready: release ")
+//        try {
+//            val delay = getDelayNaZet()?.trim()
+//            Thread.sleep(delay?.toLong()?:0L)
+//
+//        }
+//        catch (e:Exception){
+//            e.printStackTrace()
+//        }
         log.info("done: release ")
     }
 
@@ -222,15 +222,15 @@ class RobotAansturingImpl : RobotAansturing {
         log.info("start: pak ")
         arm3!!.writeI2c("^W0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
-        log.info("ready: pak ")
-        try {
-            val delay = getDelayNaPak()?.trim()
-            Thread.sleep(delay?.toLong()?:0L)
-
-        }
-        catch (e:Exception){
-            e.printStackTrace()
-        }
+//        log.info("ready: pak ")
+//        try {
+//            val delay = getDelayNaPak()?.trim()
+//            Thread.sleep(delay?.toLong()?:0L)
+//
+//        }
+//        catch (e:Exception){
+//            e.printStackTrace()
+//        }
         log.info("done: pak ")
     }
 
@@ -238,15 +238,15 @@ class RobotAansturingImpl : RobotAansturing {
         log.info("start: release ")
         arm3!!.writeI2c("^E0000000000000000".toByteArray(),"arm3")
         waitUntilReady(20)
-        log.info("ready: release ")
-        try {
-            val delay = getDelayNaZet()?.trim()
-            Thread.sleep(delay?.toLong()?:0L)
-
-        }
-        catch (e:Exception){
-            e.printStackTrace()
-        }
+//        log.info("ready: release ")
+//        try {
+//            val delay = getDelayNaZet()?.trim()
+//            Thread.sleep(delay?.toLong()?:0L)
+//
+//        }
+//        catch (e:Exception){
+//            e.printStackTrace()
+//        }
         log.info("done: release ")
     }
 
@@ -558,7 +558,7 @@ class RobotAansturingImpl : RobotAansturing {
             val arm1Status = arm1!!.readI2c("arm1")
             val arm2Status = arm2!!.readI2c("arm2")
             val arm3Status = arm3!!.readI2c("arm3")
-            allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1 // arm3 : alleen checken dat hij niet aan het moven is
+            allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1
         } catch (e: Exception) {
             e.printStackTrace()
             allReady = false
@@ -641,6 +641,7 @@ class RobotAansturingImpl : RobotAansturing {
             sleep(10)
             udateStatus()
         }
+        println("All ready")
 //        sleep(200)// extra sleep, deze zou weg moeten kunnen
     }
 

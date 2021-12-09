@@ -34,7 +34,9 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     }
 
     override fun clamp1() {
+        println("clamp1")
         get("$host/api/clamp1")
+        println("clamp1 done")
     }
 
     override fun release1() {

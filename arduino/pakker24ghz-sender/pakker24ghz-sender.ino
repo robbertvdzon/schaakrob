@@ -26,8 +26,9 @@ states:
 #define READY 1
 #define GRABBING 2
 #define RELEASING 3
-#define HOME_SPEED 120
 #define beepPin 9
+#define WAIT_TIME_AFTER_GRAB 2700
+#define WAIT_TIME_AFTER_RELEASE 2400
 
 
 char command;
@@ -113,13 +114,14 @@ void clamp1(){
   state = GRABBING;
   Serial.println("grabbing arm 1");
   const char text[] = "pak1";
-  bool result = radio.write(&text, sizeof(text));
+  bool result = sendWithRetry(&text, sizeof(text));
   if (result){
     Serial.println("grabbed");
   }
   else{
     Serial.println("grabbing failed");
   }
+  delay(WAIT_TIME_AFTER_GRAB); // return ready after grab is finished (performed by the reciever)
   state = READY;
   command = '-';
 }
@@ -128,13 +130,14 @@ void release1(){
   state = RELEASING;
   Serial.println("releasing arm 1");
   const char text[] = "zet1";
-  bool result = radio.write(&text, sizeof(text));
+  bool result = sendWithRetry(&text, sizeof(text));
   if (result){
     Serial.println("released");
   }
   else{
     Serial.println("releasing failed");
   }
+  delay(WAIT_TIME_AFTER_RELEASE); // return ready after release is finished (performed by the reciever)
   state = READY;
   command = '-';
 }
@@ -143,14 +146,14 @@ void clamp2(){
   state = GRABBING;
   Serial.println("grabbing arm 2");
   const char text[] = "pak2";
-  bool result = radio.write(&text, sizeof(text));
+  bool result = sendWithRetry(&text, sizeof(text));
   if (result){
     Serial.println("grabbed");
   }
   else{
     Serial.println("grabbing failed");
   }
-
+  delay(WAIT_TIME_AFTER_GRAB); // return ready after grab is finished (performed by the reciever)
   state = READY;
   command = '-';
 }
@@ -160,15 +163,30 @@ void release2(){
 
   Serial.println("releasing arm 2");
   const char text[] = "zet2";
-  bool result = radio.write(&text, sizeof(text));
+  bool result = sendWithRetry(&text, sizeof(text));
   if (result){
     Serial.println("released");
   }
   else{
     Serial.println("releasing failed");
   }
+  delay(WAIT_TIME_AFTER_RELEASE); // return ready after release is finished (performed by the reciever)
   state = READY;
   command = '-';
+}
+
+bool sendWithRetry(const void* buf, uint8_t len){
+  int retryCount = 0; 
+  int MAX_RETRIES = 100; // max 10 seconds
+  bool succeeded = radio.write(buf, len);
+  while (retryCount<MAX_RETRIES && !succeeded){
+    retryCount++;
+    delay(100);
+    Serial.print("failed, try again:");
+    Serial.println(retryCount);
+    succeeded = radio.write(buf, len); // try again
+  }
+  return succeeded;
 }
 
 void bootSeq(){
