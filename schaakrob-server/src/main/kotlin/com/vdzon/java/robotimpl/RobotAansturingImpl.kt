@@ -559,7 +559,6 @@ class RobotAansturingImpl : RobotAansturing {
             val arm1Status = arm1!!.readI2c("arm1")
             val arm2Status = arm2!!.readI2c("arm2")
             val arm3Status = arm3!!.readI2c("arm3")
-            println("arm3:"+arm3Status)
             allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1
         } catch (e: Exception) {
             e.printStackTrace()
@@ -570,7 +569,6 @@ class RobotAansturingImpl : RobotAansturing {
     private fun udateStatusArm3() {
         try {
             val arm3Status = arm3!!.readI2c("arm3")
-            println("arm3:"+arm3Status)
             arm3Ready = arm3Status == 1
         } catch (e: Exception) {
             e.printStackTrace()
