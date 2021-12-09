@@ -35,6 +35,7 @@ class RobotAansturingImpl : RobotAansturing {
     var formattedDelayFactor1 = "0050"
     var formattedDelayFactor2 = "0050"
     private var allReady = false
+    private var arm3Ready = false
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
     private var arm3: I2CDevice? = null
@@ -189,7 +190,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun clamp1() {
         log.info("start: pak ")
         arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+        waitUntilArmReady(20)
 //        log.info("ready: pak ")
 //        try {
 //            val delay = getDelayNaPak()?.trim()
@@ -205,7 +206,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun release1() {
         log.info("start: release ")
         arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+        waitUntilArmReady(20)
 //        log.info("ready: release ")
 //        try {
 //            val delay = getDelayNaZet()?.trim()
@@ -221,7 +222,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun clamp2() {
         log.info("start: pak ")
         arm3!!.writeI2c("^W0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+        waitUntilArmReady(20)
 //        log.info("ready: pak ")
 //        try {
 //            val delay = getDelayNaPak()?.trim()
@@ -237,7 +238,7 @@ class RobotAansturingImpl : RobotAansturing {
     override fun release2() {
         log.info("start: release ")
         arm3!!.writeI2c("^E0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
+        waitUntilArmReady(20)
 //        log.info("ready: release ")
 //        try {
 //            val delay = getDelayNaZet()?.trim()
@@ -566,6 +567,17 @@ class RobotAansturingImpl : RobotAansturing {
         }
     }
 
+    private fun udateStatusArm3() {
+        try {
+            val arm3Status = arm3!!.readI2c("arm3")
+            println("arm3:"+arm3Status)
+            arm3Ready = arm3Status == 1
+        } catch (e: Exception) {
+            e.printStackTrace()
+            arm3Ready = false
+        }
+    }
+
     private fun stopLoop() {
         if (currentLoopThread != null) {
             currentLoopThread=null
@@ -644,6 +656,18 @@ class RobotAansturingImpl : RobotAansturing {
             udateStatus()
         }
         println("All ready")
+//        sleep(200)// extra sleep, deze zou weg moeten kunnen
+    }
+
+    private fun waitUntilArmReady(initialDelay: Int) {
+        sleep(initialDelay)
+        udateStatusArm3()
+        println("Wait until arm3 ready")
+        while (!arm3Ready) {
+            sleep(10)
+            udateStatusArm3()
+        }
+        println("arm3 ready")
 //        sleep(200)// extra sleep, deze zou weg moeten kunnen
     }
 
