@@ -1,14 +1,5 @@
-/*
-* Arduino Wireless Communication Tutorial
-*       Example 1 - Receiver Code
-*
-* by Dejan Nedelkovski, www.HowToMechatronics.com
-*
-* Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
-*/
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
+
+#include <RF24.h> // see https://github.com/tmrh20/RF24/
 #include <Adafruit_PWMServoDriver.h>
 
 RF24 radio(8,9); // CE, CSN
@@ -29,7 +20,6 @@ Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
 
 void setup() {
   Serial.begin(9600);
-
 
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
@@ -83,9 +73,6 @@ void setup() {
  analogWrite(3, MAGNET_OFF);
  pwm.setPWM(2, 0, SERVO_MIDDLE);
  pwm.setPWM(3, 0, SERVO_MIDDLE);
-
-
-
 }
 
 unsigned long lastGrapTime1 = 0;
