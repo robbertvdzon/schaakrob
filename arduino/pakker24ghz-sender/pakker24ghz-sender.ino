@@ -26,10 +26,10 @@ send: state + pos
 
 */
 
-#include <Wire.h>
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
+#include <Wire.h>// kan dit weg?
+#include <SPI.h> // kan dit weg?
+//#include <nRF24L01.h>// kan dit weg?
+#include <RF24.h>  // for documentation: https://nrf24.github.io/RF24/classRF24.html
 
 #define NR_OF_BYTES_TO_READ 12
 
@@ -37,20 +37,20 @@ send: state + pos
 #define GRABBING 2
 #define RELEASING 3
 
-#define HOME_SPEED 120
-
-#define magneetPin 3
-#define pullMagneetPin 5
-#define magneet2PinA 4
-#define magneet2PinB 2
+// #define HOME_SPEED 120
+//
+// #define magneetPin 3
+// #define pullMagneetPin 5
+// #define magneet2PinA 4
+// #define magneet2PinB 2
 #define beepPin 9
 
-#define adressPin1 10
-#define adressPin2 11
+// #define adressPin1 10
+// #define adressPin2 11
 
 char command;
-int requestedPos;
-int vertraginsfactor;
+// int requestedPos;
+// int vertraginsfactor;
 char number[50];
 int state = READY;
 int readPos = 0;
@@ -59,17 +59,17 @@ int SLAVE_ADDRESS = 5;
 RF24 radio(7, 8); // CE, CSN
 const byte address[6] = "00002";
 
-int lastButton1 = 0;
-int lastButton2 = 0;
+// int lastButton1 = 0;
+// int lastButton2 = 0;
 
 void setup() {
 
-  TCCR2B = TCCR2B & B11111000 | B00000001; // for PWM frequency of 31372.55 Hz
+  TCCR2B = TCCR2B & B11111000 | B00000001; // kan dit weg?
 
-  pinMode(pullMagneetPin, OUTPUT);
-  pinMode(magneetPin, OUTPUT);
-  pinMode(magneet2PinB, OUTPUT);
-  pinMode(magneet2PinA, OUTPUT);
+//   pinMode(pullMagneetPin, OUTPUT);
+//   pinMode(magneetPin, OUTPUT);
+//   pinMode(magneet2PinB, OUTPUT);
+//   pinMode(magneet2PinA, OUTPUT);
   pinMode(beepPin, OUTPUT);
 
 
@@ -88,26 +88,27 @@ void setup() {
   Serial.print("Slave on adress:");
   Serial.println(SLAVE_ADDRESS);
 
-  Wire.begin(SLAVE_ADDRESS);
-  Wire.onReceive(receiveData);
-  Wire.onRequest(sendData);
+  Wire.begin(SLAVE_ADDRESS); // OUDE LIB? REMOVE?
+  Wire.onReceive(receiveData); // OUDE LIB? REMOVE?
+  Wire.onRequest(sendData); // OUDE LIB? REMOVE?
 
   // show that we have been restarted
   bootSeq();
 
 
   digitalWrite(beepPin, LOW);
-  analogWrite(magneetPin, 0);
-  analogWrite(pullMagneetPin, 0);
+//   analogWrite(magneetPin, 0);
+//   analogWrite(pullMagneetPin, 0);
   
   
 // new
-  pinMode(4, INPUT);
-  pinMode(5, INPUT);
+//   pinMode(4, INPUT);
+//   pinMode(5, INPUT);
   radio.begin();
   radio.openWritingPipe(address);
   radio.setPALevel(RF24_PA_MIN);
   radio.stopListening();
+
   Serial.println("radio ready");
 }
 
@@ -116,7 +117,7 @@ void loop() {
   processCommand();
  // loop2();
 }
-
+/*
 void loop2() {
   int button1 =  digitalRead(4);
   int button2 =  digitalRead(5);
@@ -149,16 +150,17 @@ void loop2() {
 
   }
 }
-
-void sendData(){
-   Wire.write(state);
-}
-
-void receiveData(int byteCount){
-  while(Wire.available()) {
-    processCharRead(Wire.read());
-  }
-}
+*/
+//
+// void sendData(){
+//    Wire.write(state);
+// }
+//
+// void receiveData(int byteCount){
+//   while(Wire.available()) {
+//     processCharRead(Wire.read());
+//   }
+// }
 
 void processCharRead(char c){
   if (c == '^'){
@@ -213,43 +215,45 @@ void parseCommand(){
 void processCommand(){
  if (command == 'C') clamp1();
  if (command == 'R') release1();
- if (command == 'H') hold();
- if (command == 'D') drop();
- if (command == 'A') activateMagnet();
- if (command == 'I') deactivateMagnet();
+//  if (command == 'H') hold();
+//  if (command == 'D') drop();
+//  if (command == 'A') activateMagnet();
+//  if (command == 'I') deactivateMagnet();
 
  if (command == 'W') clamp2();
  if (command == 'E') release2();
 }
 
-void hold(){
-  Serial.print("clamp");
-  analogWrite(pullMagneetPin, 255);
-  command = '-';      
-}
-
-void drop(){
-  Serial.print("clamp");
-  analogWrite(pullMagneetPin, 0);  
-  command = '-';      
-}
-
-void activateMagnet(){
-  Serial.print("clamp");
-  analogWrite(magneetPin, 255);
-  command = '-';      
-}
-
-void deactivateMagnet(){
-  Serial.print("clamp");
-  analogWrite(magneetPin, 0);
-  command = '-';      
-}
+// void hold(){
+//   Serial.print("clamp");
+//   analogWrite(pullMagneetPin, 255);
+//   command = '-';
+// }
+//
+// void drop(){
+//   Serial.print("clamp");
+//   analogWrite(pullMagneetPin, 0);
+//   command = '-';
+// }
+//
+// void activateMagnet(){
+//   Serial.print("clamp");
+//   analogWrite(magneetPin, 255);
+//   command = '-';
+// }
+//
+// void deactivateMagnet(){
+//   Serial.print("clamp");
+//   analogWrite(magneetPin, 0);
+//   command = '-';
+// }
 
 void clamp1(){
   state = GRABBING;
   const char text[] = "pak1";
-  radio.write(&text, sizeof(text));
+  radio.writeBlocking(&text, sizeof(text), 1000);
+  radio.txStandBy(1000);
+                                              // Blocks only until user timeout or success. Data flushed on fail.
   Serial.println("pak1");
   state = READY;
   command = '-';
@@ -259,7 +263,8 @@ void release1(){
   state = RELEASING;
 
   const char text[] = "zet1";
-  radio.write(&text, sizeof(text));
+  radio.writeBlocking(&text, sizeof(text), 1000);
+  radio.txStandBy(1000);
   Serial.println("zet1");
   state = READY;
   command = '-';
@@ -268,7 +273,8 @@ void release1(){
 void clamp2(){
   state = GRABBING;
   const char text[] = "pak2";
-  radio.write(&text, sizeof(text));
+  radio.writeBlocking(&text, sizeof(text), 1000);
+  radio.txStandBy(1000);
   Serial.println("pak2");
   state = READY;
   command = '-';
@@ -278,7 +284,8 @@ void release2(){
   state = RELEASING;
 
   const char text[] = "zet2";
-  radio.write(&text, sizeof(text));
+  radio.writeBlocking(&text, sizeof(text), 1000);
+  radio.txStandBy(1000);
   Serial.println("zet2");
   state = READY;
   command = '-';
