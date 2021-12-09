@@ -73,11 +73,11 @@ void setup() {
   pinMode(beepPin, OUTPUT);
 
 
-  pinMode(adressPin1, INPUT);
-  pinMode(adressPin1, INPUT);
+//  pinMode(adressPin1, INPUT);
+//  pinMode(adressPin1, INPUT);
 
-  boolean addr1 = digitalRead(adressPin1);
-  boolean addr2 = digitalRead(adressPin2);
+//  boolean addr1 = digitalRead(adressPin1);
+//  boolean addr2 = digitalRead(adressPin2);
 
 //  if (addr1) SLAVE_ADDRESS = SLAVE_ADDRESS+1;
 //  if (addr2) SLAVE_ADDRESS = SLAVE_ADDRESS+2;
@@ -88,9 +88,9 @@ void setup() {
   Serial.print("Slave on adress:");
   Serial.println(SLAVE_ADDRESS);
 
-  Wire.begin(SLAVE_ADDRESS); // OUDE LIB? REMOVE?
-  Wire.onReceive(receiveData); // OUDE LIB? REMOVE?
-  Wire.onRequest(sendData); // OUDE LIB? REMOVE?
+//  Wire.begin(SLAVE_ADDRESS); // OUDE LIB? REMOVE?
+//  Wire.onReceive(receiveData); // OUDE LIB? REMOVE?
+//  Wire.onRequest(sendData); // OUDE LIB? REMOVE?
 
   // show that we have been restarted
   bootSeq();
@@ -195,21 +195,21 @@ void parseCommand(){
   int toPos = atoi(buffer);
 
   buffer[0] = number[8];
-  buffer[1] = number[9];
+  buffer[1] = snumber[9];
   buffer[2] = number[10];
   buffer[3] = number[11];
   buffer[4] = '\0';
-  vertraginsfactor = atoi(buffer);
-  if (vertraginsfactor<10){
-    vertraginsfactor = 10;
-  }
+//  vertraginsfactor = atoi(buffer);
+//  if (vertraginsfactor<10){
+//    vertraginsfactor = 10;
+//  }
 
 
-  requestedPos = toPos;
+//  requestedPos = toPos;
   command = number[1];
 
   Serial.print("- cmd:");Serial.println(command);
-  Serial.print("- pos:");Serial.println(requestedPos);
+//  Serial.print("- pos:");Serial.println(requestedPos);
 }
 
 void processCommand(){
