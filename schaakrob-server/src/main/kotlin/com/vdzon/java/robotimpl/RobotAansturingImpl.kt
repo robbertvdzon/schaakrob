@@ -85,17 +85,17 @@ class RobotAansturingImpl : RobotAansturing {
         thread {
             println("start check sleep thread")
             while (true){
-//                val res = arm3!!.readI2c("arm3")
-//                println("arm3 state="+res)
-//                Thread.sleep(1000)
-                Thread.sleep(3000)
-                val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
-                val bothHome = bothArmsAtHome()
-                val hasTimeout = lastMovement<timeout
-                if (bothHome && hasTimeout){
-                    println("automatically sleep!")
-                    sleep()
-                }
+                val res = arm1!!.readI2c("arm1")
+                println("arm1 state="+res)
+                Thread.sleep(1000)
+//                Thread.sleep(3000)
+//                val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
+//                val bothHome = bothArmsAtHome()
+//                val hasTimeout = lastMovement<timeout
+//                if (bothHome && hasTimeout){
+//                    println("automatically sleep!")
+//                    sleep()
+//                }
             }
         }
 
