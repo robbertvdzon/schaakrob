@@ -201,6 +201,8 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun sleep() {
+        arm1AtHome = false
+        arm2AtHome = false
         log.info("sleeping")
         try {
             val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
