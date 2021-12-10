@@ -75,6 +75,9 @@ void loop() {
 }
 
 void sendData(){      
+  Serial.print("state:");
+  Serial.println(state);
+
    Wire.write(state);
 }
 
@@ -200,6 +203,20 @@ void bootSeq(){
   beep();
   command = '-';    
 }
+
+void errorSeq(){
+  beep();
+  delay(500);
+  beep();
+  delay(500);
+  beep();
+  delay(500);
+  beep();
+  delay(500);
+  beep();
+  command = '-';    
+}
+
 
 void beep(){
     digitalWrite(beepPin, HIGH);

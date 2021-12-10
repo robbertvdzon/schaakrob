@@ -688,6 +688,9 @@ class RobotAansturingImpl : RobotAansturing {
 }
 
 private fun I2CDevice.readI2c(devicename: String): Int {
+    if (devicename=="arm3"){
+        println("start readI2c arm3")
+    }
     var result:Int = -1;
     Lock.lock()
     var succeeded = false
@@ -704,6 +707,9 @@ private fun I2CDevice.readI2c(devicename: String): Int {
         }
     }
     Lock.unlock()
+    if (devicename=="arm3"){
+        println("result readI2c arm3:"+result)
+    }
     return result
 
 }
