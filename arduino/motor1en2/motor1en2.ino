@@ -35,7 +35,7 @@ send: state + pos
 
 #define NR_OF_BYTES_TO_READ 12
 
-#define HOMING_NEEDED 0
+#define HOMING_NEEDED 9
 #define READY 1
 #define MOVING 2
 #define HOMING 3

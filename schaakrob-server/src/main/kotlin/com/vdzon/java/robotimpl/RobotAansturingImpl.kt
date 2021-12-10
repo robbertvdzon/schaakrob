@@ -700,7 +700,10 @@ private fun I2CDevice.readI2c(devicename: String): Int {
     while (!succeeded && tryCount<20) {
         try {
             result = read()
-            succeeded = true
+            if (result!=0) {
+                log.info("status of 0 not accepted for "+devicename+", retry read status")
+                succeeded = true
+            }
         }
         catch (e:Exception){
             tryCount++;
