@@ -196,7 +196,7 @@ class RobotAansturingImpl : RobotAansturing {
         println("Start home hor")
         home(arm2)
         println("End home hor")
-        arm2AtHome = true
+        arm1AtHome = true
     }
 
     override fun sleep() {
