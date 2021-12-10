@@ -51,21 +51,6 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         get("$host/api/release2")
     }
 
-    override fun hold() {
-        get("$host/api/hold")
-    }
-
-    override fun drop() {
-        get("$host/api/drop")
-    }
-
-    override fun activate() {
-        get("$host/api/activate")
-    }
-
-    override fun deactivate() {
-        get("$host/api/deactivate")
-    }
 
     override fun bootsound() {
         log.info("call bootsound")
@@ -141,21 +126,6 @@ class RobotAansturingClient(host: String) : RobotAansturing {
 
     override fun setSnelheid(snelheid: String) {
         post("$host/api/snelheid", snelheid)
-    }
-    override fun getDelayNaPak(): String? {
-        return get("$host/api/delaynapak")
-    }
-
-    override fun setDelayNaPak(delay: String) {
-        post("$host/api/delaynapak", delay)
-    }
-
-    override fun getDelayNaZet(): String? {
-        return get("$host/api/delaynazet")
-    }
-
-    override fun setDelayNaZet(delay: String) {
-        post("$host/api/delaynazet", delay)
     }
     override fun getDemoString(): String? {
         return get("$host/api/demo")

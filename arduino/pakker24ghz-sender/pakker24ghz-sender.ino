@@ -59,7 +59,9 @@ void setup() {
 
   radio.begin();
   radio.openWritingPipe(address);
-  radio.setPALevel(RF24_PA_MIN);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setCRCLength(RF24_CRC_8);
   radio.stopListening();
   Serial.println("radio ready");
 }
@@ -177,7 +179,7 @@ void release2(){
 
 bool sendWithRetry(const void* buf, uint8_t len){
   int retryCount = 0; 
-  int MAX_RETRIES = 100; // max 10 seconds
+  int MAX_RETRIES = 300; // max 30 seconds
   bool succeeded = radio.write(buf, len);
   while (retryCount<MAX_RETRIES && !succeeded){
     retryCount++;

@@ -406,7 +406,8 @@ Vue.component("play", {
       fetch(`/api/game/computermove`)
           .then(res => res.text())
           .then(text => this.updateBoard(JSON.parse(text)))
-          .then(text => this.moveAway())
+          // .then(text => this.moveAway())
+          .then(text => this.home())
           .catch(() => alert("Error"));
     },
     move: function (vlak) {

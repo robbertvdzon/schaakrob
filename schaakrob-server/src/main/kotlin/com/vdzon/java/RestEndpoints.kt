@@ -36,10 +36,6 @@ class RestEndpoints {
         app["/api/clamp2", { ctx: Context? -> robotAansturing.clamp2() }]
         app["/api/release2", { ctx: Context? -> robotAansturing.release2() }]
         app["/api/bootsound", { ctx: Context? -> robotAansturing.bootsound() }]
-        app["/api/hold", { ctx: Context? -> robotAansturing.hold() }]
-        app["/api/drop", { ctx: Context? -> robotAansturing.drop() }]
-        app["/api/activate", { ctx: Context? -> robotAansturing.activate() }]
-        app["/api/deactivate", { ctx: Context? -> robotAansturing.deactivate() }]
         app["/api/a8", { ctx: Context -> ctx.result(robotAansturing.getA8()!!) }]
         app["/api/a11", { ctx: Context -> ctx.result(robotAansturing.getA11()!!) }]
         app["/api/a21", { ctx: Context -> ctx.result(robotAansturing.getA21()!!) }]
@@ -57,10 +53,6 @@ class RestEndpoints {
         app.post("/api/snelheid") { ctx: Context -> robotAansturing.setSnelheid(ctx.body()) }
         app["/api/pakkerhoogte", { ctx: Context -> ctx.result(robotAansturing.getPakkerHoogte()!!) }]
         app.post("/api/pakkerhoogte") { ctx: Context -> robotAansturing.setPakkerHoogte(ctx.body()) }
-        app["/api/delaynapak", { ctx: Context -> ctx.result(robotAansturing.getDelayNaPak()!!) }]
-        app.post("/api/delaynapak") { ctx: Context -> robotAansturing.setDelayNaPak(ctx.body()) }
-        app["/api/delaynazet", { ctx: Context -> ctx.result(robotAansturing.getDelayNaZet()!!) }]
-        app.post("/api/delaynazet") { ctx: Context -> robotAansturing.setDelayNaZet(ctx.body()) }
 
         app["/api/demo", { ctx: Context -> ctx.result(robotAansturing.getDemoString()!!) }]
         app.post("/api/demo") { ctx: Context -> robotAansturing.setDemoString(ctx.body()) }

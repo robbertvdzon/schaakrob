@@ -24,6 +24,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 import java.util.function.Consumer
+import kotlin.concurrent.thread
 
 
 private val log = LoggerFactory.getLogger(RobotAansturingImpl::class.java)
@@ -39,8 +40,9 @@ class RobotAansturingImpl : RobotAansturing {
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
     private var arm3: I2CDevice? = null
-
-
+    private var lastMovement = 0L
+    private var arm1AtHome = false
+    private var arm2AtHome = false
 
     private var currentLoopThread: Thread? = null
     fun init() {
@@ -77,11 +79,38 @@ class RobotAansturingImpl : RobotAansturing {
 
         log.info("Devices found")
 
+        thread {
+            println("start check sleep thread")
+            Thread.sleep(1000)
+            println("check if can sleep")
+            val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
+            if (bothArmsAtHome() && lastMovement<timeout){
+                sleep()
+            }
+        }
+
+
+
 
     }
 
+    fun bothArmsAtHome(): Boolean = arm1AtHome && arm2AtHome
+
+    fun updateLastMovement(){
+        lastMovement = System.currentTimeMillis()
+    }
+
     override fun movetoVlak(vlak: String, arm: Int) {
+        updateLastMovement()
         log.info("start: move to "+vlak)
+        // check if homeing is needed
+        if (homeingNeeded()){
+            homeHor()
+            homeVert()
+            waitUntilReady(100)
+        }
+
+
         val posA8 = getA8()
         val posA11 = getA11()
         val posA21 = getA21()
@@ -141,6 +170,7 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun moveto(x: Int, y: Int) {
+        updateLastMovement()
         calcDelays(x, y)
         gotoPos(arm1, x, formattedDelayFactor1)
         gotoPos(arm2, y, formattedDelayFactor2)
@@ -148,11 +178,19 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun homeVert() {
+        updateLastMovement()
+        println("Start home vert")
         home(arm1)
+        println("End home vert")
+        arm2AtHome = true
     }
 
     override fun homeHor() {
+        updateLastMovement()
+        println("Start home hor")
         home(arm2)
+        println("End home hor")
+        arm2AtHome = true
     }
 
     override fun sleep() {
@@ -172,6 +210,8 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     fun gotoPos(arm: I2CDevice?, pos: Int, vertraging: String) {
+        arm1AtHome == false
+        arm2AtHome == false
         try {
             val formattedPos = String.format("%06d", pos)
             val command = "^M$formattedPos$vertraging"
@@ -191,15 +231,6 @@ class RobotAansturingImpl : RobotAansturing {
         log.info("start: pak ")
         arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
         waitUntilArmReady(20)
-//        log.info("ready: pak ")
-//        try {
-//            val delay = getDelayNaPak()?.trim()
-//            Thread.sleep(delay?.toLong()?:0L)
-//
-//        }
-//        catch (e:Exception){
-//            e.printStackTrace()
-//        }
         log.info("done: pak ")
     }
 
@@ -207,15 +238,6 @@ class RobotAansturingImpl : RobotAansturing {
         log.info("start: release ")
         arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
         waitUntilArmReady(20)
-//        log.info("ready: release ")
-//        try {
-//            val delay = getDelayNaZet()?.trim()
-//            Thread.sleep(delay?.toLong()?:0L)
-//
-//        }
-//        catch (e:Exception){
-//            e.printStackTrace()
-//        }
         log.info("done: release ")
     }
 
@@ -223,15 +245,6 @@ class RobotAansturingImpl : RobotAansturing {
         log.info("start: pak ")
         arm3!!.writeI2c("^W0000000000000000".toByteArray(),"arm3")
         waitUntilArmReady(20)
-//        log.info("ready: pak ")
-//        try {
-//            val delay = getDelayNaPak()?.trim()
-//            Thread.sleep(delay?.toLong()?:0L)
-//
-//        }
-//        catch (e:Exception){
-//            e.printStackTrace()
-//        }
         log.info("done: pak ")
     }
 
@@ -239,37 +252,28 @@ class RobotAansturingImpl : RobotAansturing {
         log.info("start: release ")
         arm3!!.writeI2c("^E0000000000000000".toByteArray(),"arm3")
         waitUntilArmReady(20)
-//        log.info("ready: release ")
-//        try {
-//            val delay = getDelayNaZet()?.trim()
-//            Thread.sleep(delay?.toLong()?:0L)
-//
-//        }
-//        catch (e:Exception){
-//            e.printStackTrace()
-//        }
         log.info("done: release ")
     }
-
-    override fun hold() {
-        arm3!!.writeI2c("^H0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
-    }
-
-    override fun drop() {
-        arm3!!.writeI2c("^D0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
-    }
-
-    override fun activate() {
-        arm3!!.writeI2c("^A0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
-    }
-
-    override fun deactivate() {
-        arm3!!.writeI2c("^I0000000000000000".toByteArray(),"arm3")
-        waitUntilReady(20)
-    }
+//
+//    override fun hold() {
+//        arm3!!.writeI2c("^H0000000000000000".toByteArray(),"arm3")
+//        waitUntilReady(20)
+//    }
+//
+//    override fun drop() {
+//        arm3!!.writeI2c("^D0000000000000000".toByteArray(),"arm3")
+//        waitUntilReady(20)
+//    }
+//
+//    override fun activate() {
+//        arm3!!.writeI2c("^A0000000000000000".toByteArray(),"arm3")
+//        waitUntilReady(20)
+//    }
+//
+//    override fun deactivate() {
+//        arm3!!.writeI2c("^I0000000000000000".toByteArray(),"arm3")
+//        waitUntilReady(20)
+//    }
 
     override fun bootsound() {
         log.info("bootsound")
@@ -355,21 +359,21 @@ class RobotAansturingImpl : RobotAansturing {
         saveToFile("/home/pi/snelheid.data", snelheid)
     }
 
-    override fun getDelayNaPak(): String? {
-        return loadFile("/home/pi/pakdelay.data")
-    }
-
-    override fun setDelayNaPak(delay: String) {
-        saveToFile("/home/pi/pakdelay.data", delay)
-    }
-
-    override fun getDelayNaZet(): String? {
-        return loadFile("/home/pi/zetdelay.data")
-    }
-
-    override fun setDelayNaZet(delay: String) {
-        saveToFile("/home/pi/zetdelay.data", delay)
-    }
+//    override fun getDelayNaPak(): String? {
+//        return loadFile("/home/pi/pakdelay.data")
+//    }
+//
+//    override fun setDelayNaPak(delay: String) {
+//        saveToFile("/home/pi/pakdelay.data", delay)
+//    }
+//
+//    override fun getDelayNaZet(): String? {
+//        return loadFile("/home/pi/zetdelay.data")
+//    }
+//
+//    override fun setDelayNaZet(delay: String) {
+//        saveToFile("/home/pi/zetdelay.data", delay)
+//    }
 
     override fun getDemoString(): String? {
         return loadFile("/home/pi/loop.data")
@@ -472,24 +476,7 @@ class RobotAansturingImpl : RobotAansturing {
         val inetAddress = localHostLANAddress()
         val ipAdress = inetAddress.hostAddress
         lcd.write(0, ipAdress)
-        var zandloperChar = "*"
-//        while (true) {
-//            try {
-//                Thread.sleep(300)
-//                zandloperChar = if (zandloperChar=="*") "o" else "*"
-//                val arm1Status = arm1!!.read()
-//                val arm2Status = arm2!!.read()
-//                val arm3Status = arm3!!.read()
-//                allReady = arm1Status == 1 && arm2Status == 1 && arm3Status != 2 // arm3 : alleen checken dat hij niet aan het moven is
-//                val status = zandloperChar+" "+getStatusString(arm1Status) + "/" + getStatusString(arm2Status) + "/" + getArm3StatusString(arm3Status)
-//                val status = zandloperChar
-//                lcd.write(0, ipAdress)
-//                lcd.write(1, status)
-//            } catch (e: Exception) {
-//                log.info("Error updating display:"+e.message)
-//                e.printStackTrace()
-//            }
-//        }
+
     }
 
     private fun home(arm: I2CDevice?) {
@@ -623,25 +610,17 @@ class RobotAansturingImpl : RobotAansturing {
                             homeVert()
                             waitUntilReady(100)
                         }
-//                        } else {
-//                            val splitWords = row.split(",".toRegex()).toTypedArray()
-//                            if (splitWords.size >= 3) {
-//                                val posArm1 = splitWords[0].trim { it <= ' ' }
-//                                val posArm2 = splitWords[1].trim { it <= ' ' }
-//                                try {
-//                                    val pos1 = posArm1.toInt()
-//                                    val pos2 = posArm2.toInt()
-//                                    calcDelays(pos1, pos2)
-//                                    gotoPos(arm1, pos1, formattedDelayFactor1)
-//                                    gotoPos(arm2, pos2, formattedDelayFactor2)
-//                                } catch (ex: Exception) {
-//                                    ex.printStackTrace()
-//                                }
-//                            }
-//                        }
                     }
                 }
         )
+    }
+
+    private fun homeingNeeded(): Boolean{
+        val arm1Status = arm1!!.readI2c("arm1")
+        val arm2Status = arm2!!.readI2c("arm2")
+        val arm1SleepingOrHomingNeeded = arm1Status == 1 || arm1Status == 6
+        val arm2SleepingOrHomingNeeded = arm2Status == 1 || arm2Status == 6
+        return arm1SleepingOrHomingNeeded || arm2SleepingOrHomingNeeded
     }
 
 
@@ -654,7 +633,6 @@ class RobotAansturingImpl : RobotAansturing {
             udateStatus()
         }
         println("All ready")
-//        sleep(200)// extra sleep, deze zou weg moeten kunnen
     }
 
     private fun waitUntilArmReady(initialDelay: Int) {
@@ -666,7 +644,6 @@ class RobotAansturingImpl : RobotAansturing {
             udateStatusArm3()
         }
         println("arm3 ready")
-//        sleep(200)// extra sleep, deze zou weg moeten kunnen
     }
 
     private fun sleep(initialDelay: Int) {
@@ -681,7 +658,6 @@ class RobotAansturingImpl : RobotAansturing {
         private const val ARM1 = 0x6
         private const val ARM2 = 0x7
         private const val ARM3 = 0x5
-        private const val DISPLAY = 0x38
     }
 
     init {

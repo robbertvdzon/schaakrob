@@ -37,7 +37,9 @@ void setup() {
 
   radio.begin();
   radio.openReadingPipe(0, address);
-  radio.setPALevel(RF24_PA_MIN);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setCRCLength(RF24_CRC_8);
   radio.startListening();
   analogWrite(2, MAGNET_OFF);  
   Serial.println("START");

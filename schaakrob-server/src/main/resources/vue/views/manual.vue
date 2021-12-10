@@ -23,13 +23,6 @@
               <button type="submit" v-on:click="release2">Laat los2</button>
        </span>
       <br>
-      <span>
-              <button type="submit" v-on:click="hold">hold</button>
-              <button type="submit" v-on:click="drop">drop</button>
-              <button type="submit" v-on:click="activate">activate</button>
-              <button type="submit" v-on:click="deactivate">deactivate</button>
-       </span>
-      <br>
       <br>
       <table>
         <tr>
@@ -153,29 +146,6 @@
           </td>
         </tr>
 
-        <tr>
-          <td class="label">
-            Delay na pak:
-          </td>
-          <td>
-            <input v-model="delaynapak">
-          </td>
-          <td>
-            <button type="submit" v-on:click="saveDelayNaPak">Save</button>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">
-            Delay na zet:
-          </td>
-          <td>
-            <input v-model="delaynazet">
-          </td>
-          <td>
-            <button type="submit" v-on:click="saveDelayNaZet">Save</button>
-          </td>
-        </tr>
       </table>
       <br>
       <br>
@@ -204,8 +174,6 @@ Vue.component("manual", {
     h20pos: "",
     snelheid: "2.0",
     pakkerhoogte: "",
-    delaynapak: "2.0",
-    delaynazet: "2.0",
     vlak: "A8",
     fen_to_load: "r2qkb1r/1bpppppp/1pn2n2/p7/4PB2/2NP1Q2/PPP2PPP/R3KBNR w KQkq - 2 6"
   }),
@@ -264,16 +232,6 @@ Vue.component("manual", {
           .then(text => this.pakkerhoogte = text)
           .catch(() => alert("Error"));
 
-      fetch(`/api/delaynapak`)
-          .then(res => res.text())
-          .then(text => this.delaynapak = text)
-          .catch(() => alert("Error"));
-
-      fetch(`/api/delaynazet`)
-          .then(res => res.text())
-          .then(text => this.delaynazet = text)
-          .catch(() => alert("Error"));
-
     },
     home_vert: function (event) {
       fetch(`/api/home_vert`)
@@ -287,23 +245,6 @@ Vue.component("manual", {
       fetch(`/api/sleep`)
           .catch(() => alert("Error"));
     },
-    hold: function (event) {
-      fetch(`/api/hold`)
-          .catch(() => alert("Error"));
-    },
-    drop: function (event) {
-      fetch(`/api/drop`)
-          .catch(() => alert("Error"));
-    },
-    activate: function (event) {
-      fetch(`/api/activate`)
-          .catch(() => alert("Error"));
-    },
-    deactivate: function (event) {
-      fetch(`/api/deactivate`)
-          .catch(() => alert("Error"));
-    },
-
     clamp1: function (event) {
       fetch(`/api/clamp1`)
           .catch(() => alert("Error"));
@@ -406,22 +347,6 @@ Vue.component("manual", {
     },
     saveSnelheid: function (event) {
       axios.post(`/api/snelheid`, this.snelheid)
-          .then(res => {
-          })
-          .catch(error => {
-            alert("Error")
-          })
-    },
-    saveDelayNaPak: function (event) {
-      axios.post(`/api/delaynapak`, this.delaynapak)
-          .then(res => {
-          })
-          .catch(error => {
-            alert("Error")
-          })
-    },
-    saveDelayNaZet: function (event) {
-      axios.post(`/api/delaynazet`, this.delaynazet)
           .then(res => {
           })
           .catch(error => {

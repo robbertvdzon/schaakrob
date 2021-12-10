@@ -10,10 +10,6 @@ interface RobotAansturing {
     fun release1()
     fun clamp2()
     fun release2()
-    fun hold()
-    fun drop()
-    fun activate()
-    fun deactivate()
     fun bootsound();
     fun rebuild()
     fun restart()
@@ -33,10 +29,6 @@ interface RobotAansturing {
     fun setPakkerHoogte(snelheid: String)
     fun getSnelheid(): String?
     fun setSnelheid(snelheid: String)
-    fun getDelayNaPak(): String?
-    fun setDelayNaPak(delay: String)
-    fun getDelayNaZet(): String?
-    fun setDelayNaZet(delay: String)
     fun getDemoString(): String?
     fun setDemoString(demoString: String)
     fun runDemoLoop()

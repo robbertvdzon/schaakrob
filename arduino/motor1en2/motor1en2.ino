@@ -283,7 +283,7 @@ void move(){
   if (state == FATAL_ERROR) return;
 
   if (state == HOMING_NEEDED){
-    home1(HOME_SPEED);
+    home1(HOME_SPEED_SLOW);
   }
   if (state == SLEEPING){
     home1(HOME_SPEED_SLOW);
