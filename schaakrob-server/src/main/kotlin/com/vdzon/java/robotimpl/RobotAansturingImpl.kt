@@ -81,11 +81,13 @@ class RobotAansturingImpl : RobotAansturing {
 
         thread {
             println("start check sleep thread")
-            Thread.sleep(1000)
-            println("check if can sleep")
-            val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
-            if (bothArmsAtHome() && lastMovement<timeout){
-                sleep()
+            while (true){
+                Thread.sleep(1000)
+                println("check if can sleep")
+                val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
+                if (bothArmsAtHome() && lastMovement<timeout){
+                    sleep()
+                }
             }
         }
 
@@ -620,7 +622,9 @@ class RobotAansturingImpl : RobotAansturing {
         val arm2Status = arm2!!.readI2c("arm2")
         val arm1SleepingOrHomingNeeded = arm1Status == 1 || arm1Status == 6
         val arm2SleepingOrHomingNeeded = arm2Status == 1 || arm2Status == 6
-        return arm1SleepingOrHomingNeeded || arm2SleepingOrHomingNeeded
+        val res = arm1SleepingOrHomingNeeded || arm2SleepingOrHomingNeeded
+        println("Homing needed: $arm1Status / $arm2Status : $res")
+        return res
     }
 
 
