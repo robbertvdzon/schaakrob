@@ -55,14 +55,11 @@ class MainWeb {
     }
 
     private fun login(ctx: Context) {
-        println("login!")
         val accessCode: String = ctx.body()
-        println("set cookie "+accessCode)
         ctx.cookieStore("auth",accessCode)
     }
 
     private fun logout(ctx: Context) {
-        println("clear cookies")
         ctx.cookieStore("auth","")
         ctx.clearCookieStore()
 
@@ -74,7 +71,6 @@ class MainWeb {
 
     fun accessManager(handler: Handler, ctx: Context, permittedRoles: Set<Role>) {
         val roles = ctx.userRole
-        println(roles)
         when {
             permittedRoles.contains(RouteRole.SPECTATOR) || permittedRoles.isEmpty()->
                 handler.handle(ctx)

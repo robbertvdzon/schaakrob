@@ -35,10 +35,14 @@ void setup() {
   pwm.setPWM(2, 0, SERVO_MIDDLE );
   pwm.setPWM(3, 0, SERVO_MIDDLE );
 
-  radio.begin();
+  if (!radio.begin()) {
+    Serial.println(F("radio hardware is not responding!!"));
+    while (1) {} // hold in infinite loop
+  }
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
+  radio.setPayloadSize(sizeof("pak1"));  
   radio.setCRCLength(RF24_CRC_8);
   radio.startListening();
   analogWrite(2, MAGNET_OFF);  

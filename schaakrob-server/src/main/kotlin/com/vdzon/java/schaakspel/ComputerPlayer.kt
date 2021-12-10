@@ -11,15 +11,9 @@ object ComputerPlayer {
 
         val cmd: List<String> = listOf("/usr/bin/expect","/tmp/chess.dat")
         val res = runCommand(cmd=cmd)
-        println(res)
         val bestMove = res?.substringAfterLast("bestmove")?.trim()?.toUpperCase()?:""
-        println("BEST MOVE="+bestMove)
         val from = bestMove.substring(0,2)
         val to = bestMove.substring(2,4)
-        println("from="+from)
-        println("to="+to)
-        println("from="+Square.fromValue(from))
-        println("to="+Square.fromValue(to))
         return Move(Square.fromValue(from), Square.fromValue(to))
     }
 

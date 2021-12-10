@@ -57,11 +57,15 @@ void setup() {
 
   digitalWrite(beepPin, LOW);
 
-  radio.begin();
+  if (!radio.begin()) {
+    Serial.println(F("radio hardware is not responding!!"));
+    while (1) {} // hold in infinite loop
+  }
   radio.openWritingPipe(address);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
   radio.setCRCLength(RF24_CRC_8);
+  radio.setPayloadSize(sizeof("pak1"));
   radio.stopListening();
   Serial.println("radio ready");
 }
@@ -70,7 +74,7 @@ void loop() {
   processCommand();
 }
 
-void sendData(){
+void sendData(){      
    Wire.write(state);
 }
 

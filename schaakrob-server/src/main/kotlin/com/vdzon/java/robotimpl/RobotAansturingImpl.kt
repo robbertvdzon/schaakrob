@@ -84,11 +84,9 @@ class RobotAansturingImpl : RobotAansturing {
             println("start check sleep thread")
             while (true){
                 Thread.sleep(3000)
-                println("check if can sleep")
                 val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
                 val bothHome = bothArmsAtHome()
                 val hasTimeout = lastMovement<timeout
-                println("check if can sleep: $bothHome / $timeout / $hasTimeout / $lastMovement / $arm1AtHome / $arm2AtHome")
                 if (bothHome && hasTimeout){
                     println("automatically sleep!")
                     sleep()
@@ -186,17 +184,13 @@ class RobotAansturingImpl : RobotAansturing {
 
     override fun homeVert() {
         updateLastMovement()
-        println("Start home vert")
         home(arm1)
-        println("End home vert")
         arm2AtHome = true
     }
 
     override fun homeHor() {
         updateLastMovement()
-        println("Start home hor")
         home(arm2)
-        println("End home hor")
         arm1AtHome = true
     }
 

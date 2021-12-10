@@ -384,14 +384,11 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 list.add(SquareField(sq,s.toLetter()))
             }
         }
-        println("het logal moves 1")
         val moves: List<Move> = board.legalMoves()
-        println("het logal moves 2")
         val mate = board.isMated
         val kingAttached = board.isKingAttacked
         val draw = board.isDraw
         val side = board.sideToMove
-        println("het logal moves 3")
         return ChessBoard(list, side.value(), moves.toChessMoves(), draw, mate, kingAttached)
     }
 
