@@ -59,6 +59,7 @@ void setup() {
 
   if (!radio.begin()) {
     Serial.println(F("radio hardware is not responding!!"));
+    errorSeq();
     while (1) {} // hold in infinite loop
   }
   radio.openWritingPipe(address);
@@ -75,9 +76,6 @@ void loop() {
 }
 
 void sendData(){      
-  Serial.print("state:");
-  Serial.println(state);
-
    Wire.write(state);
 }
 

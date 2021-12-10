@@ -85,17 +85,17 @@ class RobotAansturingImpl : RobotAansturing {
         thread {
             println("start check sleep thread")
             while (true){
-                val res = arm3!!.readI2c("arm3")
-                println("arm3 state="+res)
-                Thread.sleep(1000)
-//                Thread.sleep(3000)
-//                val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
-//                val bothHome = bothArmsAtHome()
-//                val hasTimeout = lastMovement<timeout
-//                if (bothHome && hasTimeout){
-//                    println("automatically sleep!")
-//                    sleep()
-//                }
+//                val res = arm3!!.readI2c("arm3")
+//                println("arm3 state="+res)
+//                Thread.sleep(1000)
+                Thread.sleep(3000)
+                val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
+                val bothHome = bothArmsAtHome()
+                val hasTimeout = lastMovement<timeout
+                if (bothHome && hasTimeout){
+                    println("automatically sleep!")
+                    sleep()
+                }
             }
         }
 
@@ -693,9 +693,6 @@ class RobotAansturingImpl : RobotAansturing {
 }
 
 private fun I2CDevice.readI2c(devicename: String): Int {
-    if (devicename=="arm3"){
-        println("start readI2c arm3")
-    }
     var result:Int = -1;
     Lock.lock()
     var succeeded = false
@@ -712,9 +709,6 @@ private fun I2CDevice.readI2c(devicename: String): Int {
         }
     }
     Lock.unlock()
-    if (devicename=="arm3"){
-        println("result readI2c arm3:"+result)
-    }
     return result
 
 }
