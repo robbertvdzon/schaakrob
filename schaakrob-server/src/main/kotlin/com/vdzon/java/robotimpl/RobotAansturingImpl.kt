@@ -85,7 +85,10 @@ class RobotAansturingImpl : RobotAansturing {
                 Thread.sleep(3000)
                 println("check if can sleep")
                 val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
-                if (bothArmsAtHome() && lastMovement<timeout){
+                val bothHome = bothArmsAtHome()
+                val hasTimeout = lastMovement<timeout
+                println("check if can sleep: $bothHome / $timeout / $hasTimeout / $lastMovement / $arm1AtHome / $arm2AtHome")
+                if (bothHome && hasTimeout){
                     println("automatically sleep!")
                     sleep()
                 }
