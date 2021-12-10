@@ -36,6 +36,7 @@ class RobotAansturingImpl : RobotAansturing {
     var formattedDelayFactor1 = "0050"
     var formattedDelayFactor2 = "0050"
     private var allReady = false
+    private var allSleeping = false
     private var arm3Ready = false
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
@@ -210,7 +211,7 @@ class RobotAansturingImpl : RobotAansturing {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        waitUntilReady(50)
+        waitUntilSleeping(50)
         lastPos2 = 0
         lastPos1 = 0
     }
@@ -553,9 +554,11 @@ class RobotAansturingImpl : RobotAansturing {
             val arm2Status = arm2!!.readI2c("arm2")
             val arm3Status = arm3!!.readI2c("arm3")
             allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1
+            allSleeping = arm1Status == 6 && arm2Status == 6
         } catch (e: Exception) {
             e.printStackTrace()
             allReady = false
+            allSleeping = false
         }
     }
 
@@ -631,6 +634,17 @@ class RobotAansturingImpl : RobotAansturing {
         return res
     }
 
+
+    private fun waitUntilSleeping(initialDelay: Int) {
+        sleep(initialDelay)
+        udateStatus()
+        println("Wait until ready")
+        while (!allSleeping) {
+            sleep(10)
+            udateStatus()
+        }
+        println("All ready")
+    }
 
     private fun waitUntilReady(initialDelay: Int) {
         sleep(initialDelay)
