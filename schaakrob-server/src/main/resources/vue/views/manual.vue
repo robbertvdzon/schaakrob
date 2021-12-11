@@ -152,8 +152,15 @@
       <button type="submit" v-on:click="rebuildapp">rebuild application</button>
       <br>
       <br>
-      <input v-model="fen_to_load">
-      <button type="submit" v-on:click="loadFen">Load FEN</button>
+      <button type="submit" v-on:click="loadFen('3qr2k/pbpp2pp/1p5N/3Q2b1/2P1P3/P7/1PP2PPP/R4RK1 w - - 0 1')">Load Puzzle-1: map in 2</button>
+      <br>
+      <button type="submit" v-on:click="loadFen('r1bq2k1/ppp2r1p/2np1pNQ/2bNpp2/2B1P3/3P4/PPP2PPP/R3K2R w KQ - 0 1')">Load Puzzle-2: map in 2</button>
+      <br>
+      <button type="submit" v-on:click="loadFen('r1bk3r/1pp2ppp/pb1p1n2/n2P4/B3P1q1/2Q2N2/PB3PPP/RN3RK1 w - - 0 1')">Load Puzzle-3: map in 2</button>
+      <br>
+      <button type="submit" v-on:click="loadFen('1kr5/ppN2ppr/8/3p2n1/3bb3/8/n3PPPQ/4R1K1 w - - 0 1')">Load Puzzle-4: map in 3</button>
+
+
 
 
 
@@ -174,15 +181,14 @@ Vue.component("manual", {
     h20pos: "",
     snelheid: "2.0",
     pakkerhoogte: "",
-    vlak: "A8",
-    fen_to_load: "r2qkb1r/1bpppppp/1pn2n2/p7/4PB2/2NP1Q2/PPP2PPP/R3KBNR w KQkq - 2 6"
+    vlak: "A8"
   }),
   created() {
     this.load()
   },
   methods: {
-    loadFen: function(){
-      axios.post(`/api/game/loadfen`, this.fen_to_load)
+    loadFen: function(fen){
+      axios.post(`/api/game/loadfen`, fen)
           .then(res => {
           })
           .catch(error => {

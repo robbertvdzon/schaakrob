@@ -628,8 +628,8 @@ class RobotAansturingImpl : RobotAansturing {
     private fun homeingNeeded(): Boolean{
         val arm1Status = arm1!!.readI2c("arm1")
         val arm2Status = arm2!!.readI2c("arm2")
-        val arm1SleepingOrHomingNeeded = arm1Status == 0 || arm1Status == 6
-        val arm2SleepingOrHomingNeeded = arm2Status == 0 || arm2Status == 6
+        val arm1SleepingOrHomingNeeded = arm1Status == 9 || arm1Status == 6
+        val arm2SleepingOrHomingNeeded = arm2Status == 9 || arm2Status == 6
         val res = arm1SleepingOrHomingNeeded || arm2SleepingOrHomingNeeded
         println("Homing needed: $arm1Status / $arm2Status : $res")
         return res

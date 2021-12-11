@@ -10,6 +10,7 @@ import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 
 class RobotAansturingClient(host: String) : RobotAansturing {
+    private val USE_ROBOT = true
     private val log = LoggerFactory.getLogger(RobotAansturingClient::class.java)
     private val httpClient = HttpClients.createDefault()
     private var host = ""
@@ -151,6 +152,7 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     }
 
     private operator fun get(url: String): String? {
+        if (!USE_ROBOT) return ""
         try {
             val request = HttpGet(url)
             httpClient.execute(request).use { response ->
@@ -172,6 +174,7 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     }
 
     private fun post(url: String, body: String): String? {
+        if (!USE_ROBOT) return ""
         try {
             val request = HttpPost(url)
             request.entity = StringEntity(body)

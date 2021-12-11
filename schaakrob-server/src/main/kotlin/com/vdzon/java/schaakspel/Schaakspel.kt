@@ -8,6 +8,7 @@ import com.github.bhlangonijr.chesslib.Side
 import com.github.bhlangonijr.chesslib.Square
 import com.github.bhlangonijr.chesslib.move.Move
 import com.vdzon.java.robitapi.RobotAansturing
+import com.vdzon.java.schaakspel.CalcUtil.calcDistance
 import java.io.File
 import java.lang.RuntimeException
 
@@ -17,6 +18,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     private var targetBoard = Board()
     private var buildBoardThread = BuildBoardThread(this)
     private val mapper = jacksonObjectMapper()
+    private var currentPos: String = "H1"
 
     var initialBlackStoreSquares: List<StoreSquare>
     var initialWhiteStoreSquares: List<StoreSquare>
@@ -121,7 +123,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     fun computermove(): ChessBoard {
         println("Coputer move")
-//        println(board.getFen())
+        if (board.isDraw||board.isMated) return toBoard()
         val move = ComputerPlayer.getMove(board.getFen())
 
         robotMove(move.from.value(), move.to.value())
@@ -153,18 +155,81 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     fun newMoveToGetToTargetBoard(): Boolean{
         // 1 stap voor terug naar target pos
-        val move = bepaalMoveForTargetBoard()
+        val moves = getAllPossibleMoves()
+        val move = findClosestMove(moves)
         if (move!=null) {
             val (van, naar) = move
             ownmove(van, naar)
             return false
         }
         return true
+    }
 
+    fun findClosestMove(moves: List<Pair<String, String>> ):Pair<String, String>?{
+
+//        println("Find closest move, possible moves (current pos=$currentPos):---------------------------------------")
+//        moves.forEach{
+//            println(" "+it.first+"-"+it.second)
+//        }
+
+        var closestMove:Pair<String, String>? = null
+        var closestDistance = Double.MAX_VALUE
+        moves.forEach{ moveToCheck ->
+            val distance = calcDistance(moveToCheck.first, currentPos)
+            if (distance<closestDistance){
+                closestDistance = distance
+                closestMove = moveToCheck
+            }
+        }
+//        println("Closest move:"+closestMove)
+        return closestMove
 
     }
 
-    private fun bepaalMoveForTargetBoard(): Pair<String, String>? {
+    private fun getAllPossibleMoves(): List<Pair<String, String>> {
+        val result = mutableListOf<Pair<String, String>>()
+        for (row in "ABCDEFGH"){
+            for (col in "12345678"){
+                val pos = "$row$col"
+                val square = Square.valueOf(pos)
+                val pieceNow = board.getPiece(square)
+                val pieceWanted = targetBoard.getPiece(square)
+                saveBoard()
+
+
+                if (pieceNow==Piece.NONE && pieceWanted!=Piece.NONE){
+                    val from= findPieceToRestore(pieceWanted)
+                    if (from==null) return emptyList()// zou niet mogen gebeuren
+                    result.add(Pair(from,pos))
+                }
+            }
+        }
+
+        // maak lege plekken
+        for (row in "ABCDEFGH"){
+            for (col in "12345678"){
+                val pos = "$row$col"
+                val square = Square.valueOf(pos)
+                val pieceNow = board.getPiece(square)
+                val pieceWanted = targetBoard.getPiece(square)
+
+                if (pieceNow!=Piece.NONE && pieceWanted==Piece.NONE){
+                    if (pieceNow.pieceSide==Side.WHITE){
+                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE.name }.first()
+                        result.add(Pair(pos,storeSquare.pos))
+                    }
+                    else{
+                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE.name }.first()
+                        result.add(Pair(pos,storeSquare.pos))
+                    }
+                }
+            }
+        }
+
+
+        return result
+    }
+    private fun bepaalMoveForTargetBoardOld(): Pair<String, String>? {
         for (row in "ABCDEFGH"){
             for (col in "12345678"){
                 val pos = "$row$col"
@@ -266,7 +331,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
 
     fun ownmove(van: String, naar: String): ChessBoard {
-        println("SCHAAK: " + van + " ->" + naar)
+//        println("--------------------------------------- MOVE: " + van + " ->" + naar)
 
         if (positieBuitenBord(van)){
             if (getPiece(naar)!=Piece.NONE) throw RuntimeException("Zet van buitenbord kan alleen naar lege plek")
@@ -330,6 +395,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
                 robotAansturing.movetoVlak(storeSquare.pos,1)
                 robotAansturing.release2()
+
+                currentPos = storeSquare.pos
             }
             else{
                 val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE.name }.first()
@@ -345,6 +412,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
                 robotAansturing.movetoVlak(storeSquare.pos,0)
                 robotAansturing.release1()
+                currentPos = storeSquare.pos
             }
         }
         else {
@@ -360,12 +428,14 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.clamp2()
                 robotAansturing.movetoVlak(to, 1)
                 robotAansturing.release2()
+                currentPos = to
             }
             else{
                 robotAansturing.movetoVlak(van, 0)
                 robotAansturing.clamp1()
                 robotAansturing.movetoVlak(to, 0)
                 robotAansturing.release1()
+                currentPos = to
             }
             // als hij van buiten bord komt, dan vlak leegmaken
             if (positieBuitenBord(van)){
@@ -384,12 +454,52 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 list.add(SquareField(sq,s.toLetter()))
             }
         }
-        val moves: List<Move> = board.legalMoves()
-        val mate = board.isMated
-        val kingAttached = board.isKingAttacked
-        val draw = board.isDraw
+        val moves: List<Move> = getLegalMoves()
+        val mate = isMated()
+        val kingAttached = isKingAttacked()
+        val draw = isDraw()
         val side = board.sideToMove
         return ChessBoard(list, side.value(), moves.toChessMoves(), draw, mate, kingAttached)
+    }
+
+    private fun isMated():Boolean{
+        try{
+            return board.isMated()
+        }
+        catch (e: Exception){
+            println("Kon isMated niet bepalen! "+e.message)
+            return false
+        }
+    }
+
+    private fun isKingAttacked():Boolean{
+        try{
+            return board.isKingAttacked()
+        }
+        catch (e: Exception){
+            println("Kon isKingAttacked niet bepalen! "+e.message)
+            return false
+        }
+    }
+
+    private fun isDraw():Boolean{
+        try{
+            return board.isDraw()
+        }
+        catch (e: Exception){
+            println("Kon isDraw niet bepalen! "+e.message)
+            return false
+        }
+    }
+
+    private fun getLegalMoves(): List<Move>{
+        try{
+            return board.legalMoves()
+        }
+        catch (e: Exception){
+            println("Kon geen legal move bepalen! "+e.message)
+            return emptyList()
+        }
     }
 
     private fun printBoard(boardToPrint: Board) {
