@@ -26,6 +26,8 @@ class RestEndpoints {
         app["/api/game/computermove", { ctx: Context? -> ctx?.json(schaakspel.computermove()) }]
         app.get("/api/game/ownmove/:van/:naar", { ctx: Context? -> ctx?.json(schaakspel.ownmove(ctx?.pathParam("van")?:"",ctx?.pathParam("naar")?:"")) }, setOf(
             RouteRole.ADMIN, RouteRole.PLAYER))
+        app["/api/game/startautoplay", { ctx: Context? -> schaakspel.startAutoPlay() }]
+        app["/api/game/stopautoplay", { ctx: Context? -> schaakspel.stopAutoplay() }]
 
         app["/api/rebuild", { ctx: Context? -> robotAansturing.rebuild() }]
         app["/api/restart", { ctx: Context? -> robotAansturing.restart() }]

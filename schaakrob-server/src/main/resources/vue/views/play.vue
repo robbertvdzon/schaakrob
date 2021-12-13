@@ -90,6 +90,8 @@
               <button type="submit" v-on:click="home">Home</button>
               <button type="submit" v-on:click="computerSingleMove">Computer zet</button>
               <button type="submit" v-on:click="demo">demo</button>
+              <button type="submit" v-on:click="startautoplay">Start Autoplay</button>
+              <button type="submit" v-on:click="stopautoplay">Stop Autoplay</button>
               <button type="submit" v-on:click="manual">manual</button>
        </span>
 
@@ -426,6 +428,16 @@ Vue.component("play", {
       fetch(`/api/game/computermove`)
           .then(res => res.text())
           .then(text => this.updateBoard(JSON.parse(text)))
+          .catch(() => alert("Error"));
+    },
+    startautoplay: function (event) {
+      fetch(`/api/game/startautoplay`)
+          .then(res => res.text())
+          .catch(() => alert("Error"));
+    },
+    stopautoplay: function (event) {
+      fetch(`/api/game/stopautoplay`)
+          .then(res => res.text())
           .catch(() => alert("Error"));
     },
     move: function (vlak) {

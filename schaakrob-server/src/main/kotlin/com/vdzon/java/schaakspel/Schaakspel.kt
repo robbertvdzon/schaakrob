@@ -24,6 +24,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     var initialWhiteStoreSquares: List<StoreSquare>
     lateinit var  blackStoreSquares : List<StoreSquare>
     lateinit var whiteStoreSquares: List<StoreSquare>
+    private var currentLoopThread: Thread? = null
 
     init{
 
@@ -70,6 +71,26 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
 
 
+    fun stopAutoplay() {
+        if (currentLoopThread != null) {
+            currentLoopThread=null
+        }
+    }
+
+    fun startAutoPlay() {
+        currentLoopThread = Thread(Runnable { autoPlay() })
+        currentLoopThread!!.start()
+    }
+
+    private fun autoPlay(){
+        home()
+        while (!isMated() && currentLoopThread!=null){
+            computermove()
+        }
+        if (currentLoopThread!=null) {
+            home()
+        }
+    }
 
 
 

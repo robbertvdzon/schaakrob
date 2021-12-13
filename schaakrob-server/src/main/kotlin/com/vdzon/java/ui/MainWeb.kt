@@ -87,7 +87,7 @@ class MainWeb {
 
     private val userRoleMap = hashMapOf(
         "1961" to RouteRole.ADMIN,
-        "1974" to RouteRole.PLAYER
+        "1976" to RouteRole.PLAYER
     )
 
 
