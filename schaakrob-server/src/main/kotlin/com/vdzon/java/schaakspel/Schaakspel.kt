@@ -102,6 +102,10 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         return toBoard()
     }
 
+    fun getFen(): String {
+        return board.fen
+    }
+
     fun moveExtraWhenCastle(move: Move){
         val side= board.getPiece(move.from).pieceSide
         val isKingSideCastle = board.context.isKingSideCastle(move)

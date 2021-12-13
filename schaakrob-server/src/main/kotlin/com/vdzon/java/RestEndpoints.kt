@@ -16,6 +16,7 @@ class RestEndpoints {
             val (vlak, arm) = ctx.body().split(" ")
             robotAansturing.movetoVlak(vlak, arm.toInt())
         }
+        app["/api/game/fen", { ctx: Context? -> ctx?.result(schaakspel.getFen()) }]
         app["/api/game/load", { ctx: Context? -> ctx?.json(schaakspel.load()) }]
         app["/api/game/sleep", { ctx: Context? -> ctx?.json(schaakspel.sleep()) }]
         app["/api/game/home", { ctx: Context? -> ctx?.json(schaakspel.home()) }]

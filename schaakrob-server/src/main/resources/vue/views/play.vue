@@ -32,12 +32,25 @@
             <table>
               <tbody>
               <tr v-for="row in rows">
+                <td><span class="label" >{{row.id}}</span></td>
                 <td v-for="col in cols" v-on:click="move(col.id+row.id)" v-bind:class="checkSquareClass(row, col)">
                   <div v-bind:class="getPieceImage(row, col)" v-bind:id="col.id+row.id+'img'">
                     <img src="/icons/png/stukken/empty.png">
                   </div>
                 </td>
               </tr>
+              <tr>
+                <td></td>
+                <td align="center"><span class="label" >A</span></td>
+                <td align="center"><span class="label" >B</span></td>
+                <td align="center"><span class="label" >C</span></td>
+                <td align="center"><span class="label" >D</span></td>
+                <td align="center"><span class="label" >E</span></td>
+                <td align="center"><span class="label" >F</span></td>
+                <td align="center"><span class="label" >G</span></td>
+                <td align="center"><span class="label" >H</span></td>
+              </tr>
+
               </tbody>
             </table>
 
@@ -75,7 +88,7 @@
               <button type="submit" v-on:click="reset">Reset board</button>
               <button type="submit" v-on:click="sleep">Sleep</button>
               <button type="submit" v-on:click="home">Home</button>
-              <button type="submit" v-on:click="computerMove">Computer zet</button>
+              <button type="submit" v-on:click="computerSingleMove">Computer zet</button>
               <button type="submit" v-on:click="demo">demo</button>
               <button type="submit" v-on:click="manual">manual</button>
        </span>
@@ -406,8 +419,13 @@ Vue.component("play", {
       fetch(`/api/game/computermove`)
           .then(res => res.text())
           .then(text => this.updateBoard(JSON.parse(text)))
-          // .then(text => this.moveAway())
           .then(text => this.home())
+          .catch(() => alert("Error"));
+    },
+    computerSingleMove: function (event) {
+      fetch(`/api/game/computermove`)
+          .then(res => res.text())
+          .then(text => this.updateBoard(JSON.parse(text)))
           .catch(() => alert("Error"));
     },
     move: function (vlak) {
@@ -570,6 +588,9 @@ $(document).ready(function () {
 }
 .schaakmat {
   font-size: 38px;
+}
+.label {
+  color: white;
 }
 
 </style>
