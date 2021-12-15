@@ -441,6 +441,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             }
         }
         else {
+            // niet slaan
+
             if (positieBuitenBord(to)){
                 val storeSquareBlack = blackStoreSquares.filter { it.pos== to }.firstOrNull()
                 val storeSquareWhite = whiteStoreSquares.filter { it.pos== to }.firstOrNull()
@@ -448,7 +450,10 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 storeSquareWhite?.piece = board.getPiece(Square.fromValue(van)).name
             }
 
-            if (van.endsWith("21") || to.endsWith("21")) {// bovenste rij
+            val piece = board.getPiece(Square.fromValue(van))
+
+//            if (van.endsWith("21") || to.endsWith("21")) {// bovenste rij
+            if (piece.pieceSide==Side.BLACK) {// bovenste magneet
                 robotAansturing.movetoVlak(van, 1)
                 robotAansturing.clamp2()
                 robotAansturing.movetoVlak(to, 1)
