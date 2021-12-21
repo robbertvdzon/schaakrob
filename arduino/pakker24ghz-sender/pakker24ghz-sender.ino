@@ -63,6 +63,8 @@ void setup() {
     while (1) {} // hold in infinite loop
   }
   radio.openWritingPipe(address);
+  
+  radio.setChannel(125); // channel with less noise
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
   radio.setCRCLength(RF24_CRC_8);

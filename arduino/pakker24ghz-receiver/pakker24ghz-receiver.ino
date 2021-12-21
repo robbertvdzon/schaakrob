@@ -11,7 +11,8 @@ const byte address[6] = "00002";
 const int SERVOMIN = 120; // this is the 'minimum' pulse length count (out of 4096)
 const int SERVOMAX = 620; // this is the 'maximum' pulse length count (out of 4096)
 const int SERVO_MIDDLE = (SERVOMAX-SERVOMIN)/2+SERVOMIN;
-const int PULSES_DOWN = 140;
+const int PULSES_DOWN_ARM1 = 220;
+const int PULSES_DOWN_ARM2 = 185;
 const int TIMEOUT_MAGNET = 20000;
 
 const int MAGNET_OFF = 0;
@@ -56,6 +57,7 @@ void setup() {
     while (1) {} // hold in infinite loop
   }
   radio.openReadingPipe(0, address);
+  radio.setChannel(125); // channel with less noise
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
   radio.setPayloadSize(sizeof("pak1"));  
@@ -121,8 +123,8 @@ void loop() {
 }
 
 void pak1(){
-       pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
-       pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
+       pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN_ARM1 );
+       pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN_ARM1 );
        delay(200);
        analogWrite(2, MAGNET_ON);
        delay(400);
@@ -134,8 +136,8 @@ void pak1(){
 }
 
 void pak2(){
-       pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
-       pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
+       pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN_ARM2 );
+       pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN_ARM2 );
        delay(200);
        analogWrite(3, MAGNET_ON);
        delay(400);
@@ -147,8 +149,8 @@ void pak2(){
 }
 
 void zet1(){
-       pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN );
-       pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN );
+       pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN_ARM1 );
+       pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN_ARM1 );
        delay(200);
        analogWrite(2, MAGNET_OFF);
        pwm.setPWM(0, 0, SERVO_MIDDLE);
@@ -157,8 +159,8 @@ void zet1(){
 }
 
 void zet2(){
-       pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN );
-       pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN );
+       pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN_ARM2 );
+       pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN_ARM2 );
        delay(200);
        analogWrite(3, MAGNET_OFF);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
