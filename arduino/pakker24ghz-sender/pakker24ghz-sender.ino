@@ -45,7 +45,7 @@ void setup() {
   pinMode(beepPin, OUTPUT);
 
   Serial.begin(9600);
-  Serial.println("Starting pakker");
+  Serial.println("Starting pakkersender");
   Serial.print("Slave on adress:");
   Serial.println(SLAVE_ADDRESS);
 

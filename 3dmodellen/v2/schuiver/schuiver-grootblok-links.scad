@@ -2,9 +2,6 @@
 difference(){
 	union(){
         
-        translate([-30,4.5,11]){
-         //   cube([25,3,15], center=false);
-        }         
         translate([-10.5,-13,11]){
             cube([21,20.5,3], center=false);
         }         
@@ -35,7 +32,7 @@ difference(){
         }         
 
 
-        translate([-7.5,-10,-0.5]){
+        translate([-7.5,-10-3,-0.5]){
             rotate([0,90,0]){
                 cylinder(h=15, r=7.5, $fn=100, center=false);
             }
@@ -84,17 +81,17 @@ difference(){
         }
 
         // bovenste as
-        translate([0,-15,-30]){
+        translate([0,-15-3,-30]){
             rotate([0,0,90]){
                 cylinder(h=50, r=1.5, $fn=100, center=false);
             }
         }
-        translate([-60,-10,-0.5]){
+        translate([-60,-10-3,-0.5]){
             rotate([0,90,0]){
                 cylinder(h=200, r=4, $fn=100, center=false);
             }
         }
-        translate([0,-10,-0.5]){
+        translate([0,-10-3,-0.5]){
             rotate([90,0,0]){
                 cylinder(h=100, r=1.7, $fn=100, center=false);
             }
