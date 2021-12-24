@@ -399,7 +399,7 @@ class RobotAansturingImpl() : RobotAansturing {
     }
 
     override fun runDemoOnce() {
-        schaakspel?.stopAutoplay()
+        schaakspel?.startAutoPlay()
     }
 
     override fun runDemoLoop() {
