@@ -42,6 +42,11 @@ class MainWeb {
             RobotAansturingClient("http://192.168.178.50:8080")
         }
         val schaakspel = Schaakspel(robotAansturing)
+
+        if (robotAansturing is RobotAansturingImpl){
+            robotAansturing.setSchaakspel(schaakspel) // deze dependency op betere manier oplossen
+        }
+
         RestEndpoints().initRestEndpoints(app, robotAansturing, schaakspel)
         log.info("Starting server")
         robotAansturing.bootsound()

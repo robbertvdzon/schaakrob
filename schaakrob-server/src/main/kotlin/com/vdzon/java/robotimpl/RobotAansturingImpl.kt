@@ -30,7 +30,9 @@ import kotlin.concurrent.thread
 
 private val log = LoggerFactory.getLogger(RobotAansturingImpl::class.java)
 
-class RobotAansturingImpl(private val schaakspel: Schaakspel) : RobotAansturing {
+class RobotAansturingImpl() : RobotAansturing {
+
+    private var schaakspel: Schaakspel? = null // todo: deze injecteren
 
     var lastPos1 = 0
     var lastPos2 = 0
@@ -45,8 +47,8 @@ class RobotAansturingImpl(private val schaakspel: Schaakspel) : RobotAansturing 
     private var lastMovement = 0L
     private var arm1AtHome = false
     private var arm2AtHome = false
-
     private var currentLoopThread: Thread? = null
+
     fun init() {
 
         if (arm1 != null) {
@@ -103,6 +105,10 @@ class RobotAansturingImpl(private val schaakspel: Schaakspel) : RobotAansturing 
 
 
 
+    }
+
+    fun setSchaakspel(schaakspel: Schaakspel){
+        this.schaakspel = schaakspel
     }
 
     fun bothArmsAtHome(): Boolean = arm1AtHome && arm2AtHome
@@ -393,7 +399,7 @@ class RobotAansturingImpl(private val schaakspel: Schaakspel) : RobotAansturing 
     }
 
     override fun runDemoOnce() {
-        schaakspel.stopAutoplay()
+        schaakspel?.stopAutoplay()
     }
 
     override fun runDemoLoop() {
@@ -401,11 +407,11 @@ class RobotAansturingImpl(private val schaakspel: Schaakspel) : RobotAansturing 
     }
 
     override fun stopDemo() {
-        schaakspel.stopAutoplay()
+        schaakspel?.stopAutoplay()
     }
 
     override fun resetBoard() {
-        schaakspel.reset()
+        schaakspel?.reset()
     }
 
     private fun getStatusString(status: Int): String {
