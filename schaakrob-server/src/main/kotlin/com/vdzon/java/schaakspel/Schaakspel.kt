@@ -34,7 +34,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             StoreSquare("C21"),
             StoreSquare("D21"),
             StoreSquare("E21"),
-            StoreSquare("F21"),
+           // StoreSquare("F21"), dit vlak niet gebruiken! Magneetje zit niet goed op dat vlak
             StoreSquare("G21"),
             StoreSquare("H21"),
             StoreSquare("A20"),

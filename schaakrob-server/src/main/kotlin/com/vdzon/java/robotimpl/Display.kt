@@ -19,35 +19,33 @@ class Display(private val robotAansturing: RobotAansturing) {
     private var pageNr = 0
 
     fun button1(event: GpioPinDigitalStateChangeEvent){
-//        displayText("11:"+event.state)
-
     }
+
     fun button2(event: GpioPinDigitalStateChangeEvent){
-//        displayText("22:"+event.state)
         if (event.state==PinState.HIGH) {
             nextPage()
             showPage()
         }
     }
     fun button3(event: GpioPinDigitalStateChangeEvent){
-//        displayText("33:"+event.state)
         if (event.state==PinState.HIGH) {
             prevPage()
             showPage()
         }
     }
     fun button4(event: GpioPinDigitalStateChangeEvent){
-        val maxPages = 10
+        val maxPages = 11
         when(pageNr % maxPages){
             1-> robotAansturing.runDemoOnce()
             2-> robotAansturing.stopDemo()
-            3-> robotAansturing.homeHor()
-            4-> robotAansturing.homeVert()
-            5-> robotAansturing.clamp1()
-            6-> robotAansturing.release1()
-            7-> robotAansturing.clamp2()
-            8-> robotAansturing.release2()
-            9-> robotAansturing.rebuild()
+            3-> robotAansturing.resetBoard()
+            4-> robotAansturing.homeHor()
+            5-> robotAansturing.homeVert()
+            6-> robotAansturing.clamp1()
+            7-> robotAansturing.release1()
+            8-> robotAansturing.clamp2()
+            9-> robotAansturing.release2()
+            10-> robotAansturing.rebuild()
         }
 
     }
@@ -64,15 +62,16 @@ class Display(private val robotAansturing: RobotAansturing) {
         val maxPages = 10
         when(pageNr % maxPages){
             0-> displayText(localHostLANAddress().hostAddress)
-            1-> displayText("start demo")
-            2-> displayText("stop demo")
-            3-> displayText("home hor")
-            4-> displayText("home ver")
-            5-> displayText("pak 1")
-            6-> displayText("release 1")
-            7-> displayText("pak 2")
-            8-> displayText("release 2")
-            9-> displayText("rebuild")
+            1-> displayText("start autoplay")
+            2-> displayText("stop autoplay")
+            3-> displayText("reset board")
+            4-> displayText("home hor")
+            5-> displayText("home ver")
+            6-> displayText("pak 1")
+            7-> displayText("release 1")
+            8-> displayText("pak 2")
+            9-> displayText("release 2")
+            10-> displayText("rebuild")
             else-> displayText("unknown!")
         }
     }

@@ -34,5 +34,6 @@ interface RobotAansturing {
     fun runDemoLoop()
     fun runDemoOnce()
     fun stopDemo()
+    fun resetBoard()
     fun startDisplayThread()
 }

@@ -62,6 +62,7 @@ class RestEndpoints {
         app["/api/startdemoonce", { ctx: Context? -> robotAansturing.runDemoOnce() }]
         app["/api/startdemoloop", { ctx: Context? -> robotAansturing.runDemoLoop() }]
         app["/api/stopdemo", { ctx: Context? -> robotAansturing.stopDemo() }]
+        app["/api/resetboard", { ctx: Context? -> robotAansturing.resetBoard() }]
     }
 
     private fun move(body: String) {

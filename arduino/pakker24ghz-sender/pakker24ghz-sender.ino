@@ -64,8 +64,8 @@ void setup() {
   }
   radio.openWritingPipe(address);
   
-  radio.setChannel(125); // channel with less noise
-  radio.setPALevel(RF24_PA_MAX);
+  radio.setChannel(108); // channel with less noise
+  radio.setPALevel(RF24_PA_LOW);
   radio.setDataRate(RF24_250KBPS);
   radio.setCRCLength(RF24_CRC_8);
   radio.setPayloadSize(sizeof("pak1"));

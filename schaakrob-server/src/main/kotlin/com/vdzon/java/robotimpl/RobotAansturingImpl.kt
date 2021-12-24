@@ -12,6 +12,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException
 import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
+import com.vdzon.java.schaakspel.Schaakspel
 import de.pi3g.pi.oled.Font
 import de.pi3g.pi.oled.OLEDDisplay
 import org.slf4j.LoggerFactory
@@ -29,7 +30,7 @@ import kotlin.concurrent.thread
 
 private val log = LoggerFactory.getLogger(RobotAansturingImpl::class.java)
 
-class RobotAansturingImpl : RobotAansturing {
+class RobotAansturingImpl(private val schaakspel: Schaakspel) : RobotAansturing {
 
     var lastPos1 = 0
     var lastPos2 = 0
@@ -392,7 +393,7 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun runDemoOnce() {
-        runOnceInThread(getDemoString())
+        schaakspel.stopAutoplay()
     }
 
     override fun runDemoLoop() {
@@ -400,7 +401,11 @@ class RobotAansturingImpl : RobotAansturing {
     }
 
     override fun stopDemo() {
-        stopLoop()
+        schaakspel.stopAutoplay()
+    }
+
+    override fun resetBoard() {
+        schaakspel.reset()
     }
 
     private fun getStatusString(status: Int): String {

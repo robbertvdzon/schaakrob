@@ -147,6 +147,11 @@ class RobotAansturingClient(host: String) : RobotAansturing {
     override fun stopDemo() {
         get("$host/api/stopdemo")
     }
+
+    override fun resetBoard() {
+        get("$host/api/resetboard")
+    }
+
     override fun startDisplayThread() {
      // disable for remote
     }
