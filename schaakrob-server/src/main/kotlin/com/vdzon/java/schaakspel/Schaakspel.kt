@@ -29,7 +29,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     init{
 
         initialBlackStoreSquares = listOf<StoreSquare>(
-            StoreSquare("A21"),
+//            StoreSquare("A21"),
             StoreSquare("B21"),
             StoreSquare("C21"),
             StoreSquare("D21"),
@@ -48,7 +48,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         )
         initialWhiteStoreSquares = listOf<StoreSquare>(
             StoreSquare("A11"),
-            StoreSquare("B11"),
+  //          StoreSquare("B11"),
             StoreSquare("C11"),
             StoreSquare("D11"),
             StoreSquare("E11"),
