@@ -5,27 +5,24 @@ Run “Raspberry Pi Imager” on osx
 Choose OS: “Raspberry PI OD (32 bit)”
 Write to SD card
 Place SD card in PI and startup (with display and keyboard/mouse)
-perform the following steps on the PI
+perform the following steps with a screen and keyboard/mouse on the PI
 finish installation (choose country and language)
-username: pi
+username: pi (ignore the warning about the username)
 connect to wifi
-
-# enable sshd
 open raspberry pi configuration
 enable: ssh, ic2
 save
 Finish the rest of the installation using ssh
+ssh pi@192.168.178.88
 
 # Update the system:
 sudo apt-get update
 sudo apt-get upgrade
 sudo rpi-update
 
-# Install i2c modules
-#SKIP THIS STEP!!#  sudo apt-get install python-smbus i2c-tools
+# Install i2c modules 
 sudo modprobe i2c-dev
 sudo modprobe i2c-bcm2708
-i2cdetect -y 1
 
 # Install java:
 sudo apt install openjdk-8-jdk
@@ -33,11 +30,9 @@ sudo apt install openjdk-8-jdk
 
 
 # Configure java8 to be the default java
-sudo update-alternatives --config java
+#SKIP THIS STEP!!#sudo update-alternatives --config java
 
 # build pi4j native lib
-## NIET NODIG ## sudo apt-get remove wiringpi -y ; niet nodig
-## NIET NODIG ## sudo apt-get --yes install git-core gcc make ; niet nodig
 cd ~
 git clone https://github.com/WiringPi/WiringPi --branch master --single-branch wiringpi
 cd ~/wiringpi
@@ -48,12 +43,12 @@ sudo apt-get install -y expect
 sudo apt-get install stockfish
 
 # Install schaakrob:
-mkdir /home/pi/git
-cd /home/pi/git
+mkdir ~/git
+cd ~/git
 git clone https://github.com/robbertvdzon/schaakrob
 
 # Initial build and run the code:
-cd /home/pi/git/schaakrob
+cd ~/git/schaakrob
 ./update_and_run.sh
 
 # Add the folling to  "crontab -e"
@@ -78,7 +73,6 @@ done
 
 # Change permissions:
 chmod a+x /home/pi/ui.sh
-
 
 # After starting the server for the first time: fill in the calibration in the 'manual' section
 A8: 16470,13130
