@@ -21,7 +21,11 @@ object ComputerPlayer {
 
         val exe1 = File("/home/robbert/Downloads/stockfish_14.1_linux_x64/stockfish_14.1_linux_x64")
         val exe2 = File("/usr/games/stockfish")
-        var exeName = if (exe2.isFile) "/usr/games/stockfish" else if (exe1.isFile) "/home/robbert/Downloads/stockfish_14.1_linux_x64/stockfish_14.1_linux_x64" else throw RuntimeException("Stockfish not found")
+        val exe3 = File("/opt/homebrew/bin/stockfish")
+        var exeName = if (exe2.isFile) "/usr/games/stockfish"
+        else if (exe1.isFile) "/home/robbert/Downloads/stockfish_14.1_linux_x64/stockfish_14.1_linux_x64"
+        else if (exe3.isFile) "/opt/homebrew/bin/stockfish"
+        else throw RuntimeException("Stockfish not found")
         println("use stockfish:"+exeName)
 
 

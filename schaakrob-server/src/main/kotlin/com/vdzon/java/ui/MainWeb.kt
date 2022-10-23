@@ -39,7 +39,7 @@ class MainWeb {
         robotAansturing = if (schaakbord) {
             RobotAansturingImpl()
         } else {
-            RobotAansturingClient("http://192.168.178.50:8080")
+            RobotAansturingClient("http://192.168.178.88:8080")
         }
         val schaakspel = Schaakspel(robotAansturing)
 

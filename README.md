@@ -18,7 +18,8 @@ XRL chassis: https://www.allekabels.nl/xlr-stekker/69/1602/xlr-chassis-3-polig.h
 
 schakelaar: https://www.allekabels.nl/schakelaar/7303/1079540/wipschakelaar.html (max 16A = 2A per motor!)
 
-# service installatie:
-sudo apt-get install -y expect
-sudo apt-get install stockfish
+# Install the rasperry pi:
+see /documentatino/setup_pi.md
 
+# running on osx:
+- brew install stockfish
