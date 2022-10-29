@@ -29,9 +29,6 @@ sudo apt install openjdk-8-jdk
 (note, we need java8. Later versions are not supported by the used pi4j library)
 
 
-# Configure java8 to be the default java
-#SKIP THIS STEP!!#sudo update-alternatives --config java
-
 # build pi4j native lib
 cd ~
 git clone https://github.com/WiringPi/WiringPi --branch master --single-branch wiringpi
@@ -84,12 +81,15 @@ H20:18600,450
 Pakker hoogte: -1900
 Snelheid: 0.8
 
-# check i2c status
+# optional: check i2c status
 i2cdetect -y 1
 
-# check gpio status:
+# optional: check gpio status:
 gpio readall
 
-# If you afterwards needs to enable an interface (ssh, i2c, SPI):
+# optional: If you afterwards needs to enable an interface (ssh, i2c, SPI):
 sudo raspi-config
 choose: 3 Interface Options
+
+# optional: When you want to change the default java version:
+#SKIP THIS STEP!!#sudo update-alternatives --config java
