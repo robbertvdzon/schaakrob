@@ -63,7 +63,7 @@ void setup() {
     while (1) {} // hold in infinite loop
   }
   radio.openWritingPipe(address);
-  
+
   radio.setChannel(108); // channel with less noise
   radio.setPALevel(RF24_PA_LOW);
   radio.setDataRate(RF24_250KBPS);
@@ -73,11 +73,11 @@ void setup() {
   Serial.println("radio ready");
 }
 
-void loop() {    
+void loop() {
   processCommand();
 }
 
-void sendData(){      
+void sendData(){
    Wire.write(state);
 }
 
@@ -185,7 +185,7 @@ void release2(){
 }
 
 bool sendWithRetry(const void* buf, uint8_t len){
-  int retryCount = 0; 
+  int retryCount = 0;
   int MAX_RETRIES = 300; // max 30 seconds
   bool succeeded = radio.write(buf, len);
   while (retryCount<MAX_RETRIES && !succeeded){
@@ -201,7 +201,7 @@ bool sendWithRetry(const void* buf, uint8_t len){
 void bootSeq(){
   beep();
   beep();
-  command = '-';    
+  command = '-';
 }
 
 void errorSeq(){
@@ -214,7 +214,7 @@ void errorSeq(){
   beep();
   delay(500);
   beep();
-  command = '-';    
+  command = '-';
 }
 
 
