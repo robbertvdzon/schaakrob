@@ -49,48 +49,53 @@ class RobotAansturingImpl() : RobotAansturing {
 
     // BLE Pakker settings
     private val bleServiceUuid = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
-    private val bleRxCharUuid = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E" // write characteristic
+    private val bleRxCharUuid = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E" // write characteristic (for reference)
     private val bleDeviceName = "NanoESP32-Pakker"
+    private val bleHandle = "0x000b" // GATT handle used by gatttool for RX characteristic
     private val bleMacAddress: String? by lazy { resolveBleMac() }
 
     private fun resolveBleMac(): String? {
-        // Priority: env var -> file -> null
+        // Priority: env var -> file -> default to provided MAC
         val env = System.getenv("BLE_PAKKER_MAC")?.trim()?.ifBlank { null }
         if (env != null) return env
-        return try {
+        try {
             val path = Paths.get("/home/pi/pakker_ble_mac.txt")
             if (Files.exists(path)) {
-                String(Files.readAllBytes(path)).trim().ifBlank { null }
-            } else null
+                val fromFile = String(Files.readAllBytes(path)).trim().ifBlank { null }
+                if (fromFile != null) return fromFile
+            }
         } catch (e: Exception) {
-            null
+            // ignore and fall through to default
         }
+        // Default MAC provided by user
+        return "E4:B0:63:AD:D2:AD"
     }
 
     private fun bleEncodeHex(text: String): String {
-        return text.toByteArray(Charsets.UTF_8).joinToString(" ") { String.format("%02x", (it.toInt() and 0xFF)) }
+        // gatttool expects a continuous hex string without spaces
+        return text.toByteArray(Charsets.UTF_8).joinToString("") { String.format("%02x", (it.toInt() and 0xFF)) }
     }
 
     private fun bleWrite(command: String): Boolean {
         val mac = bleMacAddress
         if (mac.isNullOrBlank()) {
-            log.warn("BLE MAC for Pakker not configured. Set env BLE_PAKKER_MAC or /home/pi/pakker_ble_mac.txt")
+            log.warn("BLE MAC for Pakker not configured.")
             return false
         }
-        try {
+        return try {
             val hex = bleEncodeHex(command)
-            val shellCmd = "echo -e \"connect $mac\nmenu gatt\nselect-attribute $bleRxCharUuid\nwrite $hex\nback\nquit\" | bluetoothctl"
+            val shellCmd = "gatttool -b $mac --char-write-req -a $bleHandle -n $hex"
             val pb = ProcessBuilder("bash", "-lc", shellCmd)
             pb.redirectErrorStream(true)
             val proc = pb.start()
             val exit = proc.waitFor()
             if (exit != 0) {
-                log.warn("bluetoothctl exited with code $exit while sending '$command'")
+                log.warn("gatttool exited with code $exit while sending '$command'")
             }
-            return exit == 0
+            exit == 0
         } catch (e: Exception) {
             log.warn("Failed to send BLE command '$command': ${e.message}")
-            return false
+            false
         }
     }
 
@@ -101,13 +106,10 @@ class RobotAansturingImpl() : RobotAansturing {
             return
         }
         try {
-            // Try a connect only first (faster), then send 'connected'
-            val connectCmd = "echo -e \"connect $mac\nquit\" | bluetoothctl"
-            ProcessBuilder("bash", "-lc", connectCmd).start().waitFor()
-            // send connected notification
+            // Just send a 'connected' message via gatttool; gatttool will handle the connection for the write
             bleWrite("connected")
         } catch (e: Exception) {
-            log.warn("Initial BLE connect failed: ${e.message}")
+            log.warn("Initial BLE notify failed: ${e.message}")
         }
     }
 
