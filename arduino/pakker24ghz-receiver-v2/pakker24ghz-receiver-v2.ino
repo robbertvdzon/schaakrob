@@ -46,7 +46,10 @@ void setup() {
   analogWrite(3, MAGNET_OFF);
 
 
-  beep();
+  startBeep();
+  delay(1000);
+//   errorbeep();
+  connectedBeep();
 
   // TCCR2B = TCCR2B & B11111000 | B00000001; // for PWM frequency of 31372.55 Hz, avoind zooming of the magnet
 
@@ -87,7 +90,6 @@ void setup() {
 
   Serial.println("START (BLE: pak1/pak2/zet1/zet2/beep/test)");
 
-  errorbeep();
 
 }
 
@@ -100,7 +102,7 @@ void handleCommand(const String& in) {
   else if (s == "pak2") pak2();
   else if (s == "zet1") zet1();
   else if (s == "zet2") zet2();
-  else if (s == "beep") errorbeep();
+  else if (s == "beep") connectedBeep();
   else if (s == "test") testloop();
 }
 
@@ -253,17 +255,33 @@ void testloop(){
 }
 
 
-void errorbeep(){
-  beep();
+void beep(){
+    analogWrite(buzzerpin , 0);
+    delay(200);
+    analogWrite(buzzerpin , 255);
+    delay(50);
+}
+
+void connectedBeep(){
+  beepTime(5,500);
+  delay(50);
+  beepTime(5,100);
+  delay(50);
+  beepTime(5,100);
+}
+
+void startBeep() {
   beep();
   beep();
   beep();
 }
 
 
-void beep(){
-    analogWrite(buzzerpin , 0);
-    delay(200);
-    analogWrite(buzzerpin , 255);
-    delay(50);
+void beepTime(int delayTime, int totalTime) {
+  int beepCount = totalTime / delayTime;   // bereken hoeveel keer we moeten schakelen
+  for (int i = 0; i < beepCount; i++) {
+    analogWrite(buzzerpin, (i % 2 == 0) ? 255 : 0);
+    delay(delayTime);
+  }
+  analogWrite(buzzerpin, 255);
 }
