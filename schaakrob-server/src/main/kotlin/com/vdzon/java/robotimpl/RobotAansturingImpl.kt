@@ -328,7 +328,7 @@ class RobotAansturingImpl() : RobotAansturing {
 
     override fun bootsound() {
         log.info("bootsound")
-        bleWrite("beep")
+        arm1!!.writeI2c("^B0000000000000000".toByteArray(),"arm1")
     }
 
 
