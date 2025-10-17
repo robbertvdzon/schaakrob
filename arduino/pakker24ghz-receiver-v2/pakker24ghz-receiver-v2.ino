@@ -7,7 +7,6 @@
 #define switchpin 5
 
 
-// RF24 radio(8,9); // CE, CSN
 const byte address[6] = "00002";
 
 const int SERVOMIN = 120; // this is the 'minimum' pulse length count (out of 4096)
@@ -47,34 +46,16 @@ void setup() {
 
 
   startBeep();
-  delay(1000);
-//   errorbeep();
-  connectedBeep();
 
   // TCCR2B = TCCR2B & B11111000 | B00000001; // for PWM frequency of 31372.55 Hz, avoind zooming of the magnet
 
-  // pwm.begin();
-  // pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
-  // pwm.setPWM(0, 0, SERVO_MIDDLE );
-  // pwm.setPWM(1, 0, SERVO_MIDDLE );
-  // pwm.setPWM(2, 0, SERVO_MIDDLE );
-  // pwm.setPWM(3, 0, SERVO_MIDDLE );
+  pwm.begin();
+  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
+  pwm.setPWM(0, 0, SERVO_MIDDLE );
+  pwm.setPWM(1, 0, SERVO_MIDDLE );
+  pwm.setPWM(2, 0, SERVO_MIDDLE );
+  pwm.setPWM(3, 0, SERVO_MIDDLE );
 
-
-
-
-  // if (!radio.begin()) {
-  //   Serial.println(F("radio hardware is not responding!!"));
-  //   errorbeep();
-  //   while (1) {} // hold in infinite loop
-  // }
-  // radio.openReadingPipe(0, address);
-  // radio.setChannel(108); // channel with less noise
-  // radio.setPALevel(RF24_PA_LOW);
-  // radio.setDataRate(RF24_250KBPS);
-  // radio.setPayloadSize(sizeof("pak1"));
-  // radio.setCRCLength(RF24_CRC_8);
-  // radio.startListening();
   analogWrite(2, MAGNET_OFF);
   Serial.println("START");
 
@@ -102,7 +83,8 @@ void handleCommand(const String& in) {
   else if (s == "pak2") pak2();
   else if (s == "zet1") zet1();
   else if (s == "zet2") zet2();
-  else if (s == "beep") connectedBeep();
+  else if (s == "beep") beep();
+  else if (s == "connected") connectedBeep();
   else if (s == "test") testloop();
 }
 
@@ -115,39 +97,6 @@ boolean oldButtonState = true;
 
 
 void loop() {
-  // Verbindingen afhandelen (ArduinoBLE pattern)
-  BLEDevice central = BLE.central();
-
-  // Wachten op writes: wanneer de central iets naar rxChar schrijft:
-  if (rxChar.written()) {
-    handleCommand(rxChar.value());   // rxChar.value() geeft String
-  }
-
-  // Knop
-  // bool buttonState = digitalRead(SWITCH_PIN);
-  // if (!buttonState && oldButtonState) {
-  //   Serial.println("button pressed");
-  //   beepShort();
-  //   testloop();
-  // }
-  // oldButtonState = buttonState;
-
-  // magneet time-outs
-  // unsigned long now = millis();
-  // if (lastGrapTime1 != -1 && (now - lastGrapTime1) > TIMEOUT_MAGNET) {
-  //   magnetWrite(1, MAGNET_OFF);
-  //   lastGrapTime1 = -1;
-  // }
-  // if (lastGrapTime2 != -1 && (now - lastGrapTime2) > TIMEOUT_MAGNET) {
-  //   magnetWrite(2, MAGNET_OFF);
-  //   lastGrapTime2 = -1;
-  // }
-
-  delay(1);
-}
-
-
-void loopOld() {
   boolean buttonState = digitalRead(switchpin);
   if (!buttonState &&  oldButtonState){
     Serial.println("pressed");
@@ -172,28 +121,15 @@ void loopOld() {
   }
 
 
-  // if (radio.available()) {
-  //   char text[32] = "";
-  //   radio.read(&text, sizeof(text));
-  //   if(strcmp(text, "pak1") == 0){
-  //     pak1();
-  //   }
-  //   if(strcmp(text, "zet1") == 0){
-  //     zet1();
-  //   }
+  // Verbindingen afhandelen (ArduinoBLE pattern)
+  BLEDevice central = BLE.central();
 
-  //   if(strcmp(text, "pak2") == 0){
-  //     pak2();
-  //   }
-
-  //   if(strcmp(text, "zet2") == 0){
-  //     zet2();
-  //   }
-  //   if(strcmp(text, "") != 0){
-  //     Serial.println(text);
-  //   }
-  // }
+  // Wachten op writes: wanneer de central iets naar rxChar schrijft:
+  if (rxChar.written()) {
+    handleCommand(rxChar.value());   // rxChar.value() geeft String
+  }
 }
+
 
 void pak1(){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN_ARM1 );
@@ -278,7 +214,7 @@ void startBeep() {
 
 
 void beepTime(int delayTime, int totalTime) {
-  int beepCount = totalTime / delayTime;   // bereken hoeveel keer we moeten schakelen
+  int beepCount = totalTime / delayTime;
   for (int i = 0; i < beepCount; i++) {
     analogWrite(buzzerpin, (i % 2 == 0) ? 255 : 0);
     delay(delayTime);
