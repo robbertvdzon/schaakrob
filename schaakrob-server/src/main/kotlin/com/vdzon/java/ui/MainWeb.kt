@@ -19,7 +19,7 @@ class MainWeb {
 
     var app: Javalin? = null
     fun start(schaakbord: Boolean) {
-        log.info("Starting backend..")
+        log.info("Starting backend.. v1")
         app = Javalin.create { config: JavalinConfig ->
             config.enableWebjars()
             config.addStaticFiles("/html")

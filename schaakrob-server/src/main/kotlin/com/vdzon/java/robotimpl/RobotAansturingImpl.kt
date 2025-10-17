@@ -114,7 +114,6 @@ class RobotAansturingImpl() : RobotAansturing {
     }
 
     fun init() {
-
         if (arm1 != null) {
             return
         }
