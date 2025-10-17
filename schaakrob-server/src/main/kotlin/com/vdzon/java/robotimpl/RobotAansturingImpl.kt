@@ -712,7 +712,7 @@ private fun I2CDevice.readI2c(devicename: String): Int {
         try {
             result = read()
             if (result!=0) {
-                log.info("status of 0 not accepted for "+devicename+", retry read status")
+//                log.info("status of 0 not accepted for "+devicename+", retry read status")
                 succeeded = true
             }
         }
