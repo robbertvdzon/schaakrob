@@ -55,24 +55,10 @@ class RobotAansturingImpl() : RobotAansturing {
     private val bleMacAddress: String? by lazy { resolveBleMac() }
 
     private fun resolveBleMac(): String? {
-        // Priority: env var -> file -> default to provided MAC
-        val env = System.getenv("BLE_PAKKER_MAC")?.trim()?.ifBlank { null }
-        if (env != null) return env
-        try {
-            val path = Paths.get("/home/pi/pakker_ble_mac.txt")
-            if (Files.exists(path)) {
-                val fromFile = String(Files.readAllBytes(path)).trim().ifBlank { null }
-                if (fromFile != null) return fromFile
-            }
-        } catch (e: Exception) {
-            // ignore and fall through to default
-        }
-        // Default MAC provided by user
         return "E4:B0:63:AD:D2:AD"
     }
 
     private fun bleEncodeHex(text: String): String {
-        // gatttool expects a continuous hex string without spaces
         return text.toByteArray(Charsets.UTF_8).joinToString("") { String.format("%02x", (it.toInt() and 0xFF)) }
     }
 
@@ -309,21 +295,25 @@ class RobotAansturingImpl() : RobotAansturing {
     override fun clamp1() {
         log.info("BLE: pak1")
         bleWrite("pak1")
+        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
     }
 
     override fun release1() {
         log.info("BLE: zet1")
         bleWrite("zet1")
+        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
     }
 
     override fun clamp2() {
         log.info("BLE: pak2")
         bleWrite("pak2")
+        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
     }
 
     override fun release2() {
         log.info("BLE: zet2")
         bleWrite("zet2")
+        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
     }
 
 
