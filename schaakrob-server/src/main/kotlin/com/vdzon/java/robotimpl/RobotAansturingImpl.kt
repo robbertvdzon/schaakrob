@@ -49,6 +49,70 @@ class RobotAansturingImpl() : RobotAansturing {
     private var arm2AtHome = false
     private var currentLoopThread: Thread? = null
 
+    // BLE Pakker settings
+    private val bleServiceUuid = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
+    private val bleRxCharUuid = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E" // write characteristic
+    private val bleDeviceName = "NanoESP32-Pakker"
+    private val bleMacAddress: String? by lazy { resolveBleMac() }
+
+    private fun resolveBleMac(): String? {
+        // Priority: env var -> file -> null
+        val env = System.getenv("BLE_PAKKER_MAC")?.trim()?.ifBlank { null }
+        if (env != null) return env
+        return try {
+            val path = Paths.get("/home/pi/pakker_ble_mac.txt")
+            if (Files.exists(path)) {
+                String(Files.readAllBytes(path)).trim().ifBlank { null }
+            } else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun bleEncodeHex(text: String): String {
+        return text.toByteArray(Charsets.UTF_8).joinToString(" ") { String.format("%02x", (it.toInt() and 0xFF)) }
+    }
+
+    private fun bleWrite(command: String): Boolean {
+        val mac = bleMacAddress
+        if (mac.isNullOrBlank()) {
+            log.warn("BLE MAC for Pakker not configured. Set env BLE_PAKKER_MAC or /home/pi/pakker_ble_mac.txt")
+            return false
+        }
+        try {
+            val hex = bleEncodeHex(command)
+            val shellCmd = "echo -e \"connect $mac\nmenu gatt\nselect-attribute $bleRxCharUuid\nwrite $hex\nback\nquit\" | bluetoothctl"
+            val pb = ProcessBuilder("bash", "-lc", shellCmd)
+            pb.redirectErrorStream(true)
+            val proc = pb.start()
+            val exit = proc.waitFor()
+            if (exit != 0) {
+                log.warn("bluetoothctl exited with code $exit while sending '$command'")
+            }
+            return exit == 0
+        } catch (e: Exception) {
+            log.warn("Failed to send BLE command '$command': ${e.message}")
+            return false
+        }
+    }
+
+    private fun bleConnectAndNotify() {
+        val mac = bleMacAddress
+        if (mac.isNullOrBlank()) {
+            log.info("BLE MAC not set; skipping initial BLE connect to Pakker")
+            return
+        }
+        try {
+            // Try a connect only first (faster), then send 'connected'
+            val connectCmd = "echo -e \"connect $mac\nquit\" | bluetoothctl"
+            ProcessBuilder("bash", "-lc", connectCmd).start().waitFor()
+            // send connected notification
+            bleWrite("connected")
+        } catch (e: Exception) {
+            log.warn("Initial BLE connect failed: ${e.message}")
+        }
+    }
+
     fun init() {
 
         if (arm1 != null) {
@@ -84,6 +148,9 @@ class RobotAansturingImpl() : RobotAansturing {
         }
 
         log.info("Devices found")
+
+        // Try to connect to BLE Pakker at startup and send 'connected'
+        thread { bleConnectAndNotify() }
 
         thread {
             println("start check sleep thread")
@@ -243,52 +310,25 @@ class RobotAansturingImpl() : RobotAansturing {
     }
 
     override fun clamp1() {
-        log.info("start: pak ")
-        arm3!!.writeI2c("^C0000000000000000".toByteArray(),"arm3")
-        waitUntilArmReady(20)
-        log.info("done: pak ")
+        log.info("BLE: pak1")
+        bleWrite("pak1")
     }
 
     override fun release1() {
-        log.info("start: release ")
-        arm3!!.writeI2c("^R0000000000000000".toByteArray(),"arm3")
-        waitUntilArmReady(20)
-        log.info("done: release ")
+        log.info("BLE: zet1")
+        bleWrite("zet1")
     }
 
     override fun clamp2() {
-        log.info("start: pak ")
-        arm3!!.writeI2c("^W0000000000000000".toByteArray(),"arm3")
-        waitUntilArmReady(20)
-        log.info("done: pak ")
+        log.info("BLE: pak2")
+        bleWrite("pak2")
     }
 
     override fun release2() {
-        log.info("start: release ")
-        arm3!!.writeI2c("^E0000000000000000".toByteArray(),"arm3")
-        waitUntilArmReady(20)
-        log.info("done: release ")
+        log.info("BLE: zet2")
+        bleWrite("zet2")
     }
-//
-//    override fun hold() {
-//        arm3!!.writeI2c("^H0000000000000000".toByteArray(),"arm3")
-//        waitUntilReady(20)
-//    }
-//
-//    override fun drop() {
-//        arm3!!.writeI2c("^D0000000000000000".toByteArray(),"arm3")
-//        waitUntilReady(20)
-//    }
-//
-//    override fun activate() {
-//        arm3!!.writeI2c("^A0000000000000000".toByteArray(),"arm3")
-//        waitUntilReady(20)
-//    }
-//
-//    override fun deactivate() {
-//        arm3!!.writeI2c("^I0000000000000000".toByteArray(),"arm3")
-//        waitUntilReady(20)
-//    }
+
 
     override fun bootsound() {
         log.info("bootsound")
