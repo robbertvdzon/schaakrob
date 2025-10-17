@@ -40,10 +40,8 @@ class RobotAansturingImpl() : RobotAansturing {
     var formattedDelayFactor2 = "0050"
     private var allReady = false
     private var allSleeping = false
-    private var arm3Ready = false
     private var arm1: I2CDevice? = null
     private var arm2: I2CDevice? = null
-    private var arm3: I2CDevice? = null
     private var lastMovement = 0L
     private var arm1AtHome = false
     private var arm2AtHome = false
@@ -129,11 +127,9 @@ class RobotAansturingImpl() : RobotAansturing {
                 val i2c = I2CFactory.getInstance(I2CBus.BUS_1)
                 arm1 = i2c.getDevice(ARM1)
                 arm2 = i2c.getDevice(ARM2)
-                arm3 = i2c.getDevice(ARM3)
                 // test connectoe
                 arm1!!.readI2c("arm1")
                 arm2!!.readI2c("arm2")
-                arm3!!.readI2c("arm3")
 
 
 
@@ -332,7 +328,7 @@ class RobotAansturingImpl() : RobotAansturing {
 
     override fun bootsound() {
         log.info("bootsound")
-        arm1!!.writeI2c("^B0000000000000000".toByteArray(),"arm3")
+        bleWrite("beep")
     }
 
 
@@ -464,12 +460,6 @@ class RobotAansturingImpl() : RobotAansturing {
         return if (status == 6) "SL" else "??"
     }
 
-    private fun getArm3StatusString(status: Int): String {
-        if (status == 1) return "RE"
-        if (status == 2) return "GR"
-        return if (status == 3) "RE" else "??"
-    }
-
     fun localHostLANAddress(): InetAddress {
         try {
             var candidateAddress: InetAddress? = null
@@ -556,7 +546,6 @@ class RobotAansturingImpl() : RobotAansturing {
         when (arm){
             arm1 -> "arm1"
             arm2 -> "arm2"
-            arm3 -> "arm3"
             else -> "?"
         }
 
@@ -604,23 +593,12 @@ class RobotAansturingImpl() : RobotAansturing {
         try {
             val arm1Status = arm1!!.readI2c("arm1")
             val arm2Status = arm2!!.readI2c("arm2")
-            val arm3Status = arm3!!.readI2c("arm3")
-            allReady = arm1Status == 1 && arm2Status == 1 && arm3Status == 1
+            allReady = arm1Status == 1 && arm2Status == 1
             allSleeping = arm1Status == 6 && arm2Status == 6
         } catch (e: Exception) {
             e.printStackTrace()
             allReady = false
             allSleeping = false
-        }
-    }
-
-    private fun udateStatusArm3() {
-        try {
-            val arm3Status = arm3!!.readI2c("arm3")
-            arm3Ready = arm3Status == 1
-        } catch (e: Exception) {
-            e.printStackTrace()
-            arm3Ready = false
         }
     }
 
@@ -709,17 +687,6 @@ class RobotAansturingImpl() : RobotAansturing {
         println("All ready")
     }
 
-    private fun waitUntilArmReady(initialDelay: Int) {
-        sleep(initialDelay)
-        udateStatusArm3()
-        println("Wait until arm3 ready")
-        while (!arm3Ready) {
-            sleep(10)
-            udateStatusArm3()
-        }
-        println("arm3 ready")
-    }
-
     private fun sleep(initialDelay: Int) {
         try {
             Thread.sleep(initialDelay.toLong())
@@ -731,7 +698,6 @@ class RobotAansturingImpl() : RobotAansturing {
     companion object {
         private const val ARM1 = 0x6
         private const val ARM2 = 0x7
-        private const val ARM3 = 0x5
     }
 
     init {
