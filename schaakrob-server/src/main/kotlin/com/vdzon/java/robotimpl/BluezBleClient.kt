@@ -6,6 +6,7 @@ import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.types.Variant
 import org.bluez.Device1
 import org.bluez.GattCharacteristic1
+import org.bluez.Adapter1
 import org.freedesktop.DBus.ObjectManager
 
 class BluezBleClient(
@@ -21,29 +22,58 @@ class BluezBleClient(
         return conn ?: DBusConnection.getConnection(DBusConnection.DBusBusType.SYSTEM).also { conn = it }
     }
 
+    private fun findDevicePathByAddress(bus: DBusConnection, mac: String): String? {
+        val objMgr = bus.getRemoteObject("org.bluez", "/", ObjectManager::class.java)
+        val managed = objMgr.GetManagedObjects()
+        val targetAddr = mac.uppercase()
+        return managed.entries.firstOrNull { (path, ifaces) ->
+            path.startsWith("/org/bluez/$adapter/dev_") &&
+            ifaces.containsKey("org.bluez.Device1") &&
+            ((ifaces["org.bluez.Device1"]?.get("Address") as? Variant<*>)?.value as? String)?.equals(targetAddr, true) == true
+        }?.key
+    }
+
     fun write(mac: String, data: ByteArray, timeoutMs: Long = 8000): Boolean {
         val lowercaseRx = rxCharUuid.lowercase()
         val bus = ensureConn()
-        val devicePath = "/org/bluez/$adapter/dev_" + mac.replace(":", "_")
+        val adapterPath = "/org/bluez/$adapter"
         try {
+            // Resolve or discover the device path
+            var devicePath = findDevicePathByAddress(bus, mac)
+            if (devicePath == null) {
+                // Start discovery to let BlueZ create the device object
+                val adapterObj = bus.getRemoteObject("org.bluez", adapterPath, Adapter1::class.java)
+                try { adapterObj.StartDiscovery() } catch (_: Exception) {}
+                val stopAt = System.currentTimeMillis() + timeoutMs
+                while (devicePath == null && System.currentTimeMillis() < stopAt) {
+                    Thread.sleep(200)
+                    devicePath = findDevicePathByAddress(bus, mac)
+                }
+                try { adapterObj.StopDiscovery() } catch (_: Exception) {}
+                if (devicePath == null) {
+                    log.error("BlueZ: Device with address $mac not found (discovery timeout)")
+                    return false
+                }
+            }
+
             val dev = bus.getRemoteObject("org.bluez", devicePath, Device1::class.java)
             val props = bus.getRemoteObject("org.bluez", devicePath, Properties::class.java)
 
             // Connect if needed
-            val connected = (props.Get("org.bluez.Device1", "Connected") as Variant<*>).value as? Boolean ?: false
+            val connected = try { (props.Get("org.bluez.Device1", "Connected") as Variant<*>).value as? Boolean } catch (_: Exception) { null } ?: false
             if (!connected) {
                 dev.Connect()
             }
 
-            // Wait for services resolved
+            // Wait for services resolved (best-effort)
             val stopAt = System.currentTimeMillis() + timeoutMs
-            var resolved = (props.Get("org.bluez.Device1", "ServicesResolved") as Variant<*>).value as? Boolean ?: false
+            var resolved = try { (props.Get("org.bluez.Device1", "ServicesResolved") as Variant<*>).value as? Boolean } catch (_: Exception) { null } ?: false
             while (!resolved && System.currentTimeMillis() < stopAt) {
-                Thread.sleep(50)
-                resolved = (props.Get("org.bluez.Device1", "ServicesResolved") as Variant<*>).value as? Boolean ?: false
+                Thread.sleep(100)
+                resolved = try { (props.Get("org.bluez.Device1", "ServicesResolved") as Variant<*>).value as? Boolean } catch (_: Exception) { null } ?: false
             }
             if (!resolved) {
-                log.warn("BlueZ: Services not resolved for $mac; write may fail")
+                log.warn("BlueZ: Services not resolved for $mac; proceeding to try write anyway")
             }
 
             // Find RX characteristic path under this device
