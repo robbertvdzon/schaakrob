@@ -1,6 +1,7 @@
 package com.vdzon.java.robotimpl
 
 import org.slf4j.LoggerFactory
+import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.types.Variant
@@ -27,9 +28,11 @@ class BluezBleClient(
         val managed = objMgr.GetManagedObjects()
         val suffix = "dev_" + mac.uppercase().replace(":", "_")
         // Match device object by deterministic path suffix and presence of Device1 interface
-        return managed.keys.firstOrNull { path ->
-            path.startsWith("/org/bluez/$adapter/") && path.endsWith(suffix)
+        val path: DBusPath? = managed.keys.firstOrNull { path ->
+            val p = path.path
+            p.startsWith("/org/bluez/$adapter/") && p.endsWith(suffix)
         }
+        return path?.path
     }
 
     fun write(mac: String, data: ByteArray, timeoutMs: Long = 8000): Boolean {
@@ -78,10 +81,11 @@ class BluezBleClient(
             // Find RX characteristic path under this device
             val objMgr = bus.getRemoteObject("org.bluez", "/", ObjectManager::class.java)
             val managed = objMgr.GetManagedObjects()
-            val rxPath = managed.entries.firstOrNull { (path, ifaces) ->
-                path.startsWith(devicePath) && ifaces.containsKey("org.bluez.GattCharacteristic1") &&
+            val rxPath: String? = managed.entries.firstOrNull { (path, ifaces) ->
+                val p = path.path
+                p.startsWith(devicePath) && ifaces.containsKey("org.bluez.GattCharacteristic1") &&
                         ((ifaces["org.bluez.GattCharacteristic1"]?.get("UUID") as? Variant<*>)?.value as? String)?.lowercase() == lowercaseRx
-            }?.key
+            }?.key?.path
             if (rxPath == null) {
                 log.error("BlueZ: RX characteristic $rxCharUuid not found under $devicePath")
                 return false
