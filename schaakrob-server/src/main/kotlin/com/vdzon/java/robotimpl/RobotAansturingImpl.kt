@@ -295,25 +295,29 @@ class RobotAansturingImpl() : RobotAansturing {
     override fun clamp1() {
         log.info("BLE: pak1")
         bleWrite("pak1")
-        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
+        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        log.info("pak1 klaar")
     }
 
     override fun release1() {
         log.info("BLE: zet1")
         bleWrite("zet1")
-        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
+        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        log.info("zet1 klaar")
     }
 
     override fun clamp2() {
         log.info("BLE: pak2")
         bleWrite("pak2")
-        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
+        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        log.info("pak2 klaar")
     }
 
     override fun release2() {
         log.info("BLE: zet2")
         bleWrite("zet2")
-        Thread.sleep(2000)// voor nu: wacht 2 seconden, moet later via een callback
+        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        log.info("zet2 klaar")
     }
 
 
