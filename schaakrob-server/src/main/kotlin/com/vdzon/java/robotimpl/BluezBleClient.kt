@@ -77,7 +77,7 @@ class BluezBleClient(
                 dev.Connect()
             }
 
-            // Wait for services resolved up to timeout; if not resolved, abort
+            // Wait (best-effort) for services to resolve; do not hard-abort if it takes long
             val stopAt = System.currentTimeMillis() + timeoutMs
             var resolved = false
             while (System.currentTimeMillis() < stopAt) {
@@ -87,32 +87,35 @@ class BluezBleClient(
                 Thread.sleep(100)
             }
             if (!resolved) {
-                log.error("BlueZ: Services not resolved for $mac; aborting write")
-                return false
+                log.warn("BlueZ: Services not resolved for $mac; continue and poll for characteristic")
             }
             if (!connected) {
                 log.error("BlueZ: Device $mac disconnected before write")
                 return false
             }
 
-            // Find RX characteristic path under this device
+            // Find RX characteristic path under this device, polling until it appears or timeout
             val objMgr = bus.getRemoteObject("org.bluez", "/", ObjectManager::class.java)
-            val managed = objMgr.GetManagedObjects()
             var rxPath: String? = null
-            for (entry in managed.entries) {
-                val p = entry.key.path
-                if (!p.startsWith(devicePath)) continue
-                val ifaces = entry.value
-                if (!ifaces.containsKey("org.bluez.GattCharacteristic1")) continue
-                val uuidVar = ifaces["org.bluez.GattCharacteristic1"]?.get("UUID") as? Variant<*>
-                val uuid = (uuidVar?.value as? String)?.lowercase()
-                if (uuid == lowercaseRx) {
-                    rxPath = entry.key.path
-                    break
+            val charStopAt = System.currentTimeMillis() + timeoutMs
+            while (rxPath == null && System.currentTimeMillis() < charStopAt) {
+                val managed = objMgr.GetManagedObjects()
+                for (entry in managed.entries) {
+                    val p = entry.key.path
+                    if (!p.startsWith(devicePath)) continue
+                    val ifaces = entry.value
+                    if (!ifaces.containsKey("org.bluez.GattCharacteristic1")) continue
+                    val uuidVar = ifaces["org.bluez.GattCharacteristic1"]?.get("UUID") as? Variant<*>
+                    val uuid = (uuidVar?.value as? String)?.lowercase()
+                    if (uuid == lowercaseRx) {
+                        rxPath = entry.key.path
+                        break
+                    }
                 }
+                if (rxPath == null) Thread.sleep(100)
             }
             if (rxPath == null) {
-                log.error("BlueZ: RX characteristic $rxCharUuid not found under $devicePath")
+                log.error("BlueZ: RX characteristic $rxCharUuid not found under $devicePath within timeout")
                 return false
             }
 
@@ -123,12 +126,11 @@ class BluezBleClient(
         } catch (e: Exception) {
             log.error("BlueZ write failed to $mac: ${e.message}", e)
             return false
-        } finally {
-            try { bus.close() } catch (_: Exception) {}
         }
     }
 
     override fun close() {
-        // no-op: we open/close per call
+        try { conn?.close() } catch (_: Exception) {}
+        conn = null
     }
 }
