@@ -18,6 +18,8 @@ import de.pi3g.pi.oled.OLEDDisplay
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.UnknownHostException
@@ -74,13 +76,38 @@ class RobotAansturingImpl() : RobotAansturing {
             val pb = ProcessBuilder("bash", "-lc", shellCmd)
             pb.redirectErrorStream(true)
             val proc = pb.start()
+            // Read output to capture any gatttool errors
+            val output = StringBuilder()
+            val reader = BufferedReader(InputStreamReader(proc.inputStream))
+            val readerThread = Thread {
+                try {
+                    var line: String?
+                    while (reader.readLine().also { line = it } != null) {
+                        output.appendLine(line)
+                    }
+                } catch (ignored: Exception) {
+                } finally {
+                    try { reader.close() } catch (_: Exception) {}
+                }
+            }
+            readerThread.start()
             val exit = proc.waitFor()
+            readerThread.join(500)
+            val out = output.toString().trim()
+
             if (exit != 0) {
-                log.warn("gatttool exited with code $exit while sending '$command'")
+                log.error("gatttool exited with code $exit while sending '$command' to $mac (handle $bleHandle). Output=[$out]")
+            } else {
+                // Still log warnings if gatttool reported a failure phrase even with exit 0
+                if (out.contains("failed", ignoreCase = true) || out.contains("error", ignoreCase = true)) {
+                    log.warn("gatttool reported potential issue while sending '$command': $out")
+                } else if (out.isNotEmpty()) {
+                    log.debug("gatttool output for '$command': $out")
+                }
             }
             exit == 0
         } catch (e: Exception) {
-            log.warn("Failed to send BLE command '$command': ${e.message}")
+            log.error("Failed to send BLE command '$command' via gatttool: ${e.message}", e)
             false
         }
     }
