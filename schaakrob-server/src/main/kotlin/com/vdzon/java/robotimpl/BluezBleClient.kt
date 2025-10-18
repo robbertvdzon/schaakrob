@@ -25,12 +25,11 @@ class BluezBleClient(
     private fun findDevicePathByAddress(bus: DBusConnection, mac: String): String? {
         val objMgr = bus.getRemoteObject("org.bluez", "/", ObjectManager::class.java)
         val managed = objMgr.GetManagedObjects()
-        val targetAddr = mac.uppercase()
-        return managed.entries.firstOrNull { (path, ifaces) ->
-            path.startsWith("/org/bluez/$adapter/dev_") &&
-            ifaces.containsKey("org.bluez.Device1") &&
-            ((ifaces["org.bluez.Device1"]?.get("Address") as? Variant<*>)?.value as? String)?.equals(targetAddr, true) == true
-        }?.key
+        val suffix = "dev_" + mac.uppercase().replace(":", "_")
+        // Match device object by deterministic path suffix and presence of Device1 interface
+        return managed.keys.firstOrNull { path ->
+            path.startsWith("/org/bluez/$adapter/") && path.endsWith(suffix)
+        }
     }
 
     fun write(mac: String, data: ByteArray, timeoutMs: Long = 8000): Boolean {
