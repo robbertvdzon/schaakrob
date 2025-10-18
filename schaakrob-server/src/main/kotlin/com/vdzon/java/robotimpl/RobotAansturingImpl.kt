@@ -64,53 +64,70 @@ class RobotAansturingImpl() : RobotAansturing {
         return text.toByteArray(Charsets.UTF_8).joinToString("") { String.format("%02x", (it.toInt() and 0xFF)) }
     }
 
+
+    private val dbusClient: BluezBleClient by lazy { BluezBleClient() }
+
     private fun bleWrite(command: String): Boolean {
         val mac = bleMacAddress
         if (mac.isNullOrBlank()) {
             log.warn("BLE MAC for Pakker not configured.")
             return false
         }
+        // Use BlueZ D-Bus API only
         return try {
-            val hex = bleEncodeHex(command)
-            val shellCmd = "gatttool -b $mac --char-write-req -a $bleHandle -n $hex"
-            val pb = ProcessBuilder("bash", "-lc", shellCmd)
-            pb.redirectErrorStream(true)
-            val proc = pb.start()
-            // Read output to capture any gatttool errors
-            val output = StringBuilder()
-            val reader = BufferedReader(InputStreamReader(proc.inputStream))
-            val readerThread = Thread {
-                try {
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        output.appendLine(line)
-                    }
-                } catch (ignored: Exception) {
-                } finally {
-                    try { reader.close() } catch (_: Exception) {}
-                }
+            log.info("Write using BlueZ D-Bus: '$command'")
+            val ok = dbusClient.write(mac, command.toByteArray(Charsets.UTF_8))
+            if (!ok) {
+                log.warn("BlueZ D-Bus write failed for '$command'")
             }
-            readerThread.start()
-            val exit = proc.waitFor()
-            readerThread.join(500)
-            val out = output.toString().trim()
-
-            if (exit != 0) {
-                log.error("gatttool exited with code $exit while sending '$command' to $mac (handle $bleHandle). Output=[$out]")
-            } else {
-                // Still log warnings if gatttool reported a failure phrase even with exit 0
-                if (out.contains("failed", ignoreCase = true) || out.contains("error", ignoreCase = true)) {
-                    log.warn("gatttool reported potential issue while sending '$command': $out")
-                } else if (out.isNotEmpty()) {
-                    log.debug("gatttool output for '$command': $out")
-                }
-            }
-            exit == 0
+            ok
         } catch (e: Exception) {
-            log.error("Failed to send BLE command '$command' via gatttool: ${e.message}", e)
+            log.error("BlueZ D-Bus exception for '$command': ${e.message}", e)
             false
         }
     }
+//
+//    private fun bleWriteGatttool(command: String): Boolean {
+//        val mac = bleMacAddress
+//        if (mac.isNullOrBlank()) return false
+//        return try {
+//            val hex = bleEncodeHex(command)
+//            val shellCmd = "gatttool -b $mac --char-write-req -a $bleHandle -n $hex"
+//            val pb = ProcessBuilder("bash", "-lc", shellCmd)
+//            pb.redirectErrorStream(true)
+//            val proc = pb.start()
+//            val output = StringBuilder()
+//            val reader = BufferedReader(InputStreamReader(proc.inputStream))
+//            val readerThread = Thread {
+//                try {
+//                    var line: String?
+//                    while (reader.readLine().also { line = it } != null) {
+//                        output.appendLine(line)
+//                    }
+//                } catch (_: Exception) {
+//                } finally {
+//                    try { reader.close() } catch (_: Exception) {}
+//                }
+//            }
+//            readerThread.start()
+//            val exit = proc.waitFor()
+//            readerThread.join(500)
+//            val out = output.toString().trim()
+//            if (exit != 0) {
+//                log.error("gatttool exited with code $exit while sending '$command' to $mac (handle $bleHandle). Output=[$out]")
+//            } else {
+//                if (out.contains("failed", ignoreCase = true) || out.contains("error", ignoreCase = true)) {
+//                    log.warn("gatttool reported potential issue while sending '$command': $out")
+//                } else if (out.isNotEmpty()) {
+//                    log.debug("gatttool output for '$command': $out")
+//                }
+//            }
+//            exit == 0
+//        } catch (e: Exception) {
+//            log.error("Failed to send BLE command '$command' via gatttool: ${e.message}", e)
+//            false
+//        }
+//    }
 
     private fun bleConnectAndNotify() {
         val mac = bleMacAddress
@@ -119,7 +136,7 @@ class RobotAansturingImpl() : RobotAansturing {
             return
         }
         try {
-            // Just send a 'connected' message via gatttool; gatttool will handle the connection for the write
+            // Send a 'connected' message via BlueZ D-Bus BLE client
             bleWrite("connected")
         } catch (e: Exception) {
             log.warn("Initial BLE notify failed: ${e.message}")
