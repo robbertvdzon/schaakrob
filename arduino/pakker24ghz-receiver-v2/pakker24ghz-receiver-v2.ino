@@ -31,6 +31,17 @@ BLEStringCharacteristic rxChar(
 
 Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
 
+// BLE/Timing helpers to keep BLE responsive during long actions
+volatile bool busy = false;
+
+void shortDelay(unsigned long ms){
+  unsigned long end = millis() + ms;
+  while ((long)(end - millis()) > 0) {
+    BLE.poll();
+    delay(1);
+  }
+}
+
 void setup() {
   Serial.begin(9600);
 
@@ -79,13 +90,20 @@ void handleCommand(const String& in) {
   s.trim(); s.toLowerCase();
   Serial.print("BLE cmd: "); Serial.println(s);
 
-  if (s == "pak1")      pak1();
-  else if (s == "pak2") pak2();
-  else if (s == "zet1") zet1();
-  else if (s == "zet2") zet2();
+  // Prevent overlapping long actions
+  bool isAction = (s == "pak1" || s == "pak2" || s == "zet1" || s == "zet2" || s == "test");
+  if (busy && isAction) {
+    Serial.println("busy, ignoring: " + s);
+    return;
+  }
+
+  if (s == "pak1")      { busy = true; pak1(); busy = false; }
+  else if (s == "pak2") { busy = true; pak2(); busy = false; }
+  else if (s == "zet1") { busy = true; zet1(); busy = false; }
+  else if (s == "zet2") { busy = true; zet2(); busy = false; }
   else if (s == "beep") beep();
   else if (s == "connected") connectedBeep();
-  else if (s == "test") testloop();
+  else if (s == "test") { busy = true; testloop(); busy = false; }
 }
 
 
@@ -134,12 +152,12 @@ void loop() {
 void pak1(){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN_ARM1 );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN_ARM1 );
-       delay(500);// was 200
+       shortDelay(500);// was 200
        analogWrite(2, MAGNET_ON);
-       delay(1000);// was 400
+       shortDelay(1000);// was 400
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
-       delay(800);// was 200
+       shortDelay(800);// was 200
        analogWrite(2, MAGNET_HOLD);
        lastGrapTime1 = millis();
 }
@@ -147,12 +165,12 @@ void pak1(){
 void pak2(){
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN_ARM2 );
        pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN_ARM2 );
-       delay(500);
+       shortDelay(500);
        analogWrite(3, MAGNET_ON);
-       delay(1000);
+       shortDelay(1000);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
-       delay(800);
+       shortDelay(800);
        analogWrite(3, MAGNET_HOLD);
        lastGrapTime2 = millis();
 }
@@ -160,9 +178,9 @@ void pak2(){
 void zet1(){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN_ARM1 );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN_ARM1 );
-       delay(800);// was 200
+       shortDelay(800);// was 200
        analogWrite(2, MAGNET_OFF);
-       delay(500);// was 0
+       shortDelay(500);// was 0
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
        lastGrapTime1 = -1;
@@ -171,9 +189,9 @@ void zet1(){
 void zet2(){
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN_ARM2 );
        pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN_ARM2 );
-       delay(800);
+       shortDelay(800);
        analogWrite(3, MAGNET_OFF);
-       delay(500);// was 0
+       shortDelay(500);// was 0
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
        lastGrapTime2 = -1;
@@ -183,11 +201,11 @@ void zet2(){
 void testloop(){
   Serial.println("testloop start");
   pak1();
-  delay(300);
+  shortDelay(300);
   zet1();
-  delay(500);
+  shortDelay(500);
   pak2();
-  delay(300);
+  shortDelay(300);
   zet2();
 
 }
@@ -195,16 +213,16 @@ void testloop(){
 
 void beep(){
     analogWrite(buzzerpin , 0);
-    delay(200);
+    shortDelay(200);
     analogWrite(buzzerpin , 255);
-    delay(50);
+    shortDelay(50);
 }
 
 void connectedBeep(){
   beepTime(5,500);
-  delay(50);
+  shortDelay(50);
   beepTime(5,100);
-  delay(50);
+  shortDelay(50);
   beepTime(5,100);
 }
 
@@ -219,7 +237,7 @@ void beepTime(int delayTime, int totalTime) {
   int beepCount = totalTime / delayTime;
   for (int i = 0; i < beepCount; i++) {
     analogWrite(buzzerpin, (i % 2 == 0) ? 255 : 0);
-    delay(delayTime);
+    shortDelay(delayTime);
   }
   analogWrite(buzzerpin, 255);
 }
