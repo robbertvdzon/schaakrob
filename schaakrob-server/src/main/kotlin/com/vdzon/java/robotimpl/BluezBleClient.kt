@@ -76,7 +76,12 @@ class BluezBleClient(
             val props = bus.getRemoteObject("org.bluez", devicePath, Properties::class.java)
 
             // Connect if needed
-            var connected = try { (props.Get("org.bluez.Device1", "Connected") as Variant<*>).value as? Boolean } catch (_: Exception) { null } ?: false
+            val connVal = try { props.Get("org.bluez.Device1", "Connected") } catch (_: Exception) { null }
+            var connected = when (connVal) {
+                is Variant<*> -> (connVal as Variant<*>).value as? Boolean
+                is Boolean -> connVal
+                else -> null
+            } ?: false
             if (!connected) {
                 dev.Connect()
             }
@@ -85,13 +90,21 @@ class BluezBleClient(
             val stopAt = System.currentTimeMillis() + timeoutMs
             var resolved = false
             while (System.currentTimeMillis() < stopAt) {
-                resolved = try {
-                    (props.Get("org.bluez.Device1", "ServicesResolved") as Variant<*>).value as? Boolean
-                } catch (ex: Exception) {
+                val srvVal = try { props.Get("org.bluez.Device1", "ServicesResolved") } catch (ex: Exception) {
                     log.error("BlueZ: Failed to get ServicesResolved property: ${ex.message}", ex)
                     null
+                }
+                resolved = when (srvVal) {
+                    is Variant<*> -> (srvVal as Variant<*>).value as? Boolean
+                    is Boolean -> srvVal
+                    else -> false
                 } ?: false
-                connected = try { (props.Get("org.bluez.Device1", "Connected") as Variant<*>).value as? Boolean } catch (_: Exception) { null } ?: false
+                val connNow = try { props.Get("org.bluez.Device1", "Connected") } catch (_: Exception) { null }
+                connected = when (connNow) {
+                    is Variant<*> -> (connNow as Variant<*>).value as? Boolean
+                    is Boolean -> connNow
+                    else -> null
+                } ?: false
                 if (resolved && connected) break
                 Thread.sleep(100)
             }
