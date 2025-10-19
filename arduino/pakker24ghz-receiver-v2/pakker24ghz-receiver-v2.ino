@@ -56,8 +56,6 @@ void setup() {
   analogWrite(3, MAGNET_OFF);
 
 
-  startBeep();
-
   // TCCR2B = TCCR2B & B11111000 | B00000001; // for PWM frequency of 31372.55 Hz, avoind zooming of the magnet
 
   pwm.begin();
@@ -80,6 +78,7 @@ void setup() {
   BLE.addService(service);
   BLE.advertise();
 
+  startBeep();
   Serial.println("START (BLE: pak1/pak2/zet1/zet2/beep/test)");
 
 
