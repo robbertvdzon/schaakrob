@@ -73,39 +73,29 @@ class BluezBleClient(
             }
 
             dev = bus.getRemoteObject("org.bluez", devicePath, Device1::class.java)
-            val props = bus.getRemoteObject("org.bluez", devicePath, Properties::class.java)
+            val objMgr = bus.getRemoteObject("org.bluez", "/", ObjectManager::class.java)
 
-            // Connect if needed
-            val connVal = try { props.Get("org.bluez.Device1", "Connected") } catch (_: Exception) { null }
-            var connected = when (connVal) {
-                is Variant<*> -> (connVal as Variant<*>).value as? Boolean
-                is Boolean -> connVal
-                else -> null
-            } ?: false
-            if (!connected) {
-                dev.Connect()
-            }
+            // Always attempt to connect (idempotent if already connected)
+            try { dev.Connect() } catch (_: Exception) {}
+            Thread.sleep(200) // small backoff before polling properties
 
             // Wait (best-effort) for services to resolve; tolerate slow resolve
             val stopAt = System.currentTimeMillis() + timeoutMs
             var resolved = false
+            var connected = false
             while (System.currentTimeMillis() < stopAt) {
-                val srvVal = try { props.Get("org.bluez.Device1", "ServicesResolved") } catch (ex: Exception) {
-                    log.error("BlueZ: Failed to get ServicesResolved property: ${ex.message}", ex)
-                    null
+                try {
+                    val managed = objMgr.GetManagedObjects()
+                    val devEntry = managed.entries.firstOrNull { it.key.path == devicePath }
+                    if (devEntry != null) {
+                        val devIfaces = devEntry.value["org.bluez.Device1"]
+                        connected = ((devIfaces?.get("Connected") as? Variant<*>)?.value as? Boolean) ?: false
+                        resolved = ((devIfaces?.get("ServicesResolved") as? Variant<*>)?.value as? Boolean) ?: false
+                        if (connected && resolved) break
+                    }
+                } catch (ex: Exception) {
+                    log.error("BlueZ: Failed to read Device1 props from ObjectManager: ${ex.message}", ex)
                 }
-                resolved = when (srvVal) {
-                    is Variant<*> -> (srvVal as Variant<*>).value as? Boolean
-                    is Boolean -> srvVal
-                    else -> false
-                } ?: false
-                val connNow = try { props.Get("org.bluez.Device1", "Connected") } catch (_: Exception) { null }
-                connected = when (connNow) {
-                    is Variant<*> -> (connNow as Variant<*>).value as? Boolean
-                    is Boolean -> connNow
-                    else -> null
-                } ?: false
-                if (resolved && connected) break
                 Thread.sleep(100)
             }
             if (!resolved) {
@@ -117,7 +107,6 @@ class BluezBleClient(
             }
 
             // Find RX characteristic path under this device, polling until it appears or timeout
-            val objMgr = bus.getRemoteObject("org.bluez", "/", ObjectManager::class.java)
             var rxPath: String? = null
             val charStopAt = System.currentTimeMillis() + timeoutMs
             while (rxPath == null && System.currentTimeMillis() < charStopAt) {
