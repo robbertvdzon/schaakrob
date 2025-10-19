@@ -137,7 +137,7 @@ class RobotAansturingImpl() : RobotAansturing {
         }
         try {
             // Send a 'connected' message via BlueZ D-Bus BLE client
-            bleWrite("connected")
+            bleWrite("pak1")
         } catch (e: Exception) {
             log.warn("Initial BLE notify failed: ${e.message}")
         }

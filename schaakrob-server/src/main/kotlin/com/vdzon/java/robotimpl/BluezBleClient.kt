@@ -44,31 +44,35 @@ class BluezBleClient(
         return path?.path
     }
 
+
+
     @Synchronized
-    fun write(mac: String, data: ByteArray, timeoutMs: Long = 8000): Boolean {
+    fun write(mac: String, data: ByteArray, timeoutMs: Long = 20000): Boolean {
         val lowercaseRx = rxCharUuid.lowercase()
         val bus = ensureConn()
         val adapterPath = "/org/bluez/$adapter"
+        var adapterObj: Adapter1? = null
+        var dev: Device1? = null
         try {
             // Resolve or discover the device path
             var devicePath = findDevicePathByAddress(bus, mac)
             if (devicePath == null) {
                 // Start discovery to let BlueZ create the device object
-                val adapterObj = bus.getRemoteObject("org.bluez", adapterPath, Adapter1::class.java)
+                adapterObj = bus.getRemoteObject("org.bluez", adapterPath, Adapter1::class.java)
                 try { adapterObj.StartDiscovery() } catch (_: Exception) {}
                 val stopAt = System.currentTimeMillis() + timeoutMs
                 while (devicePath == null && System.currentTimeMillis() < stopAt) {
                     Thread.sleep(200)
                     devicePath = findDevicePathByAddress(bus, mac)
                 }
-                try { adapterObj.StopDiscovery() } catch (_: Exception) {}
+                if (adapterObj != null) { try { adapterObj.StopDiscovery() } catch (_: Exception) {} }
                 if (devicePath == null) {
                     log.error("BlueZ: Device with address $mac not found (discovery timeout)")
                     return false
                 }
             }
 
-            val dev = bus.getRemoteObject("org.bluez", devicePath, Device1::class.java)
+            dev = bus.getRemoteObject("org.bluez", devicePath, Device1::class.java)
             val props = bus.getRemoteObject("org.bluez", devicePath, Properties::class.java)
 
             // Connect if needed
@@ -77,11 +81,16 @@ class BluezBleClient(
                 dev.Connect()
             }
 
-            // Wait (best-effort) for services to resolve; do not hard-abort if it takes long
+            // Wait (best-effort) for services to resolve; tolerate slow resolve
             val stopAt = System.currentTimeMillis() + timeoutMs
             var resolved = false
             while (System.currentTimeMillis() < stopAt) {
-                resolved = try { (props.Get("org.bluez.Device1", "ServicesResolved") as Variant<*>).value as? Boolean } catch (_: Exception) { null } ?: false
+                resolved = try {
+                    (props.Get("org.bluez.Device1", "ServicesResolved") as Variant<*>).value as? Boolean
+                } catch (ex: Exception) {
+                    log.error("BlueZ: Failed to get ServicesResolved property: ${ex.message}", ex)
+                    null
+                } ?: false
                 connected = try { (props.Get("org.bluez.Device1", "Connected") as Variant<*>).value as? Boolean } catch (_: Exception) { null } ?: false
                 if (resolved && connected) break
                 Thread.sleep(100)
@@ -120,12 +129,21 @@ class BluezBleClient(
             }
 
             val gatt = bus.getRemoteObject("org.bluez", rxPath, GattCharacteristic1::class.java)
-            val options = hashMapOf<String, Variant<*>>("type" to Variant("request"))
+            // Use Write Without Response to reduce timing sensitivities on peripheral
+            val options = hashMapOf<String, Variant<*>>("type" to Variant("command"))
             gatt.WriteValue(data.toList(), options)
             return true
         } catch (e: Exception) {
             log.error("BlueZ write failed to $mac: ${e.message}", e)
             return false
+        } finally {
+            // Ensure discovery is stopped and connection is closed for Option A (connect-write-disconnect)
+            if (adapterObj != null) {
+                try { adapterObj.StopDiscovery() } catch (_: Exception) {}
+            }
+            if (dev != null) {
+                try { dev.Disconnect() } catch (_: Exception) {}
+            }
         }
     }
 
