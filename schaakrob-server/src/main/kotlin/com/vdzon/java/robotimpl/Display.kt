@@ -136,8 +136,9 @@ class Display(private val robotAansturing: RobotAansturing) {
 
     fun startDisplay(){
         try{
-            display.drawStringCentered("Schaakrob!!", Font.FONT_5X8, 25, true)
-            display.update()
+            displayText(localHostLANAddress().hostAddress)
+//            display.drawStringCentered("Schaakrob!!", Font.FONT_5X8, 25, true)
+//            display.update()
         }
         catch (e:Exception){
             e.printStackTrace()
@@ -146,18 +147,18 @@ class Display(private val robotAansturing: RobotAansturing) {
         try{
             println("<--Pi4J--> GPIO Listen Example ... started.")
             val gpio = GpioFactory.getInstance()
-            val myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02, PinPullResistance.PULL_DOWN)
-            myButton.setShutdownOptions(true)
-            myButton.addListener(GpioPinListenerDigital(this::button1))
-            val myButton2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_03, PinPullResistance.PULL_DOWN)
-            myButton2.setShutdownOptions(true)
-            myButton2.addListener(GpioPinListenerDigital(this::button2))
-            val myButton3 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_04, PinPullResistance.PULL_DOWN)
-            myButton3.setShutdownOptions(true)
-            myButton3.addListener(GpioPinListenerDigital(this::button3))
-            val myButton4 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_05, PinPullResistance.PULL_DOWN)
-            myButton4.setShutdownOptions(true)
-            myButton4.addListener(GpioPinListenerDigital(this::button4))
+//            val myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02, PinPullResistance.PULL_DOWN)
+//            myButton.setShutdownOptions(true)
+//            myButton.addListener(GpioPinListenerDigital(this::button1))
+//            val myButton2 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_03, PinPullResistance.PULL_DOWN)
+//            myButton2.setShutdownOptions(true)
+//            myButton2.addListener(GpioPinListenerDigital(this::button2))
+//            val myButton3 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_04, PinPullResistance.PULL_DOWN)
+//            myButton3.setShutdownOptions(true)
+//            myButton3.addListener(GpioPinListenerDigital(this::button3))
+//            val myButton4 = gpio.provisionDigitalInputPin(RaspiPin.GPIO_05, PinPullResistance.PULL_DOWN)
+//            myButton4.setShutdownOptions(true)
+//            myButton4.addListener(GpioPinListenerDigital(this::button4))
 
         }
         catch (e:Exception){

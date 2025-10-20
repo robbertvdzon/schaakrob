@@ -1,19 +1,23 @@
 # Install pi:
 https://www.raspberrypi.com/software/
-Download Raspberry Pi Imager on osx
-Run “Raspberry Pi Imager” on osx
-Choose OS: “Raspberry PI OD (32 bit)”
+Download and run  Raspberry Pi Imager on osx
+Choose OS: “Raspberry PI OD (32 bit)” <--- Not 64 bit, otherwise pi4j will nog work!
+Before writting, edit the settings:
+    set hostname: schaakrobot
+    enable ssh
+    select 'User password authentication'
+    set username: pi
+    set password: xxx
+    set wifi ssid and password
 Write to SD card
-Place SD card in PI and startup (with display and keyboard/mouse)
-perform the following steps with a screen and keyboard/mouse on the PI
-finish installation (choose country and language)
-username: pi (ignore the warning about the username)
-connect to wifi
-open raspberry pi configuration
-enable: ssh, ic2
-save
-Finish the rest of the installation using ssh
+
+Find ip address of pi with a keyboard and monitor attached, or use your router admin page.
+
+ssh-copy-id pi@192.168.178.88
 ssh pi@192.168.178.88
+sudo raspi-config
+choose: 3 Interface Options, and enable: i2c and SPI
+
 
 # Update the system:
 sudo apt-get update
@@ -25,7 +29,13 @@ sudo modprobe i2c-dev
 sudo modprobe i2c-bcm2708
 
 # Install java:
-sudo apt install openjdk-8-jdk
+wget https://mirrors.huaweicloud.com/java/jdk/8u202-b08/jdk-8u202-linux-arm32-vfp-hflt.tar.gz
+tar -xzf jdk-8u202-linux-arm32-vfp-hflt.tar.gz
+sudo mv jdk1.8.0_202 /opt/java8
+echo 'export JAVA_HOME=/opt/java8' >> ~/.bashrc
+echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+sudo ln -s /opt/java8/bin/java /usr/bin/java
 (note, we need java8. Later versions are not supported by the used pi4j library)
 
 
@@ -45,6 +55,7 @@ cd ~/git
 git clone https://github.com/robbertvdzon/schaakrob
 
 # Initial build and run the code:
+mkdir ~/git/schaakrob/target
 cd ~/git/schaakrob
 ./update_and_run.sh
 
@@ -82,14 +93,4 @@ Pakker hoogte: -1900
 Snelheid: 0.8
 
 # optional: check i2c status
-i2cdetect -y 1
-
-# optional: check gpio status:
-gpio readall
-
-# optional: If you afterwards needs to enable an interface (ssh, i2c, SPI):
-sudo raspi-config
-choose: 3 Interface Options
-
-# optional: When you want to change the default java version:
-#SKIP THIS STEP!!#sudo update-alternatives --config java
+sudo i2cdetect -y -a 1
