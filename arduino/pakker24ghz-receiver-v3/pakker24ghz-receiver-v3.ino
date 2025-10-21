@@ -2,6 +2,8 @@
 #include <Arduino.h>
 
 #include <Adafruit_PWMServoDriver.h>
+#include <WiFi.h>
+#include <WebServer.h>
 #define buzzerpin 4
 #define switchpin 5
 
@@ -19,8 +21,38 @@ const int MAGNET_OFF = 0;
 const int MAGNET_ON = 255;
 const int MAGNET_HOLD = 220;
 
+// WiFi configuration
+const char* WIFI_SSID = "robbertkarenziggo";
+const char* WIFI_PASSWORD = "Robbert12345!";
+IPAddress local_IP(192, 168, 178, 10);
+IPAddress gateway(192, 168, 178, 1);
+IPAddress subnet(255, 255, 255, 0);
+
+WebServer server(80);
+volatile bool isBusy = false;
 
 Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
+
+// Forward declarations for action functions so we can reference them in server handlers
+void pak1();
+void pak2();
+void zet1();
+void zet2();
+void connectedBeep();
+void beep();
+void testloop();
+
+// Helper to run an action if not busy; else reply "buzy"
+void handleAction(void (*action)()) {
+  if (isBusy) {
+    server.send(200, "text/plain", "buzy");
+    return;
+  }
+  isBusy = true;
+  action();
+  isBusy = false;
+  server.send(200, "text/plain", "ok");
+}
 
 void setup() {
   Serial.begin(9600);
@@ -49,7 +81,40 @@ void setup() {
   Serial.println("START");
 
   startBeep();
-  Serial.println("START (BLE: pak1/pak2/zet1/zet2/beep/test)");
+  Serial.println("START (WiFi REST: /pak1 /pak2 /zet1 /zet2 /connected /status)");
+
+  // Connect to WiFi with static IP
+  WiFi.mode(WIFI_STA);
+  if (!WiFi.config(local_IP, gateway, subnet)) {
+    Serial.println("WiFi config failed");
+  }
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi ");
+  Serial.print(WIFI_SSID);
+  int tries = 0;
+  while (WiFi.status() != WL_CONNECTED && tries < 100) { // ~10 seconds
+    shortDelay(100);
+    Serial.print(".");
+    tries++;
+  }
+  Serial.println();
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("WiFi connected. IP: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("WiFi NOT connected yet; continuing and web server will start anyway.");
+  }
+
+  // REST endpoints
+  server.on("/pak1", [](){ handleAction(pak1); });
+  server.on("/pak2", [](){ handleAction(pak2); });
+  server.on("/zet1", [](){ handleAction(zet1); });
+  server.on("/zet2", [](){ handleAction(zet2); });
+  server.on("/connected", [](){ handleAction(connectedBeep); });
+  server.on("/status", [](){ server.send(200, "text/plain", isBusy ? "buzy" : "idle"); });
+  server.onNotFound([](){ server.send(404, "text/plain", "not found"); });
+  server.begin();
+  Serial.println("HTTP server started");
 }
 
 
@@ -65,12 +130,16 @@ boolean oldButtonState = true;
 void shortDelay(unsigned long ms){
   unsigned long end = millis() + ms;
   while ((long)(end - millis()) > 0) {
-    // handle any wifi call's if needed
+    // keep the web server responsive during delays
+    server.handleClient();
     delay(1);
   }
 }
 
 void loop() {
+  // keep server responsive
+  server.handleClient();
+
   boolean buttonState = digitalRead(switchpin);
   if (!buttonState &&  oldButtonState){
     Serial.println("pressed");
@@ -79,10 +148,7 @@ void loop() {
   }
   oldButtonState = buttonState;
 
-
-
-
-  currentTime =millis();
+  currentTime = millis();
   if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>TIMEOUT_MAGNET){
     // drop piece
     analogWrite(2, MAGNET_OFF);
@@ -93,6 +159,7 @@ void loop() {
     analogWrite(3, MAGNET_OFF);
     lastGrapTime2 = -1;
   }
+}
 
 
 void pak1(){
