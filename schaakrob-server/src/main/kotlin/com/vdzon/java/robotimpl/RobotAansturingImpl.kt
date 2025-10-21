@@ -1,10 +1,6 @@
 package com.vdzon.java.robotimpl
 
 import com.pi4j.component.lcd.impl.I2CLcdDisplay
-import com.pi4j.io.gpio.GpioFactory
-import com.pi4j.io.gpio.PinPullResistance
-import com.pi4j.io.gpio.RaspiPin
-import com.pi4j.io.gpio.event.GpioPinListenerDigital
 import com.pi4j.io.i2c.I2CBus
 import com.pi4j.io.i2c.I2CDevice
 import com.pi4j.io.i2c.I2CFactory
@@ -13,13 +9,9 @@ import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
 import com.vdzon.java.schaakspel.Schaakspel
-import de.pi3g.pi.oled.Font
-import de.pi3g.pi.oled.OLEDDisplay
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.UnknownHostException
@@ -49,82 +41,6 @@ class RobotAansturingImpl() : RobotAansturing {
     private var arm2AtHome = false
     private var currentLoopThread: Thread? = null
 
-    // BLE Pakker settings
-    private val bleServiceUuid = "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"
-    private val bleRxCharUuid = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E" // write characteristic (for reference)
-    private val bleDeviceName = "NanoESP32-Pakker"
-    private val bleHandle = "0x000b" // GATT handle used by gatttool for RX characteristic
-    private val bleMacAddress: String? by lazy { resolveBleMac() }
-
-    private fun resolveBleMac(): String? {
-        return "E4:B0:63:AD:D2:AD"
-    }
-
-    private fun bleEncodeHex(text: String): String {
-        return text.toByteArray(Charsets.UTF_8).joinToString("") { String.format("%02x", (it.toInt() and 0xFF)) }
-    }
-
-    private fun bleWrite(command: String): Boolean {
-        val mac = bleMacAddress
-        if (mac.isNullOrBlank()) {
-            log.warn("BLE MAC for Pakker not configured.")
-            return false
-        }
-        return try {
-            val hex = bleEncodeHex(command)
-            val shellCmd = "gatttool -b $mac --char-write-req -a $bleHandle -n $hex"
-            val pb = ProcessBuilder("bash", "-lc", shellCmd)
-            pb.redirectErrorStream(true)
-            val proc = pb.start()
-            // Read output to capture any gatttool errors
-            val output = StringBuilder()
-            val reader = BufferedReader(InputStreamReader(proc.inputStream))
-            val readerThread = Thread {
-                try {
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null) {
-                        output.appendLine(line)
-                    }
-                } catch (ignored: Exception) {
-                } finally {
-                    try { reader.close() } catch (_: Exception) {}
-                }
-            }
-            readerThread.start()
-            val exit = proc.waitFor()
-            readerThread.join(500)
-            val out = output.toString().trim()
-
-            if (exit != 0) {
-                log.error("gatttool exited with code $exit while sending '$command' to $mac (handle $bleHandle). Output=[$out]")
-            } else {
-                // Still log warnings if gatttool reported a failure phrase even with exit 0
-                if (out.contains("failed", ignoreCase = true) || out.contains("error", ignoreCase = true)) {
-                    log.warn("gatttool reported potential issue while sending '$command': $out")
-                } else if (out.isNotEmpty()) {
-                    log.debug("gatttool output for '$command': $out")
-                }
-            }
-            exit == 0
-        } catch (e: Exception) {
-            log.error("Failed to send BLE command '$command' via gatttool: ${e.message}", e)
-            false
-        }
-    }
-
-    private fun bleConnectAndNotify() {
-        val mac = bleMacAddress
-        if (mac.isNullOrBlank()) {
-            log.info("BLE MAC not set; skipping initial BLE connect to Pakker")
-            return
-        }
-        try {
-            // Just send a 'connected' message via gatttool; gatttool will handle the connection for the write
-            bleWrite("connected")
-        } catch (e: Exception) {
-            log.warn("Initial BLE notify failed: ${e.message}")
-        }
-    }
 
     fun init() {
         if (arm1 != null) {
@@ -159,17 +75,11 @@ class RobotAansturingImpl() : RobotAansturing {
 
         log.info("Devices found")
 
-        // Try to connect to BLE Pakker at startup and send 'connected'
-        thread { bleConnectAndNotify() }
-
         thread {
             println("start check sleep thread")
             while (true){
-//                val res = arm1!!.readI2c("arm1")
-//                println("arm1 state="+res)
-//                Thread.sleep(1000)
                 Thread.sleep(3000)
-                val timeout = System.currentTimeMillis() - 1000*20 // 20 seconds
+                val timeout = System.currentTimeMillis() - 1000*60 // 20 seconds
                 val bothHome = bothArmsAtHome()
                 val hasTimeout = lastMovement<timeout
                 if (bothHome && hasTimeout){
@@ -178,11 +88,15 @@ class RobotAansturingImpl() : RobotAansturing {
                 }
             }
         }
+    }
 
-
-
+    private fun callOppakker(string: String) {
+        println("CALL OPPAKKER: $string")
+        Thread.sleep(1000)
 
     }
+
+
 
     fun setSchaakspel(schaakspel: Schaakspel){
         this.schaakspel = schaakspel
@@ -321,29 +235,25 @@ class RobotAansturingImpl() : RobotAansturing {
 
     override fun clamp1() {
         log.info("BLE: pak1")
-        bleWrite("pak1")
-        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        callOppakker("pak1")
         log.info("pak1 klaar")
     }
 
     override fun release1() {
         log.info("BLE: zet1")
-        bleWrite("zet1")
-        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        callOppakker("zet1")
         log.info("zet1 klaar")
     }
 
     override fun clamp2() {
         log.info("BLE: pak2")
-        bleWrite("pak2")
-        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        callOppakker("pak2")
         log.info("pak2 klaar")
     }
 
     override fun release2() {
         log.info("BLE: zet2")
-        bleWrite("zet2")
-        Thread.sleep(4000)// voor nu: wacht 2 seconden, moet later via een callback
+        callOppakker("zet2")
         log.info("zet2 klaar")
     }
 
