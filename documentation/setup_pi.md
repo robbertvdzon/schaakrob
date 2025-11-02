@@ -94,3 +94,7 @@ Snelheid: 0.8
 
 # optional: check i2c status
 sudo i2cdetect -y -a 1
+
+# enable bluetooth (todo: dit moet bij het opstarten gebeuren)
+sudo rfkill unblock bluetooth
+sudo hciconfig hci0 up
