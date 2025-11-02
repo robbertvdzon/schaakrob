@@ -29,14 +29,14 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     init{
 
         initialBlackStoreSquares = listOf<StoreSquare>(
-//            StoreSquare("A21"),
+            StoreSquare("A21"),
             StoreSquare("B21"),
-            StoreSquare("C21"),
-            StoreSquare("D21"),
-            StoreSquare("E21"),
+//            StoreSquare("C21"),
+//            StoreSquare("D21"),
+//            StoreSquare("E21"),
            // StoreSquare("F21"), dit vlak niet gebruiken! Magneetje zit niet goed op dat vlak
-            StoreSquare("G21"),
-            StoreSquare("H21"),
+//            StoreSquare("G21"),
+//            StoreSquare("H21"),
             StoreSquare("A20"),
             StoreSquare("B20"),
             StoreSquare("C20"),

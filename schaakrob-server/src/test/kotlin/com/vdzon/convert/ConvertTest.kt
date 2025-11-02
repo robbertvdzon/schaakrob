@@ -37,8 +37,8 @@ Rd3 40. Qa8 c3 41. Qa4+ Ke1 42. f4 f5 43. Kc1 Rd2 44. Qa7 1-0
     fun test() {
 
         val board = Board()
-        board.doMove(Move(Square.E2, Square.E4))
-        System.out.println(board.toString())
+//        board.doMove(Move(Square.E2, Square.E4))
+//        System.out.println(board.toString())
 
         val d = File(".")
         println(d.canonicalPath)

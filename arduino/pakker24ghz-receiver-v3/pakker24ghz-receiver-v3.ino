@@ -165,12 +165,12 @@ void loop() {
 void pak1(){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN_ARM1 );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN_ARM1 );
-       shortDelay(500);// was 200
+       shortDelay(200);// was 200
        analogWrite(2, MAGNET_ON);
-       shortDelay(1000);// was 400
+       shortDelay(400);// was 400
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
-       shortDelay(800);// was 200
+       shortDelay(200);// was 200
        analogWrite(2, MAGNET_HOLD);
        lastGrapTime1 = millis();
 }
@@ -178,12 +178,12 @@ void pak1(){
 void pak2(){
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN_ARM2 );
        pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN_ARM2 );
-       shortDelay(500);
+       shortDelay(200);
        analogWrite(3, MAGNET_ON);
-       shortDelay(1000);
+       shortDelay(400);
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
-       shortDelay(800);
+       shortDelay(200);
        analogWrite(3, MAGNET_HOLD);
        lastGrapTime2 = millis();
 }
@@ -191,22 +191,24 @@ void pak2(){
 void zet1(){
        pwm.setPWM(0, 0, SERVO_MIDDLE - PULSES_DOWN_ARM1 );
        pwm.setPWM(1, 0, SERVO_MIDDLE + PULSES_DOWN_ARM1 );
-       shortDelay(800);// was 200
+       shortDelay(200);// was 200
        analogWrite(2, MAGNET_OFF);
-       shortDelay(500);// was 0
+       shortDelay(10);// was 0
        pwm.setPWM(0, 0, SERVO_MIDDLE);
        pwm.setPWM(1, 0, SERVO_MIDDLE);
+       shortDelay(200);// was 0
        lastGrapTime1 = -1;
 }
 
 void zet2(){
        pwm.setPWM(2, 0, SERVO_MIDDLE - PULSES_DOWN_ARM2 );
        pwm.setPWM(3, 0, SERVO_MIDDLE + PULSES_DOWN_ARM2 );
-       shortDelay(800);
+       shortDelay(200);
        analogWrite(3, MAGNET_OFF);
-       shortDelay(500);// was 0
+       shortDelay(10);// was 0
        pwm.setPWM(2, 0, SERVO_MIDDLE);
        pwm.setPWM(3, 0, SERVO_MIDDLE);
+       shortDelay(200);// was 0
        lastGrapTime2 = -1;
 }
 

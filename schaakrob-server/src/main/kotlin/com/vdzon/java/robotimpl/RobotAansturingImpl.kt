@@ -32,6 +32,7 @@ class RobotAansturingImpl() : RobotAansturing {
     var lastPos2 = 0
     var formattedDelayFactor1 = "0050"
     var formattedDelayFactor2 = "0050"
+    private var homeNeeded = false
     private var allReady = false
     private var allSleeping = false
     private var arm1: I2CDevice? = null
@@ -40,6 +41,9 @@ class RobotAansturingImpl() : RobotAansturing {
     private var arm1AtHome = false
     private var arm2AtHome = false
     private var currentLoopThread: Thread? = null
+    private var movingToX: Int =  0
+    private var movingToY: Int =  0
+
 
 
     fun init() {
@@ -90,10 +94,39 @@ class RobotAansturingImpl() : RobotAansturing {
         }
     }
 
-    private fun callOppakker(string: String) {
-        println("CALL OPPAKKER: $string")
-        Thread.sleep(1000)
-
+    private fun callOppakker(actie: String) {
+        println("CALL OPPAKKER: $actie")
+        val urlStr = "http://192.168.178.10/$actie"
+        while (true) {
+            try {
+                val url = java.net.URL(urlStr)
+                val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 3000
+                    readTimeout = 5000
+                }
+                conn.inputStream.bufferedReader().use { br ->
+                    val response = br.readText().trim()
+                    println("Oppakker response: '$response' for actie='$actie'")
+                    if (response == "ok") {
+                        return
+                    }
+                    if (response != "buzy") {
+                        // Unexpected response; log and still retry
+                        System.err.println("Unexpected response from oppakker: '$response' (actie='$actie')")
+                    }
+                }
+            } catch (e: Exception) {
+                System.err.println("Error calling oppakker ($urlStr): ${e.message}")
+            }
+            try {
+                Thread.sleep(1000)
+            } catch (_: InterruptedException) {
+                // Preserve interrupt status and break out
+                Thread.currentThread().interrupt()
+                return
+            }
+        }
     }
 
 
@@ -178,6 +211,8 @@ class RobotAansturingImpl() : RobotAansturing {
     }
 
     override fun moveto(x: Int, y: Int) {
+        movingToX = x
+        movingToY = y
         updateLastMovement()
         calcDelays(x, y)
         gotoPos(arm1, x, formattedDelayFactor1)
@@ -527,6 +562,8 @@ class RobotAansturingImpl() : RobotAansturing {
             val arm2Status = arm2!!.readI2c("arm2")
             allReady = arm1Status == 1 && arm2Status == 1
             allSleeping = arm1Status == 6 && arm2Status == 6
+            homeNeeded = arm1Status == 9 || arm2Status == 9
+            // 4 = error, 0,9=homing needed
         } catch (e: Exception) {
             e.printStackTrace()
             allReady = false
@@ -615,8 +652,34 @@ class RobotAansturingImpl() : RobotAansturing {
         while (!allReady) {
             sleep(10)
             udateStatus()
+            if (homeNeeded){
+                println("Error detected! Homing needed.")
+                homeAndMoveAgain()
+            }
         }
         println("All ready")
+    }
+
+    private fun homeAndMoveAgain(){
+        println("Home and move again!")
+        println("Home")
+        homeHor()
+        homeVert()
+        println("Wait until ready")
+        while (!allReady) {
+            sleep(10)
+            udateStatus()
+            if (homeNeeded){
+                println("Error detected! Homing needed.")
+                homeAndMoveAgain()
+            }
+        }
+        // move to last pos
+        println("Move again")
+        moveto(movingToX, movingToY)
+        println("Wait until ready")
+        waitUntilReady(10)
+
     }
 
     private fun sleep(initialDelay: Int) {
