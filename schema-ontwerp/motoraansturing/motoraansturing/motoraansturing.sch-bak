@@ -166,7 +166,7 @@ F 3 "~" H 2150 6250 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	1150 5800 2150 5800
+	1150 5800 1700 5800
 Wire Wire Line
 	6000 5800 6000 6050
 Wire Wire Line
@@ -184,11 +184,6 @@ Wire Wire Line
 Connection ~ 2750 5800
 Wire Wire Line
 	2750 5800 3400 5800
-Wire Wire Line
-	2150 6050 2150 5800
-Connection ~ 2150 5800
-Wire Wire Line
-	2150 5800 2750 5800
 Wire Wire Line
 	5200 2800 5200 5250
 Wire Wire Line
@@ -214,7 +209,7 @@ Wire Wire Line
 Wire Wire Line
 	2950 5500 2950 6050
 Wire Wire Line
-	1150 5700 2650 5700
+	1150 5700 2150 5700
 Wire Wire Line
 	3500 5700 3500 6050
 Wire Wire Line
@@ -222,8 +217,6 @@ Wire Wire Line
 Connection ~ 2850 5700
 Wire Wire Line
 	2850 5700 3500 5700
-Wire Wire Line
-	2650 5700 2650 4150
 Wire Wire Line
 	2650 2400 4200 2400
 Connection ~ 2650 5700
@@ -245,30 +238,10 @@ F 3 "~" H 1900 4100 50  0001 C CNN
 	1    1900 4100
 	1    0    0    -1  
 $EndComp
-$Comp
-L Transistor_BJT:2N2219 Q?
-U 1 1 60F0DA58
-P 2100 4450
-F 0 "Q?" H 2290 4496 50  0000 L CNN
-F 1 "2N2219" H 2290 4405 50  0000 L CNN
-F 2 "Package_TO_SOT_THT:TO-39-3" H 2300 4375 50  0001 L CIN
-F 3 "http://www.onsemi.com/pub_link/Collateral/2N2219-D.PDF" H 2100 4450 50  0001 L CNN
-	1    2100 4450
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	1900 4250 1900 4450
 Wire Wire Line
-	2200 4650 2200 6050
-Wire Wire Line
 	2200 6050 2250 6050
-Wire Wire Line
-	2200 4250 2200 4150
-Wire Wire Line
-	2200 4150 2650 4150
-Connection ~ 2650 4150
-Wire Wire Line
-	2650 4150 2650 2400
 Wire Wire Line
 	5700 2800 5700 3500
 Wire Wire Line
@@ -298,4 +271,47 @@ Wire Wire Line
 	1250 1550 5700 1550
 Wire Wire Line
 	5700 1550 5700 1800
+$Comp
+L Device:Q_NMOS_DGS Q?
+U 1 1 60F2D031
+P 2050 4650
+F 0 "Q?" V 2299 4650 50  0000 C CNN
+F 1 "Q_NMOS_DGS" V 2390 4650 50  0000 C CNN
+F 2 "" H 2250 4750 50  0001 C CNN
+F 3 "~" H 2050 4650 50  0001 C CNN
+	1    2050 4650
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2650 2400 2650 5700
+Wire Wire Line
+	1900 4450 2050 4450
+Wire Wire Line
+	2250 4750 2250 6050
+Connection ~ 2250 6050
+$Comp
+L Device:R R?
+U 1 1 60F344EC
+P 1700 5100
+F 0 "R?" H 1770 5146 50  0000 L CNN
+F 1 "10K" H 1770 5055 50  0000 L CNN
+F 2 "" V 1630 5100 50  0001 C CNN
+F 3 "~" H 1700 5100 50  0001 C CNN
+	1    1700 5100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1700 4750 1850 4750
+Wire Wire Line
+	1700 4750 1700 4950
+Wire Wire Line
+	1700 5250 1700 5800
+Connection ~ 1700 5800
+Wire Wire Line
+	1700 5800 2750 5800
+Wire Wire Line
+	2150 6050 2150 5700
+Connection ~ 2150 5700
+Wire Wire Line
+	2150 5700 2650 5700
 $EndSCHEMATC

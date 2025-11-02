@@ -3,9 +3,10 @@ difference(){
 
         difference(){
             union(){ 
-                translate([-27.5, -2,0]){
-                    linear_extrude(height = 2.8-0.45+0.3, center = false, convexity = 10)
-                    scale([1,1]) import(file = "svg/pion_dicht.svg", layer = "plate");
+
+                translate([-33, -12,0]){
+                    linear_extrude(height = 2.8-0.45, center = false, convexity = 10)
+                    scale([0.095,0.095]) import(file = "svg/dame-dicht.svg", layer = "plate");
                 }                              
             }
             union() {
@@ -24,7 +25,7 @@ difference(){
                         cylinder(h=500, r=2.7, $fn=100, center=false);
                     }   
                 }
-                translate([0,3,0.3]){
+                translate([0,3,-1]){
                     rotate([0,0,0]){
                         cylinder(h=500, r=11.5, $fn=100, center=false);
                     }   

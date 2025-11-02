@@ -16,13 +16,13 @@ difference(){
 
         translate([51/2+30,27/2,0]){
             rotate([0,0,0]){
-                cylinder(h=12, r=6.5, $fn=100, center=false);
+                cylinder(h=6, r=6.5, $fn=100, center=false);
             }
         }            
 
         translate([51/2-30,27/2,0]){
             rotate([0,0,0]){
-                cylinder(h=12, r=6.5, $fn=100, center=false);
+                cylinder(h=6, r=6.5, $fn=100, center=false);
             }
         }            
 
@@ -60,7 +60,7 @@ difference(){
         
         translate([51/2,27/2,4]){
             rotate([0,0,0]){
-                cylinder(h=5, r=15.05, $fn=100, center=false);
+                cylinder(h=5, r=15.5, $fn=100, center=false);
             }
         }            
         
