@@ -9,12 +9,11 @@ import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
 import com.vdzon.java.schaakspel.Schaakspel
+import com.vdzon.java.state.GlobalState
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter
-import java.net.InetAddress
-import java.net.NetworkInterface
-import java.net.UnknownHostException
+import java.net.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -23,6 +22,8 @@ import kotlin.concurrent.thread
 
 
 private val log = LoggerFactory.getLogger(RobotAansturingImpl::class.java)
+
+private const val OPPAKKER_RETRY_COUNT = 20
 
 class RobotAansturingImpl() : RobotAansturing {
 
@@ -41,9 +42,8 @@ class RobotAansturingImpl() : RobotAansturing {
     private var arm1AtHome = false
     private var arm2AtHome = false
     private var currentLoopThread: Thread? = null
-    private var movingToX: Int =  0
-    private var movingToY: Int =  0
-
+    private var movingToX: Int = 0
+    private var movingToY: Int = 0
 
 
     fun init() {
@@ -52,7 +52,7 @@ class RobotAansturingImpl() : RobotAansturing {
         }
 
         var initialized = false
-        while (!initialized ) {
+        while (!initialized) {
             val display = Display(this)
             display.startDisplay()
 
@@ -81,12 +81,12 @@ class RobotAansturingImpl() : RobotAansturing {
 
         thread {
             println("start check sleep thread")
-            while (true){
+            while (true) {
                 Thread.sleep(3000)
-                val timeout = System.currentTimeMillis() - 1000*60 // 20 seconds
+                val timeout = System.currentTimeMillis() - 1000 * 60 // 20 seconds
                 val bothHome = bothArmsAtHome()
-                val hasTimeout = lastMovement<timeout
-                if (bothHome && hasTimeout){
+                val hasTimeout = lastMovement < timeout
+                if (bothHome && hasTimeout) {
                     println("automatically sleep!")
                     sleep()
                 }
@@ -94,58 +94,108 @@ class RobotAansturingImpl() : RobotAansturing {
         }
     }
 
-    private fun callOppakker(actie: String) {
+//    private fun callOppakker(actie: String) {
+//        println("CALL OPPAKKER: $actie")
+//        val urlStr = "http://192.168.178.10/$actie"
+//        while (true) {
+//            try {
+//                val url = java.net.URL(urlStr)
+//                val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
+//                    requestMethod = "GET"
+//                    connectTimeout = 3000
+//                    readTimeout = 5000
+//                }
+//                conn.inputStream.bufferedReader().use { br ->
+//                    val response = br.readText().trim()
+//                    println("Oppakker response: '$response' for actie='$actie'")
+//                    if (response == "ok") {
+//                        return
+//                    }
+//                    if (response != "buzy") {
+//                        // Unexpected response; log and still retry
+//                        System.err.println("Unexpected response from oppakker: '$response' (actie='$actie')")
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                System.err.println("Error calling oppakker ($urlStr): ${e.message}")
+//            }
+//            try {
+//                Thread.sleep(1000)
+//            } catch (_: InterruptedException) {
+//                // Preserve interrupt status and break out
+//                Thread.currentThread().interrupt()
+//                return
+//            }
+//        }
+//    }
+
+    fun callOppakker(actie: String) {
         println("CALL OPPAKKER: $actie")
         val urlStr = "http://192.168.178.10/$actie"
+        var retryCount = 0
         while (true) {
             try {
-                val url = java.net.URL(urlStr)
-                val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
-                    requestMethod = "GET"
-                    connectTimeout = 3000
-                    readTimeout = 5000
+                val response = httpGet(urlStr)
+                println("Oppakker response: '$response' for actie='$actie'")
+
+                if (response == "buzy") {
+                    Thread.sleep(100)
+                    continue
                 }
-                conn.inputStream.bufferedReader().use { br ->
-                    val response = br.readText().trim()
-                    println("Oppakker response: '$response' for actie='$actie'")
-                    if (response == "ok") {
-                        return
-                    }
-                    if (response != "buzy") {
-                        // Unexpected response; log and still retry
-                        System.err.println("Unexpected response from oppakker: '$response' (actie='$actie')")
-                    }
+                // probeer de response te parsen naar een Int
+                val newPakkerCount = response.toInt()
+                val oldPakkerCount = GlobalState.lastPakkerCount
+                GlobalState.lastPakkerCount = newPakkerCount
+                if (GlobalState.failOnResetDetected && newPakkerCount<=oldPakkerCount){
+                    throw RuntimeException("Oppakker reset detected")
+                    GlobalState.stopTime = System.currentTimeMillis()
+                    GlobalState.errorDetected = true
                 }
-            } catch (e: Exception) {
+
+            } catch (e: NumberFormatException) {
+                throw IOException("Unexpected non-numeric response from oppakker", e)
+            } catch (e: IOException) {
+                retryCount++
+                if (retryCount>= OPPAKKER_RETRY_COUNT){
+                    throw RuntimeException("Oppakker down detected (after $OPPAKKER_RETRY_COUNT retries)")
+                }
                 System.err.println("Error calling oppakker ($urlStr): ${e.message}")
-            }
-            try {
                 Thread.sleep(1000)
             } catch (_: InterruptedException) {
-                // Preserve interrupt status and break out
                 Thread.currentThread().interrupt()
-                return
+                throw IOException("Interrupted while waiting for oppakker")
             }
         }
     }
 
 
+    fun httpGet(urlStr: String): String {
+        val url = URL(urlStr)
+        val conn = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 3000
+            readTimeout = 5000
+        }
 
-    fun setSchaakspel(schaakspel: Schaakspel){
+        return conn.inputStream.bufferedReader().use { it.readText().trim() }
+    }
+
+
+    fun setSchaakspel(schaakspel: Schaakspel) {
         this.schaakspel = schaakspel
     }
 
     fun bothArmsAtHome(): Boolean = arm1AtHome && arm2AtHome
 
-    fun updateLastMovement(){
+    fun updateLastMovement() {
         lastMovement = System.currentTimeMillis()
     }
 
     override fun movetoVlak(vlak: String, arm: Int) {
         updateLastMovement()
-        log.info("start: move to "+vlak)
+        log.info("start: move to " + vlak)
         // check if homeing is needed
-        if (homeingNeeded()){
+        if (homeingNeeded()) {
             homeHor()
             homeVert()
             waitUntilReady(100)
@@ -203,10 +253,10 @@ class RobotAansturingImpl() : RobotAansturing {
         if (y < 0) y = 0
         if (x > 13500) x = 13500
         if (x < 0) x = 0
-        if (arm==1) y = y+(getPakkerHoogte()?.toIntOrNull()?:0)
+        if (arm == 1) y = y + (getPakkerHoogte()?.toIntOrNull() ?: 0)
 
         moveto(y, x)
-        log.info("done: move to "+vlak)
+        log.info("done: move to " + vlak)
 
     }
 
@@ -237,11 +287,11 @@ class RobotAansturingImpl() : RobotAansturing {
         arm2AtHome = false
         log.info("sleeping")
         try {
-            val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
-            val delay = 100*snelheid;
+            val snelheid: Double = getSnelheid()?.toDoubleOrNull() ?: 2.0
+            val delay = 100 * snelheid;
             val formattedDelayFactor = String.format("%04d", delay.toInt())
-            arm1!!.writeI2c(("^X000000"+formattedDelayFactor).toByteArray(),"arm1")
-            arm2!!.writeI2c(("^X000000"+formattedDelayFactor).toByteArray(),"arm2")
+            arm1!!.writeI2c(("^X000000" + formattedDelayFactor).toByteArray(), "arm1")
+            arm2!!.writeI2c(("^X000000" + formattedDelayFactor).toByteArray(), "arm2")
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -295,7 +345,7 @@ class RobotAansturingImpl() : RobotAansturing {
 
     override fun bootsound() {
         log.info("bootsound")
-        arm1!!.writeI2c("^B0000000000000000".toByteArray(),"arm1")
+        arm1!!.writeI2c("^B0000000000000000".toByteArray(), "arm1")
     }
 
 
@@ -462,7 +512,7 @@ class RobotAansturingImpl() : RobotAansturing {
             // At this point, we did not find a non-loopback address.
             // Fall back to returning whatever InetAddress.getLocalHost() returns...
             val jdkSuppliedAddress = InetAddress.getLocalHost()
-                    ?: throw UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.")
+                ?: throw UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.")
             return jdkSuppliedAddress
         } catch (e: Exception) {
             val unknownHostException = UnknownHostException("Failed to determine LAN address: $e")
@@ -473,14 +523,14 @@ class RobotAansturingImpl() : RobotAansturing {
 
     override fun startDisplayThread() {
         log.info("Start display thread")
-        var lcd:I2CLcdDisplay? = null
-        while (lcd==null ) {
-            try{
-                lcd = I2CLcdDisplay(2, 16,I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
+        var lcd: I2CLcdDisplay? = null
+        while (lcd == null) {
+            try {
+                lcd = I2CLcdDisplay(2, 16, I2CBus.BUS_1, 0x38, 3, 0, 1, 2, 7, 6, 5, 4)
                 lcd.setCursorHome()
                 lcd.clear();
             } catch (e: Exception) {
-                log.info("Error loading display:"+e.message)
+                log.info("Error loading display:" + e.message)
                 Thread.sleep(3000)
             }
         }
@@ -509,13 +559,12 @@ class RobotAansturingImpl() : RobotAansturing {
         }
     }
 
-    private fun armName(arm: I2CDevice?)=
-        when (arm){
+    private fun armName(arm: I2CDevice?) =
+        when (arm) {
             arm1 -> "arm1"
             arm2 -> "arm2"
             else -> "?"
         }
-
 
 
     fun calcDelays(pos1: Int, pos2: Int): Long {
@@ -528,7 +577,7 @@ class RobotAansturingImpl() : RobotAansturing {
         if (delayFactor2 > 9999) delayFactor2 = 9999.0
 
         // speedup 2x
-        val snelheid: Double = getSnelheid()?.toDoubleOrNull()?:2.0
+        val snelheid: Double = getSnelheid()?.toDoubleOrNull() ?: 2.0
 
         delayFactor1 = delayFactor1 * snelheid
         delayFactor2 = delayFactor2 * snelheid
@@ -573,7 +622,7 @@ class RobotAansturingImpl() : RobotAansturing {
 
     private fun stopLoop() {
         if (currentLoopThread != null) {
-            currentLoopThread=null
+            currentLoopThread = null
         }
     }
 
@@ -596,34 +645,34 @@ class RobotAansturingImpl() : RobotAansturing {
     private fun runOnce(text: String?) {
         val split = text!!.split("#".toRegex()).toTypedArray()
         Arrays.asList(*split).forEach(
-                Consumer { row: String? ->
-                    if (row != null && !row.startsWith("#") && currentLoopThread!=null) {// check currentLoopThread: als die null is, dan is gevraagd op de demo te stoppen
-                        if (row.trim { it <= ' ' }.startsWith("@")) {
-                            val regel = row.trim().replace("@","")
-                            val (vlak, armStr) = regel.split(" ")
-                            val arm = armStr.toInt()
-                            movetoVlak(vlak, arm)
-                        } else if (row.trim { it <= ' ' }.startsWith("pak 0")) {
-                            clamp1()
-                        } else if (row.trim { it <= ' ' }.startsWith("pak 1")) {
-                            clamp2()
-                        } else if (row.trim { it <= ' ' }.startsWith("zet 0")) {
-                            release1()
-                        } else if (row.trim { it <= ' ' }.startsWith("zet 1")) {
-                            release2()
-                        } else if (row.trim { it <= ' ' }.startsWith("sleep")) {
-                            sleep()
-                        } else if (row.trim { it <= ' ' }.startsWith("home")) {
-                            homeHor()
-                            homeVert()
-                            waitUntilReady(100)
-                        }
+            Consumer { row: String? ->
+                if (row != null && !row.startsWith("#") && currentLoopThread != null) {// check currentLoopThread: als die null is, dan is gevraagd op de demo te stoppen
+                    if (row.trim { it <= ' ' }.startsWith("@")) {
+                        val regel = row.trim().replace("@", "")
+                        val (vlak, armStr) = regel.split(" ")
+                        val arm = armStr.toInt()
+                        movetoVlak(vlak, arm)
+                    } else if (row.trim { it <= ' ' }.startsWith("pak 0")) {
+                        clamp1()
+                    } else if (row.trim { it <= ' ' }.startsWith("pak 1")) {
+                        clamp2()
+                    } else if (row.trim { it <= ' ' }.startsWith("zet 0")) {
+                        release1()
+                    } else if (row.trim { it <= ' ' }.startsWith("zet 1")) {
+                        release2()
+                    } else if (row.trim { it <= ' ' }.startsWith("sleep")) {
+                        sleep()
+                    } else if (row.trim { it <= ' ' }.startsWith("home")) {
+                        homeHor()
+                        homeVert()
+                        waitUntilReady(100)
                     }
                 }
+            }
         )
     }
 
-    private fun homeingNeeded(): Boolean{
+    private fun homeingNeeded(): Boolean {
         val arm1Status = arm1!!.readI2c("arm1")
         val arm2Status = arm2!!.readI2c("arm2")
         val arm1SleepingOrHomingNeeded = arm1Status == 9 || arm1Status == 6
@@ -652,7 +701,7 @@ class RobotAansturingImpl() : RobotAansturing {
         while (!allReady) {
             sleep(10)
             udateStatus()
-            if (homeNeeded){
+            if (homeNeeded) {
                 println("Error detected! Homing needed.")
                 homeAndMoveAgain()
             }
@@ -660,7 +709,7 @@ class RobotAansturingImpl() : RobotAansturing {
         println("All ready")
     }
 
-    private fun homeAndMoveAgain(){
+    private fun homeAndMoveAgain() {
         println("Home and move again!")
         println("Home")
         homeHor()
@@ -669,7 +718,7 @@ class RobotAansturingImpl() : RobotAansturing {
         while (!allReady) {
             sleep(10)
             udateStatus()
-            if (homeNeeded){
+            if (homeNeeded) {
                 println("Error detected! Homing needed.")
                 homeAndMoveAgain()
             }
@@ -705,19 +754,18 @@ class RobotAansturingImpl() : RobotAansturing {
 }
 
 private fun I2CDevice.readI2c(devicename: String): Int {
-    var result:Int = -1;
+    var result: Int = -1;
     Lock.lock()
     var succeeded = false
     var tryCount = 0
-    while (!succeeded && tryCount<20) {
+    while (!succeeded && tryCount < OPPAKKER_RETRY_COUNT) {
         try {
             result = read()
-            if (result!=0) {
+            if (result != 0) {
 //                log.info("status of 0 not accepted for "+devicename+", retry read status")
                 succeeded = true
             }
-        }
-        catch (e:Exception){
+        } catch (e: Exception) {
             tryCount++;
             log.info("read failed $tryCount times for $devicename: ${e.message}")
             sleep(100)
@@ -732,12 +780,11 @@ private fun I2CDevice.writeI2c(toByteArray: ByteArray, devicename: String) {
     Lock.lock()
     var succeeded = false
     var tryCount = 0
-    while (!succeeded && tryCount<20) {
+    while (!succeeded && tryCount < OPPAKKER_RETRY_COUNT) {
         try {
             write(toByteArray)
             succeeded = true
-        }
-        catch (e:Exception){
+        } catch (e: Exception) {
             tryCount++;
             log.info("write failed $tryCount times for $devicename: ${e.message}")
             sleep(100)
@@ -746,11 +793,10 @@ private fun I2CDevice.writeI2c(toByteArray: ByteArray, devicename: String) {
     Lock.unlock()
 }
 
-private fun sleep(time:Long){
-    try{
+private fun sleep(time: Long) {
+    try {
         Thread.sleep(time)
-    }
-    catch (e:Exception){
+    } catch (e: Exception) {
 
     }
 

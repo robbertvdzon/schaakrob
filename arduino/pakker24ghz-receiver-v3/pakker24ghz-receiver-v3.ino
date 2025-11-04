@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 
 #include <Adafruit_PWMServoDriver.h>
@@ -30,6 +29,8 @@ IPAddress subnet(255, 255, 255, 0);
 
 WebServer server(80);
 volatile bool isBusy = false;
+int moveCount = 0;   // houdt aantal uitgevoerde moves bij
+
 
 Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
 
@@ -50,8 +51,9 @@ void handleAction(void (*action)()) {
   }
   isBusy = true;
   action();
+  moveCount++;            
   isBusy = false;
-  server.send(200, "text/plain", "ok");
+  server.send(200, "text/plain", String(moveCount));
 }
 
 void setup() {

@@ -9,8 +9,12 @@ import com.github.bhlangonijr.chesslib.Square
 import com.github.bhlangonijr.chesslib.move.Move
 import com.vdzon.java.robitapi.RobotAansturing
 import com.vdzon.java.schaakspel.CalcUtil.calcDistance
+import com.vdzon.java.state.GlobalState
 import java.io.File
+import java.io.Serializable
 import java.lang.RuntimeException
+
+private const val MAX_AUTO_RUN_MOVES = 15
 
 class Schaakspel(private val robotAansturing: RobotAansturing) {
 
@@ -31,12 +35,12 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         initialBlackStoreSquares = listOf<StoreSquare>(
             StoreSquare("A21"),
             StoreSquare("B21"),
-//            StoreSquare("C21"),
-//            StoreSquare("D21"),
-//            StoreSquare("E21"),
+            StoreSquare("C21"),
+            StoreSquare("D21"),
+            StoreSquare("E21"),
            // StoreSquare("F21"), dit vlak niet gebruiken! Magneetje zit niet goed op dat vlak
-//            StoreSquare("G21"),
-//            StoreSquare("H21"),
+            StoreSquare("G21"),
+            StoreSquare("H21"),
             StoreSquare("A20"),
             StoreSquare("B20"),
             StoreSquare("C20"),
@@ -48,7 +52,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         )
         initialWhiteStoreSquares = listOf<StoreSquare>(
             StoreSquare("A11"),
-  //          StoreSquare("B11"),
+            StoreSquare("B11"),
             StoreSquare("C11"),
             StoreSquare("D11"),
             StoreSquare("E11"),
@@ -75,21 +79,53 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         if (currentLoopThread != null) {
             currentLoopThread=null
         }
+        buildBoardThread.cancel()
+        GlobalState.reset()
     }
 
     fun startAutoPlay() {
+        GlobalState.startDetectError()
         currentLoopThread = Thread(Runnable { autoPlay() })
         currentLoopThread!!.start()
     }
 
+    private var autoPlayStepCount = 0
     private fun autoPlay(){
-        home()
-        while (!isMated() && currentLoopThread!=null){
-            computermove()
-        }
-        if (currentLoopThread!=null) {
+        try {
+            autoPlayStepCount =  0
             home()
+            while (currentLoopThread != null) {
+                while (!isMated() && currentLoopThread != null && autoPlayStepCount < MAX_AUTO_RUN_MOVES) {
+                    computermove()
+                    autoPlayStepCount++
+                }
+                if (currentLoopThread != null) {
+                    restoreBoard()
+                }
+                // wait until restore finished
+                while (buildBoardThread.isBuzy() && currentLoopThread != null) {
+                    Thread.sleep(10)
+                }
+                if (currentLoopThread != null) {
+                    Thread.sleep(3000)
+                }
+
+            }
         }
+        catch (e: Exception){
+            e.printStackTrace()
+            if (GlobalState.errorDetected){
+                val runTime = GlobalState.stopTime - GlobalState.startTime
+                val hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(runTime)
+                val minutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(runTime) % 60
+                val seconds = java.util.concurrent.TimeUnit.MILLISECONDS.toSeconds(runTime) % 60
+                val formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                println("Runtime until error: $formatted")
+            }
+
+        }
+        autoPlayStepCount = 0
+        currentLoopThread = null
     }
 
 
@@ -161,6 +197,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
     fun restoreBoard(){
+        printBoard(targetBoard)
         buildBoardThread.restoreBoard()
     }
 
@@ -181,7 +218,16 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     fun newMoveToGetToTargetBoard(): Boolean{
         // 1 stap voor terug naar target pos
         val moves = getAllPossibleMoves()
+
+        println("ALL POSSIBLE MOVES:")
+        moves.forEach {
+            println(" ${it.first} -> ${it.second}")
+        }
+
+
         val move = findClosestMove(moves)
+        println("CHOSEN MOVE:  ${move?.first} -> ${move?.second}" )
+
         if (move!=null) {
             val (van, naar) = move
             ownmove(van, naar)
@@ -191,12 +237,6 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
     fun findClosestMove(moves: List<Pair<String, String>> ):Pair<String, String>?{
-
-//        println("Find closest move, possible moves (current pos=$currentPos):---------------------------------------")
-//        moves.forEach{
-//            println(" "+it.first+"-"+it.second)
-//        }
-
         var closestMove:Pair<String, String>? = null
         var closestDistance = Double.MAX_VALUE
         moves.forEach{ moveToCheck ->
@@ -345,7 +385,12 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         if (whiteStoreSquare!=null){
             return Piece.fromValue(whiteStoreSquare.piece)
         }
-        return board.getPiece(Square.fromValue(pos))
+
+        try {
+            return board.getPiece(Square.fromValue(pos))
+        } catch (e: Exception) {
+            return Piece.NONE
+        }
     }
 
     private fun positieBuitenBord(pos: String): Boolean {
@@ -450,9 +495,41 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 storeSquareWhite?.piece = board.getPiece(Square.fromValue(van)).name
             }
 
-            val piece = board.getPiece(Square.fromValue(van))
-
-//            if (van.endsWith("21") || to.endsWith("21")) {// bovenste rij
+            val piece  = when(van){
+                "A21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "B21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "C21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "D21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "E21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "F21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "G21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "H21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "A22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "B22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "C22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "D22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "E22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "F22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "G22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "H22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "A11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "B11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "C11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "D11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "E11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "F11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "G11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "H11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "A12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "B12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "C12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "D12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "E12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "F12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "G12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                "H12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+                else -> board.getPiece(Square.fromValue(van))// enum fout
+            }
             if (piece.pieceSide==Side.BLACK) {// bovenste magneet
                 robotAansturing.movetoVlak(van, 1)
                 robotAansturing.clamp2()
@@ -476,6 +553,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
     private fun toBoard(): ChessBoard {
+        println("############## start toBoard")
         val list = mutableListOf<SquareField>()
         for (col in "87654321") {
             for (row in "ABCDEFGH") {
@@ -489,6 +567,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         val kingAttached = isKingAttacked()
         val draw = isDraw()
         val side = board.sideToMove
+        println("############## end toBoard")
         return ChessBoard(list, side.value(), moves.toChessMoves(), draw, mate, kingAttached)
     }
 
@@ -534,15 +613,35 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     private fun printBoard(boardToPrint: Board) {
         println("--------")
+        print("21 :")
+        printStore(blackStoreSquares.take(8))
+        print("\n22 :")
+        printStore(blackStoreSquares.takeLast(8))
         for (col in "87654321") {
             println()
+            print("$col  :")
             for (row in "ABCDEFGH") {
                 val sq = "" + row + col
                 val s = boardToPrint.getPiece(Square.fromValue(sq))
                 print(s.toLetter())
             }
         }
-        println("--------")
+        print("\n11 :")
+        printStore(whiteStoreSquares.take(8))
+        print("\n12 :")
+        printStore(whiteStoreSquares.takeLast(8))
+        println("\n--------\n")
+    }
+
+    private fun printStore(store: List<StoreSquare>) {
+        store.forEach {
+            val letter = try {
+                Piece.valueOf(it.piece).toLetter()
+            } catch (e: Exception) {
+                "?"
+            }
+            print(letter)
+        }
     }
 
     fun Piece.toLetter(): String {
@@ -559,7 +658,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             Piece.BLACK_ROOK -> "R"
             Piece.BLACK_QUEEN -> "Q"
             Piece.BLACK_KING -> "K"
-            Piece.NONE -> " "
+            Piece.NONE -> "."
         }
     }
 
@@ -582,7 +681,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         }
         if (blackStoreSquares==null || blackStoreSquares.size==0) blackStoreSquares = initialBlackStoreSquares
         if (whiteStoreSquares==null || whiteStoreSquares.size==0) whiteStoreSquares = initialWhiteStoreSquares
-        println(blackStoreSquares)
+        printBoard(board)
+
 
     }
     private fun saveBoard(){
@@ -594,4 +694,4 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
 
 }
-data class StoreSquare(val pos: String, var piece: String = Piece.NONE.name): java.io.Serializable
+data class StoreSquare(val pos: String, var piece: String = Piece.NONE.name): Serializable
