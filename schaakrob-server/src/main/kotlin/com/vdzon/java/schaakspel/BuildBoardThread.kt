@@ -30,13 +30,13 @@ class BuildBoardThread(private val schaakspel: Schaakspel) {
             while (true) {
                 if (enabled) {
                     println("Find move to restore")
-                    val finished = schaakspel.newMoveToGetToTargetBoard()
-                    if (finished) {
-                        schaakspel.resetTo(schaakspel.getTargetBoard())
-                        println("Board is restored, home")
-                        schaakspel.home()
-                        enabled = false
-                    }
+                        val finished = schaakspel.newMoveToGetToTargetBoard()
+                        if (finished) {
+                            schaakspel.resetTo(schaakspel.getTargetBoard())
+                            println("Board is restored, home")
+                            schaakspel.home()
+                            enabled = false
+                        }
                 }
                 try {
                     Thread.sleep(500)

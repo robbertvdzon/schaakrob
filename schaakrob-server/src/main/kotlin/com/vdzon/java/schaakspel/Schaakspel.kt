@@ -12,9 +12,10 @@ import com.vdzon.java.schaakspel.CalcUtil.calcDistance
 import com.vdzon.java.state.GlobalState
 import java.io.File
 import java.io.Serializable
-import java.lang.RuntimeException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-private const val MAX_AUTO_RUN_MOVES = 15
+private const val MAX_AUTO_RUN_MOVES = 60
 
 class Schaakspel(private val robotAansturing: RobotAansturing) {
 
@@ -26,11 +27,11 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     var initialBlackStoreSquares: List<StoreSquare>
     var initialWhiteStoreSquares: List<StoreSquare>
-    lateinit var  blackStoreSquares : List<StoreSquare>
+    lateinit var blackStoreSquares: List<StoreSquare>
     lateinit var whiteStoreSquares: List<StoreSquare>
     private var currentLoopThread: Thread? = null
 
-    init{
+    init {
 
         initialBlackStoreSquares = listOf<StoreSquare>(
             StoreSquare("A21"),
@@ -38,7 +39,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             StoreSquare("C21"),
             StoreSquare("D21"),
             StoreSquare("E21"),
-           // StoreSquare("F21"), dit vlak niet gebruiken! Magneetje zit niet goed op dat vlak
+            // StoreSquare("F21"), dit vlak niet gebruiken! Magneetje zit niet goed op dat vlak
             StoreSquare("G21"),
             StoreSquare("H21"),
             StoreSquare("A20"),
@@ -74,10 +75,9 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
 
-
     fun stopAutoplay() {
         if (currentLoopThread != null) {
-            currentLoopThread=null
+            currentLoopThread = null
         }
         buildBoardThread.cancel()
         GlobalState.reset()
@@ -90,14 +90,17 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
     private var autoPlayStepCount = 0
-    private fun autoPlay(){
+    private fun autoPlay() {
         try {
-            autoPlayStepCount =  0
+            autoPlayStepCount = 0
             home()
             while (currentLoopThread != null) {
-                while (!isMated() && currentLoopThread != null && autoPlayStepCount < MAX_AUTO_RUN_MOVES) {
+                while (!isGameDone() && currentLoopThread != null && autoPlayStepCount < MAX_AUTO_RUN_MOVES) {
                     computermove()
                     autoPlayStepCount++
+                    if (autoPlayStepCount%5==0){
+                        robotAansturing.home()
+                    }
                 }
                 if (currentLoopThread != null) {
                     restoreBoard()
@@ -106,34 +109,47 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 while (buildBoardThread.isBuzy() && currentLoopThread != null) {
                     Thread.sleep(10)
                 }
-                if (currentLoopThread != null) {
-                    Thread.sleep(3000)
+                if (GlobalState.errorDetected && GlobalState.failOnResetDetected) {
+                    // stop the autoplay thread when an error is detected
+                    currentLoopThread=null
                 }
 
+                if (currentLoopThread != null) {
+                    Thread.sleep(5000)
+                }
+                autoPlayStepCount = 0
+
+
             }
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
-            if (GlobalState.errorDetected){
+            if (GlobalState.errorDetected && GlobalState.failOnResetDetected) {
                 val runTime = GlobalState.stopTime - GlobalState.startTime
                 val hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(runTime)
                 val minutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(runTime) % 60
                 val seconds = java.util.concurrent.TimeUnit.MILLISECONDS.toSeconds(runTime) % 60
                 val formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-                println("Runtime until error: $formatted")
+                println("Testrun: time: $formatted #picks:${GlobalState.lastPakkerCount}")
+                appendLogLine("Testrun: time: $formatted #picks:${GlobalState.lastPakkerCount}")
             }
-
         }
-        autoPlayStepCount = 0
         currentLoopThread = null
     }
 
 
+    fun appendLogLine(message: String) {
+        val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        val homeDir = System.getProperty("user.home")
+        val file = File("$homeDir/testrun.txt")
+
+        file.appendText("[$timestamp] $message\n")
+    }
+
 
     fun reset(): ChessBoard {
         board = Board()
-        blackStoreSquares.forEach{it.piece = Piece.NONE.name}
-        whiteStoreSquares.forEach{it.piece = Piece.NONE.name}
+        blackStoreSquares.forEach { it.piece = Piece.NONE.name }
+        whiteStoreSquares.forEach { it.piece = Piece.NONE.name }
         saveBoard()
         return toBoard()
     }
@@ -163,20 +179,20 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         return board.fen
     }
 
-    fun moveExtraWhenCastle(move: Move){
-        val side= board.getPiece(move.from).pieceSide
+    fun moveExtraWhenCastle(move: Move) {
+        val side = board.getPiece(move.from).pieceSide
         val isKingSideCastle = board.context.isKingSideCastle(move)
         val isQueenSideCastle = board.context.isQueenSideCastle(move)
 
-        val extraMove: Pair<String, String> ?= when {
-            side==Side.WHITE && isKingSideCastle -> Pair("H1","F1")
-            side==Side.WHITE && isQueenSideCastle -> Pair("A1","D1")
-            side==Side.BLACK && isKingSideCastle -> Pair("H8","F8")
-            side==Side.BLACK && isQueenSideCastle ->  Pair("A8","D8")
+        val extraMove: Pair<String, String>? = when {
+            side == Side.WHITE && isKingSideCastle -> Pair("H1", "F1")
+            side == Side.WHITE && isQueenSideCastle -> Pair("A1", "D1")
+            side == Side.BLACK && isKingSideCastle -> Pair("H8", "F8")
+            side == Side.BLACK && isQueenSideCastle -> Pair("A8", "D8")
             else -> null
         }
-        if (extraMove!=null) {
-            println("EXTRA MOVE:"+extraMove)
+        if (extraMove != null) {
+            println("EXTRA MOVE:" + extraMove)
             robotMove(extraMove.first, extraMove.second)
         }
 
@@ -184,7 +200,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     fun computermove(): ChessBoard {
         println("Coputer move")
-        if (board.isDraw||board.isMated) return toBoard()
+        if (board.isDraw || board.isMated) return toBoard()
         val move = ComputerPlayer.getMove(board.getFen())
 
         robotMove(move.from.value(), move.to.value())
@@ -196,26 +212,26 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         return toBoard()
     }
 
-    fun restoreBoard(){
+    fun restoreBoard() {
         printBoard(targetBoard)
         buildBoardThread.restoreBoard()
     }
 
-    fun loadFen(fen: String){
+    fun loadFen(fen: String) {
         buildBoardThread.loadFen(fen)
     }
 
-    fun setTargetBoard(board: Board){
+    fun setTargetBoard(board: Board) {
         targetBoard = board
         printBoard(targetBoard)
     }
 
-    fun getTargetBoard(): Board{
+    fun getTargetBoard(): Board {
         return targetBoard
     }
 
 
-    fun newMoveToGetToTargetBoard(): Boolean{
+    fun newMoveToGetToTargetBoard(): Boolean {
         // 1 stap voor terug naar target pos
         val moves = getAllPossibleMoves()
 
@@ -226,9 +242,9 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
 
         val move = findClosestMove(moves)
-        println("CHOSEN MOVE:  ${move?.first} -> ${move?.second}" )
+        println("CHOSEN MOVE:  ${move?.first} -> ${move?.second}")
 
-        if (move!=null) {
+        if (move != null) {
             val (van, naar) = move
             ownmove(van, naar)
             return false
@@ -236,12 +252,12 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         return true
     }
 
-    fun findClosestMove(moves: List<Pair<String, String>> ):Pair<String, String>?{
-        var closestMove:Pair<String, String>? = null
+    fun findClosestMove(moves: List<Pair<String, String>>): Pair<String, String>? {
+        var closestMove: Pair<String, String>? = null
         var closestDistance = Double.MAX_VALUE
-        moves.forEach{ moveToCheck ->
+        moves.forEach { moveToCheck ->
             val distance = calcDistance(moveToCheck.first, currentPos)
-            if (distance<closestDistance){
+            if (distance < closestDistance) {
                 closestDistance = distance
                 closestMove = moveToCheck
             }
@@ -253,8 +269,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     private fun getAllPossibleMoves(): List<Pair<String, String>> {
         val result = mutableListOf<Pair<String, String>>()
-        for (row in "ABCDEFGH"){
-            for (col in "12345678"){
+        for (row in "ABCDEFGH") {
+            for (col in "12345678") {
                 val pos = "$row$col"
                 val square = Square.valueOf(pos)
                 val pieceNow = board.getPiece(square)
@@ -262,30 +278,29 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 saveBoard()
 
 
-                if (pieceNow==Piece.NONE && pieceWanted!=Piece.NONE){
-                    val from= findPieceToRestore(pieceWanted)
-                    if (from==null) return emptyList()// zou niet mogen gebeuren
-                    result.add(Pair(from,pos))
+                if (pieceNow == Piece.NONE && pieceWanted != Piece.NONE) {
+                    val from = findPieceToRestore(pieceWanted)
+                    if (from == null) return emptyList()// zou niet mogen gebeuren
+                    result.add(Pair(from, pos))
                 }
             }
         }
 
         // maak lege plekken
-        for (row in "ABCDEFGH"){
-            for (col in "12345678"){
+        for (row in "ABCDEFGH") {
+            for (col in "12345678") {
                 val pos = "$row$col"
                 val square = Square.valueOf(pos)
                 val pieceNow = board.getPiece(square)
                 val pieceWanted = targetBoard.getPiece(square)
 
-                if (pieceNow!=Piece.NONE && pieceWanted==Piece.NONE){
-                    if (pieceNow.pieceSide==Side.WHITE){
-                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE.name }.first()
-                        result.add(Pair(pos,storeSquare.pos))
-                    }
-                    else{
-                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE.name }.first()
-                        result.add(Pair(pos,storeSquare.pos))
+                if (pieceNow != Piece.NONE && pieceWanted == Piece.NONE) {
+                    if (pieceNow.pieceSide == Side.WHITE) {
+                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece == Piece.NONE.name }.first()
+                        result.add(Pair(pos, storeSquare.pos))
+                    } else {
+                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece == Piece.NONE.name }.first()
+                        result.add(Pair(pos, storeSquare.pos))
                     }
                 }
             }
@@ -294,9 +309,10 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
         return result
     }
+
     private fun bepaalMoveForTargetBoardOld(): Pair<String, String>? {
-        for (row in "ABCDEFGH"){
-            for (col in "12345678"){
+        for (row in "ABCDEFGH") {
+            for (col in "12345678") {
                 val pos = "$row$col"
                 val square = Square.valueOf(pos)
                 val pieceNow = board.getPiece(square)
@@ -304,31 +320,30 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 saveBoard()
 
 
-                if (pieceNow==Piece.NONE && pieceWanted!=Piece.NONE){
-                    val from= findPieceToRestore(pieceWanted)
-                    if (from==null) return null// zou niet mogen gebeuren
-                    return Pair(from,pos)
+                if (pieceNow == Piece.NONE && pieceWanted != Piece.NONE) {
+                    val from = findPieceToRestore(pieceWanted)
+                    if (from == null) return null// zou niet mogen gebeuren
+                    return Pair(from, pos)
                 }
             }
         }
 
         // maak lege plekken
-        for (row in "ABCDEFGH"){
-            for (col in "12345678"){
+        for (row in "ABCDEFGH") {
+            for (col in "12345678") {
                 val pos = "$row$col"
                 val square = Square.valueOf(pos)
                 val pieceNow = board.getPiece(square)
                 val pieceWanted = targetBoard.getPiece(square)
 
-                if (pieceNow!=Piece.NONE && pieceWanted==Piece.NONE){
-                    if (pieceNow.pieceSide==Side.WHITE){
-                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE.name }.first()
-                        return Pair(pos,storeSquare.pos)
-                    }
-                    else{
-                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE.name }.first()
+                if (pieceNow != Piece.NONE && pieceWanted == Piece.NONE) {
+                    if (pieceNow.pieceSide == Side.WHITE) {
+                        val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece == Piece.NONE.name }.first()
+                        return Pair(pos, storeSquare.pos)
+                    } else {
+                        val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece == Piece.NONE.name }.first()
 
-                        return Pair(pos,storeSquare.pos)
+                        return Pair(pos, storeSquare.pos)
                     }
                 }
             }
@@ -340,49 +355,49 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     private fun findPieceToRestore(piece: Piece): String? {
         // find on board
-        for (row in "ABCDEFGH"){
-            for (col in "12345678"){
+        for (row in "ABCDEFGH") {
+            for (col in "12345678") {
                 val pos = "$row$col"
                 val square = Square.valueOf(pos)
                 val pieceNow = board.getPiece(square)
                 val pieceWanted = targetBoard.getPiece(square)
 
-                if (pieceNow!=pieceWanted && pieceNow==piece){
+                if (pieceNow != pieceWanted && pieceNow == piece) {
                     return pos
                 }
             }
         }
 
         // find outside board
-        for (row in "ABCDEFGH"){
-            for (col in listOf("20","21","10","11")){
+        for (row in "ABCDEFGH") {
+            for (col in listOf("20", "21", "10", "11")) {
                 val pos = "$row$col"
-                if (getPiece(pos)==piece) return pos
+                if (getPiece(pos) == piece) return pos
             }
         }
 
         return null
     }
 
-    private fun clearPos(pos: String){
-        val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos}
-        val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos}
-        if (blackStoreSquare!=null){
+    private fun clearPos(pos: String) {
+        val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos }
+        val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos }
+        if (blackStoreSquare != null) {
             blackStoreSquare.piece = Piece.NONE.name
         }
-        if (whiteStoreSquare!=null){
+        if (whiteStoreSquare != null) {
             whiteStoreSquare.piece = Piece.NONE.name
         }
     }
 
 
     private fun getPiece(pos: String): Piece {
-        val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos}
-        val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos}
-        if (blackStoreSquare!=null){
+        val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos }
+        val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos }
+        if (blackStoreSquare != null) {
             return Piece.fromValue(blackStoreSquare.piece)
         }
-        if (whiteStoreSquare!=null){
+        if (whiteStoreSquare != null) {
             return Piece.fromValue(whiteStoreSquare.piece)
         }
 
@@ -394,39 +409,37 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
     private fun positieBuitenBord(pos: String): Boolean {
-        val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos}
-        val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos}
-        return blackStoreSquare!=null || whiteStoreSquare!=null
+        val blackStoreSquare = blackStoreSquares.firstOrNull { it.pos == pos }
+        val whiteStoreSquare = whiteStoreSquares.firstOrNull { it.pos == pos }
+        return blackStoreSquare != null || whiteStoreSquare != null
     }
 
 
     fun ownmove(van: String, naar: String): ChessBoard {
 //        println("--------------------------------------- MOVE: " + van + " ->" + naar)
 
-        if (positieBuitenBord(van)){
-            if (getPiece(naar)!=Piece.NONE) throw RuntimeException("Zet van buitenbord kan alleen naar lege plek")
+        if (positieBuitenBord(van)) {
+            if (getPiece(naar) != Piece.NONE) throw RuntimeException("Zet van buitenbord kan alleen naar lege plek")
             val naarValue = Square.fromValue(naar)
-            val pieceToMove:Piece = getPiece(van)
+            val pieceToMove: Piece = getPiece(van)
             robotMove(van, naar)
             println("board.setPiece: " + pieceToMove + " ->" + naarValue)
             board.setPiece(pieceToMove, naarValue)
             saveBoard()
 
-        }
-        else {
-            if (positieBuitenBord(naar)){
+        } else {
+            if (positieBuitenBord(naar)) {
                 val fromValue: Square = Square.fromValue(van)
                 robotMove(van, naar)
                 println("board.setPiece: " + fromValue + " ->" + Piece.NONE)
                 board.unsetPiece(board.getPiece(fromValue), fromValue)
                 saveBoard()
-            }
-            else{
+            } else {
                 val fromValue: Square = Square.fromValue(van)
                 val naarValue = Square.fromValue(naar)
                 robotMove(van, naar)
                 moveExtraWhenCastle(Move(fromValue, naarValue))
-                if (!board.doMove(Move(fromValue, naarValue))){
+                if (!board.doMove(Move(fromValue, naarValue))) {
                     // not valid
                     // do it anyway
                     val piece = board.getPiece(fromValue)
@@ -444,100 +457,97 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
 
-    private fun robotMove(van: String, to:String){
+    private fun robotMove(van: String, to: String) {
         println("robot from:$van to:$to")
 
         val toPiece = if (positieBuitenBord(to)) Piece.NONE else board.getPiece(Square.fromValue(to))
 
-        if (toPiece!=Piece.NONE){
+        if (toPiece != Piece.NONE) {
             // slaan
-            if (toPiece.pieceSide==Side.BLACK){
-                val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece==Piece.NONE.name }.first()
+            if (toPiece.pieceSide == Side.BLACK) {
+                val storeSquare: StoreSquare = blackStoreSquares.filter { it.piece == Piece.NONE.name }.first()
                 storeSquare.piece = toPiece.name
                 robotAansturing.movetoVlak(van, 0)
                 robotAansturing.clamp1()
 
-                robotAansturing.movetoVlak(to,1)
+                robotAansturing.movetoVlak(to, 1)
                 robotAansturing.clamp2()
 
                 robotAansturing.movetoVlak(to, 0)
                 robotAansturing.release1()
 
-                robotAansturing.movetoVlak(storeSquare.pos,1)
+                robotAansturing.movetoVlak(storeSquare.pos, 1)
                 robotAansturing.release2()
 
                 currentPos = storeSquare.pos
-            }
-            else{
-                val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece==Piece.NONE.name }.first()
+            } else {
+                val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece == Piece.NONE.name }.first()
                 storeSquare.piece = toPiece.name
                 robotAansturing.movetoVlak(van, 1)
                 robotAansturing.clamp2()
 
-                robotAansturing.movetoVlak(to,0)
+                robotAansturing.movetoVlak(to, 0)
                 robotAansturing.clamp1()
 
                 robotAansturing.movetoVlak(to, 1)
                 robotAansturing.release2()
 
-                robotAansturing.movetoVlak(storeSquare.pos,0)
+                robotAansturing.movetoVlak(storeSquare.pos, 0)
                 robotAansturing.release1()
                 currentPos = storeSquare.pos
             }
-        }
-        else {
+        } else {
             // niet slaan
 
-            if (positieBuitenBord(to)){
-                val storeSquareBlack = blackStoreSquares.filter { it.pos== to }.firstOrNull()
-                val storeSquareWhite = whiteStoreSquares.filter { it.pos== to }.firstOrNull()
+            if (positieBuitenBord(to)) {
+                val storeSquareBlack = blackStoreSquares.filter { it.pos == to }.firstOrNull()
+                val storeSquareWhite = whiteStoreSquares.filter { it.pos == to }.firstOrNull()
                 storeSquareBlack?.piece = board.getPiece(Square.fromValue(van)).name
                 storeSquareWhite?.piece = board.getPiece(Square.fromValue(van)).name
             }
 
-            val piece  = when(van){
-                "A21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "B21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "C21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "D21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "E21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "F21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "G21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "H21" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "A22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "B22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "C22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "D22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "E22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "F22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "G22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "H22" -> Piece.valueOf(blackStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "A11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "B11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "C11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "D11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "E11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "F11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "G11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "H11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "A12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "B12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "C12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "D12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "E12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "F12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "G12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
-                "H12" -> Piece.valueOf(whiteStoreSquares.filter { it.pos==van }.firstOrNull()?.piece?:Piece.NONE.name)
+            val piece = when (van) {
+                "A21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "B21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "C21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "D21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "E21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "F21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "G21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "H21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "A20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "B20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "C20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "D20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "E20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "F20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "G20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "H20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "A10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "B10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "C10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "D10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "E10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "F10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "G10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "H10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "A11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "B11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "C11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "D11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "E11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "F11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "G11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "H11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
                 else -> board.getPiece(Square.fromValue(van))// enum fout
             }
-            if (piece.pieceSide==Side.BLACK) {// bovenste magneet
+            if (piece.pieceSide == Side.BLACK) {// bovenste magneet
                 robotAansturing.movetoVlak(van, 1)
                 robotAansturing.clamp2()
                 robotAansturing.movetoVlak(to, 1)
                 robotAansturing.release2()
                 currentPos = to
-            }
-            else{
+            } else {
                 robotAansturing.movetoVlak(van, 0)
                 robotAansturing.clamp1()
                 robotAansturing.movetoVlak(to, 0)
@@ -545,7 +555,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 currentPos = to
             }
             // als hij van buiten bord komt, dan vlak leegmaken
-            if (positieBuitenBord(van)){
+            if (positieBuitenBord(van)) {
                 clearPos(van)
 
             }
@@ -559,7 +569,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             for (row in "ABCDEFGH") {
                 val sq = "" + row + col
                 val s = board.getPiece(Square.fromValue(sq))
-                list.add(SquareField(sq,s.toLetter()))
+                list.add(SquareField(sq, s.toLetter()))
             }
         }
         val moves: List<Move> = getLegalMoves()
@@ -571,42 +581,46 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         return ChessBoard(list, side.value(), moves.toChessMoves(), draw, mate, kingAttached)
     }
 
-    private fun isMated():Boolean{
-        try{
+    private fun isMated(): Boolean {
+        try {
             return board.isMated()
-        }
-        catch (e: Exception){
-            println("Kon isMated niet bepalen! "+e.message)
+        } catch (e: Exception) {
+            println("Kon isMated niet bepalen! " + e.message)
             return false
         }
     }
 
-    private fun isKingAttacked():Boolean{
-        try{
+    private fun isGameDone(): Boolean {
+        try {
+            return board.isMated() || board.isDraw()
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    private fun isKingAttacked(): Boolean {
+        try {
             return board.isKingAttacked()
-        }
-        catch (e: Exception){
-            println("Kon isKingAttacked niet bepalen! "+e.message)
+        } catch (e: Exception) {
+            println("Kon isKingAttacked niet bepalen! " + e.message)
             return false
         }
     }
 
-    private fun isDraw():Boolean{
-        try{
+    private fun isDraw(): Boolean {
+        try {
             return board.isDraw()
-        }
-        catch (e: Exception){
-            println("Kon isDraw niet bepalen! "+e.message)
+        } catch (e: Exception) {
+            println("Kon isDraw niet bepalen! " + e.message)
             return false
         }
     }
 
-    private fun getLegalMoves(): List<Move>{
-        try{
+    private fun getLegalMoves(): List<Move> {
+        try {
             return board.legalMoves()
-        }
-        catch (e: Exception){
-            println("Kon geen legal move bepalen! "+e.message)
+        } catch (e: Exception) {
+            println("Kon geen legal move bepalen! " + e.message)
             return emptyList()
         }
     }
@@ -664,8 +678,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
     private fun loadBoard(initialBlackStoreSquares: List<StoreSquare>, initialWhiteStoreSquares: List<StoreSquare>) {
         try {
-            blackStoreSquares= emptyList()
-            whiteStoreSquares=emptyList()
+            blackStoreSquares = emptyList()
+            whiteStoreSquares = emptyList()
 
             val fen = File("chessboard.dat").readText()
             board.loadFromFen(fen)
@@ -675,17 +689,17 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             val whiteJson = File("chessboard-whitekstore.dat").readText()
             whiteStoreSquares = mapper.readValue(whiteJson)
 
+        } catch (e: Exception) {
+            println("Error loading fen: " + e.message)
         }
-        catch (e:Exception){
-            println("Error loading fen: "+e.message)
-        }
-        if (blackStoreSquares==null || blackStoreSquares.size==0) blackStoreSquares = initialBlackStoreSquares
-        if (whiteStoreSquares==null || whiteStoreSquares.size==0) whiteStoreSquares = initialWhiteStoreSquares
+        if (blackStoreSquares == null || blackStoreSquares.size == 0) blackStoreSquares = initialBlackStoreSquares
+        if (whiteStoreSquares == null || whiteStoreSquares.size == 0) whiteStoreSquares = initialWhiteStoreSquares
         printBoard(board)
 
 
     }
-    private fun saveBoard(){
+
+    private fun saveBoard() {
         File("chessboard.dat").writeText(board.getFen())
         File("chessboard-blackstore.dat").writeText(mapper.writeValueAsString(blackStoreSquares))
         File("chessboard-whitekstore.dat").writeText(mapper.writeValueAsString(whiteStoreSquares))
@@ -694,4 +708,5 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
 
 }
-data class StoreSquare(val pos: String, var piece: String = Piece.NONE.name): Serializable
+
+data class StoreSquare(val pos: String, var piece: String = Piece.NONE.name) : Serializable

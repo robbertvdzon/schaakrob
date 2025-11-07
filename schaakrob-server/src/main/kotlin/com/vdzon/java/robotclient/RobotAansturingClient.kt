@@ -22,6 +22,14 @@ class RobotAansturingClient(host: String) : RobotAansturing {
         post("$host/api/move", "$x,$y")
     }
 
+    override fun home() {
+        get("$host/api/home")
+    }
+
+    override fun getStats(): String {
+        return get("$host/api/stats")?:""
+    }
+
     override fun homeVert() {
         get("$host/api/home_vert")
     }

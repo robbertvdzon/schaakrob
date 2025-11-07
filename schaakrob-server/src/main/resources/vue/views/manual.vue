@@ -21,6 +21,7 @@
               <button type="submit" v-on:click="release1">Laat los1</button>
               <button type="submit" v-on:click="clamp2">Pak2</button>
               <button type="submit" v-on:click="release2">Laat los2</button>
+              <button type="submit" v-on:click="stats">Stats</button>
        </span>
       <br>
       <br>
@@ -266,6 +267,13 @@ Vue.component("manual", {
     release2: function (event) {
       fetch(`/api/release2`)
           .catch(() => alert("Error"));
+    },
+    stats: function (event) {
+      const w = window.open(`/api/stats`, `_blank`);
+      if (!w) {
+        // Fallback when pop-up is blocked: navigate current tab
+        window.location.href = `/api/stats`;
+      }
     },
     bootsound: function (event) {
       fetch(`/api/bootsound`)

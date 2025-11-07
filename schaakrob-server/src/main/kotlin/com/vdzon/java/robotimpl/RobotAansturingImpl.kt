@@ -9,14 +9,18 @@ import com.vdzon.java.BerekenVersnelling
 import com.vdzon.java.Lock
 import com.vdzon.java.robitapi.RobotAansturing
 import com.vdzon.java.schaakspel.Schaakspel
-import com.vdzon.java.state.GlobalState
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.PrintWriter
-import java.net.*
+import java.net.HttpURLConnection
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.net.URL
+import java.net.UnknownHostException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.*
+import java.util.Arrays
+import java.util.Enumeration
 import java.util.function.Consumer
 import kotlin.concurrent.thread
 
@@ -94,41 +98,6 @@ class RobotAansturingImpl() : RobotAansturing {
         }
     }
 
-//    private fun callOppakker(actie: String) {
-//        println("CALL OPPAKKER: $actie")
-//        val urlStr = "http://192.168.178.10/$actie"
-//        while (true) {
-//            try {
-//                val url = java.net.URL(urlStr)
-//                val conn = (url.openConnection() as java.net.HttpURLConnection).apply {
-//                    requestMethod = "GET"
-//                    connectTimeout = 3000
-//                    readTimeout = 5000
-//                }
-//                conn.inputStream.bufferedReader().use { br ->
-//                    val response = br.readText().trim()
-//                    println("Oppakker response: '$response' for actie='$actie'")
-//                    if (response == "ok") {
-//                        return
-//                    }
-//                    if (response != "buzy") {
-//                        // Unexpected response; log and still retry
-//                        System.err.println("Unexpected response from oppakker: '$response' (actie='$actie')")
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                System.err.println("Error calling oppakker ($urlStr): ${e.message}")
-//            }
-//            try {
-//                Thread.sleep(1000)
-//            } catch (_: InterruptedException) {
-//                // Preserve interrupt status and break out
-//                Thread.currentThread().interrupt()
-//                return
-//            }
-//        }
-//    }
-
     fun callOppakker(actie: String) {
         println("CALL OPPAKKER: $actie")
         val urlStr = "http://192.168.178.10/$actie"
@@ -143,20 +112,20 @@ class RobotAansturingImpl() : RobotAansturing {
                     continue
                 }
                 // probeer de response te parsen naar een Int
-                val newPakkerCount = response.toInt()
-                val oldPakkerCount = GlobalState.lastPakkerCount
-                GlobalState.lastPakkerCount = newPakkerCount
-                if (GlobalState.failOnResetDetected && newPakkerCount<=oldPakkerCount){
-                    throw RuntimeException("Oppakker reset detected")
-                    GlobalState.stopTime = System.currentTimeMillis()
-                    GlobalState.errorDetected = true
+                val newPakkerCount = response.toLong()
+                val oldPakkerCount = Statistics.getLastPickCount()
+                if (newPakkerCount <= oldPakkerCount) {
+                    Statistics.pickerRestartDetected()
                 }
+                Statistics.setLastPickCount(newPakkerCount)
+                Statistics.addPick()
+                return
 
             } catch (e: NumberFormatException) {
                 throw IOException("Unexpected non-numeric response from oppakker", e)
             } catch (e: IOException) {
                 retryCount++
-                if (retryCount>= OPPAKKER_RETRY_COUNT){
+                if (retryCount >= OPPAKKER_RETRY_COUNT) {
                     throw RuntimeException("Oppakker down detected (after $OPPAKKER_RETRY_COUNT retries)")
                 }
                 System.err.println("Error calling oppakker ($urlStr): ${e.message}")
@@ -191,11 +160,27 @@ class RobotAansturingImpl() : RobotAansturing {
         lastMovement = System.currentTimeMillis()
     }
 
+    override fun home() {
+        homeHor()
+        homeVert()
+        waitUntilReady(100)
+    }
+
+    override fun getStats(): String {
+        val stats = Statistics.getCurrentStats()
+        // format stats as string
+        val errors = stats.errors.joinToString ("\n")
+        val statsAsString = "lastPickCount = ${stats.lastPickCount}\npicksSinceLastPickerRestartDetected = ${stats.picksSinceLastPickerRestartDetected}\npicksSinceLastHomeNeededDetected = ${stats.picksSinceLastHomeNeededDetected}\nerrors:\n$errors"
+        return statsAsString
+
+    }
+
     override fun movetoVlak(vlak: String, arm: Int) {
         updateLastMovement()
         log.info("start: move to " + vlak)
         // check if homeing is needed
         if (homeingNeeded()) {
+            Statistics.homeNeededDetected()
             homeHor()
             homeVert()
             waitUntilReady(100)
@@ -703,6 +688,7 @@ class RobotAansturingImpl() : RobotAansturing {
             udateStatus()
             if (homeNeeded) {
                 println("Error detected! Homing needed.")
+                Statistics.homeNeededDetected()
                 homeAndMoveAgain()
             }
         }
@@ -720,6 +706,7 @@ class RobotAansturingImpl() : RobotAansturing {
             udateStatus()
             if (homeNeeded) {
                 println("Error detected! Homing needed.")
+                Statistics.homeNeededDetected()
                 homeAndMoveAgain()
             }
         }
