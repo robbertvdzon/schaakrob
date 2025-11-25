@@ -25,11 +25,7 @@ difference(){
             }
         }         
 
-        translate([0,9.5+12,11.5]){
-            rotate([0,0,90]){
-             //   cylinder(h=25, r=4, $fn=100, center=false);
-            }
-        }         
+          
         translate([-23+4,9.5-6,25]){
             rotate([0,90,45]){
                 cylinder(h=21, r=6, $fn=100, center=false);

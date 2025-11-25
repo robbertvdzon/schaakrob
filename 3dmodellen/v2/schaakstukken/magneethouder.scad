@@ -5,8 +5,32 @@ difference(){
             union(){ 
 
                 translate([0, 0,0]){
-                       cylinder(h=2.2, r=14 , $fn=100, center=false);
+                   //    cylinder(h=2.2, r=14 , $fn=100, center=false);
                 }                              
+
+
+                translate([0+10,0,0]){
+                    rotate([0,0,0]){
+                        cylinder(h=2.2, r=4, $fn=100, center=false);
+                    }   
+                }
+                translate([0-10,0,0]){
+                    rotate([0,0,0]){
+                        cylinder(h=2.2, r=4, $fn=100, center=false);
+                    }   
+                }
+                translate([0,10,0]){
+                    rotate([0,0,0]){
+                        cylinder(h=2.2, r=4, $fn=100, center=false);
+                    }   
+                }
+               translate([-10,-4,0]){
+                    cube([20,8,2.2], center=false);
+                }        
+               translate([-4,2,0]){
+                    cube([8,8,2.2], center=false);
+                }        
+
 
             }
             union() {
