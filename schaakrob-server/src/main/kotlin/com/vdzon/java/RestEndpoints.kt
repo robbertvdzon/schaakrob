@@ -31,6 +31,8 @@ class RestEndpoints {
 
         app["/api/rebuild", { ctx: Context? -> robotAansturing.rebuild() }]
         app["/api/restart", { ctx: Context? -> robotAansturing.restart() }]
+        app["/api/stats", { ctx: Context? -> ctx?.result(robotAansturing.getStats())  }]
+        app["/api/home", { ctx: Context? -> robotAansturing.home() }]
         app["/api/home_vert", { ctx: Context? -> robotAansturing.homeVert() }]
         app["/api/home_hor", { ctx: Context? -> robotAansturing.homeHor() }]
         app["/api/sleep", { ctx: Context? -> robotAansturing.sleep() }]
