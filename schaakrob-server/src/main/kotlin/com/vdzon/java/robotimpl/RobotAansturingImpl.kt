@@ -305,26 +305,34 @@ class RobotAansturingImpl() : RobotAansturing {
 
     override fun clamp1() {
         log.info("BLE: pak1")
+        val startTime = System.currentTimeMillis()
         callOppakker("pak1")
-        log.info("pak1 klaar")
+        val diff = System.currentTimeMillis() - startTime
+        log.info("pak1 klaar in $diff msec")
     }
 
     override fun release1() {
         log.info("BLE: zet1")
+        val startTime = System.currentTimeMillis()
         callOppakker("zet1")
-        log.info("zet1 klaar")
+        val diff = System.currentTimeMillis() - startTime
+        log.info("zet1 klaar in $diff msec")
     }
 
     override fun clamp2() {
         log.info("BLE: pak2")
+        val startTime = System.currentTimeMillis()
         callOppakker("pak2")
-        log.info("pak2 klaar")
+        val diff = System.currentTimeMillis() - startTime
+        log.info("pak2 klaar in $diff msec")
     }
 
     override fun release2() {
         log.info("BLE: zet2")
+        val startTime = System.currentTimeMillis()
         callOppakker("zet2")
-        log.info("zet2 klaar")
+        val diff = System.currentTimeMillis() - startTime
+        log.info("zet2 klaar in $diff msec")
     }
 
 
