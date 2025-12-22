@@ -23,9 +23,65 @@ import java.util.Arrays
 import java.util.Enumeration
 import java.util.function.Consumer
 import kotlin.concurrent.thread
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 
 private val log = LoggerFactory.getLogger(RobotAansturingImpl::class.java)
+
+// Eenvoudige WebSocket client die 1 outstanding request tegelijk ondersteunt
+class OppakkerWsClient(private val url: String) {
+    private val client = OkHttpClient.Builder()
+        .pingInterval(10, TimeUnit.SECONDS)
+        .readTimeout(0, TimeUnit.MILLISECONDS) // stream, geen lees-timeout
+        .build()
+
+    @Volatile private var webSocket: WebSocket? = null
+    private val responseQueue = LinkedBlockingQueue<CompletableFuture<String>>()
+
+    @Synchronized
+    private fun ensureConnected() {
+        if (webSocket != null) return
+        val request = Request.Builder().url(url).build()
+        webSocket = client.newWebSocket(request, object : WebSocketListener() {
+            override fun onOpen(ws: WebSocket, response: Response) {
+                // noop
+            }
+
+            override fun onMessage(ws: WebSocket, text: String) {
+                responseQueue.poll()?.complete(text.trim())
+            }
+
+            override fun onClosed(ws: WebSocket, code: Int, reason: String) {
+                webSocket = null
+            }
+
+            override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
+                webSocket = null
+                responseQueue.poll()?.completeExceptionally(t)
+            }
+        })
+    }
+
+    fun sendCommandWaitResult(cmd: String, timeoutMs: Long = 5000): String {
+        ensureConnected()
+        val ws = webSocket ?: throw IOException("Oppakker WS not connected")
+        val fut = CompletableFuture<String>()
+        responseQueue.put(fut)
+        val sent = ws.send(cmd)
+        if (!sent) {
+            responseQueue.remove(fut)
+            throw IOException("Send failed for command '$cmd'")
+        }
+        return fut.get(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+    }
+}
 
 private const val OPPAKKER_RETRY_COUNT = 20
 
@@ -100,18 +156,16 @@ class RobotAansturingImpl() : RobotAansturing {
 
     fun callOppakker(actie: String) {
         println("CALL OPPAKKER: $actie")
-        val urlStr = "http://192.168.178.10/$actie"
         var retryCount = 0
         while (true) {
             try {
-                val response = httpGet(urlStr)
+                val response = oppakkerWs.sendCommandWaitResult(actie, timeoutMs = 5000)
                 println("Oppakker response: '$response' for actie='$actie'")
 
                 if (response == "buzy") {
                     Thread.sleep(100)
                     continue
                 }
-                // probeer de response te parsen naar een Int
                 val newPakkerCount = response.toLong()
                 val oldPakkerCount = Statistics.getLastPickCount()
                 if (newPakkerCount <= oldPakkerCount) {
@@ -120,19 +174,15 @@ class RobotAansturingImpl() : RobotAansturing {
                 Statistics.setLastPickCount(newPakkerCount)
                 Statistics.addPick()
                 return
-
             } catch (e: NumberFormatException) {
                 throw IOException("Unexpected non-numeric response from oppakker", e)
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 retryCount++
                 if (retryCount >= OPPAKKER_RETRY_COUNT) {
                     throw RuntimeException("Oppakker down detected (after $OPPAKKER_RETRY_COUNT retries)")
                 }
-                System.err.println("Error calling oppakker ($urlStr): ${e.message}")
+                System.err.println("Error calling oppakker via WS: ${e.message}")
                 Thread.sleep(1000)
-            } catch (_: InterruptedException) {
-                Thread.currentThread().interrupt()
-                throw IOException("Interrupted while waiting for oppakker")
             }
         }
     }
@@ -148,6 +198,9 @@ class RobotAansturingImpl() : RobotAansturing {
 
         return conn.inputStream.bufferedReader().use { it.readText().trim() }
     }
+
+    // WebSocket client naar de oppakker (ESP32/ESP8266)
+    private val oppakkerWs = OppakkerWsClient("ws://192.168.178.10:81/")
 
 
     fun setSchaakspel(schaakspel: Schaakspel) {

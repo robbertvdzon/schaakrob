@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WebServer.h>
+#include <WebSocketsServer.h>
 #define buzzerpin 7//5
 #define switchpin 6//4
 #define pull1 4//7
@@ -23,7 +23,7 @@ IPAddress local_IP(192, 168, 178, 10);
 IPAddress gateway(192, 168, 178, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-WebServer server(80);
+WebSocketsServer ws(81);   // WebSocket server op poort 81
 volatile bool isBusy = false;
 int moveCount = 0;   // houdt aantal uitgevoerde moves bij
 
@@ -37,16 +37,16 @@ void beep();
 void testloop();
 
 // Helper to run an action if not busy; else reply "buzy"
-void handleAction(void (*action)()) {
+void handleAction(void (*action)(), uint8_t num) {
   if (isBusy) {
-    server.send(200, "text/plain", "buzy");
+    ws.sendTXT(num, "buzy");
     return;
   }
   isBusy = true;
   action();
-  moveCount++;            
+  moveCount++;
   isBusy = false;
-  server.send(200, "text/plain", String(moveCount));
+  ws.sendTXT(num, String(moveCount));
 }
 
 void setup() {
@@ -102,16 +102,22 @@ void setup() {
     beepLong();
   }
 
-  // REST endpoints
-  server.on("/pak1", [](){ handleAction(pak1); });
-  server.on("/pak2", [](){ handleAction(pak2); });
-  server.on("/zet1", [](){ handleAction(zet1); });
-  server.on("/zet2", [](){ handleAction(zet2); });
-  server.on("/connected", [](){ handleAction(connectedBeep); });
-  server.on("/status", [](){ server.send(200, "text/plain", isBusy ? "buzy" : "idle"); });
-  server.onNotFound([](){ server.send(404, "text/plain", "not found"); });
-  server.begin();
-  Serial.println("HTTP server started");
+  // WebSocket server starten
+  ws.begin();
+  ws.onEvent([](uint8_t num, WStype_t type, uint8_t * payload, size_t length){
+    if (type == WStype_TEXT) {
+      String cmd = String((char*)payload).substring(0, length);
+      cmd.trim();
+      if (cmd == "pak1") { handleAction(pak1, num); return; }
+      if (cmd == "pak2") { handleAction(pak2, num); return; }
+      if (cmd == "zet1") { handleAction(zet1, num); return; }
+      if (cmd == "zet2") { handleAction(zet2, num); return; }
+      if (cmd == "connected") { handleAction(connectedBeep, num); return; }
+      if (cmd == "status") { ws.sendTXT(num, isBusy ? "buzy" : "idle"); return; }
+      ws.sendTXT(num, "unknown");
+    }
+  });
+  Serial.println("WebSocket server started");
 }
 
 
@@ -127,15 +133,15 @@ boolean oldButtonState = true;
 void shortDelay(unsigned long ms){
   unsigned long end = millis() + ms;
   while ((long)(end - millis()) > 0) {
-    // keep the web server responsive during delays
-    server.handleClient();
+    // keep the websocket server responsive during delays
+    ws.loop();
     delay(1);
   }
 }
 
 void loop() {
-  // keep server responsive
-  server.handleClient();
+  // keep websocket server responsive
+  ws.loop();
 
   boolean buttonState = digitalRead(switchpin);
   if (!buttonState &&  oldButtonState){
