@@ -110,7 +110,6 @@ void setup() {
   // WebSocket server starten
   ws.begin();
   // Minimize TCP latency (disable Nagle) if supported by the library version
-  ws.setNoDelay(true);
   ws.onEvent([](uint8_t num, WStype_t type, uint8_t * payload, size_t length){
     if (type == WStype_TEXT) {
       String cmd = String((char*)payload).substring(0, length);
