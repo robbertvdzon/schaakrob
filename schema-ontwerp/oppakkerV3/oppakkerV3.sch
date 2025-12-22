@@ -1,0 +1,395 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L MCU_Module:Arduino_Nano_v3.x A1
+U 1 1 60BBD392
+P 3500 2950
+F 0 "A1" H 3500 1861 50  0000 C CNN
+F 1 "Arduino_Nano_v3.x" H 3500 1770 50  0000 C CNN
+F 2 "Module:Arduino_Nano" H 3500 2950 50  0001 C CIN
+F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 3500 2950 50  0001 C CNN
+	1    3500 2950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:LED D1
+U 1 1 60BC0791
+P 5450 5650
+F 0 "D1" H 5443 5867 50  0000 C CNN
+F 1 "LED" H 5443 5776 50  0000 C CNN
+F 2 "" H 5450 5650 50  0001 C CNN
+F 3 "~" H 5450 5650 50  0001 C CNN
+	1    5450 5650
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R R1
+U 1 1 60BC5078
+P 4700 5000
+F 0 "R1" H 4770 5046 50  0000 L CNN
+F 1 "10K" H 4770 4955 50  0000 L CNN
+F 2 "" V 4630 5000 50  0001 C CNN
+F 3 "~" H 4700 5000 50  0001 C CNN
+	1    4700 5000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R2
+U 1 1 60BC0141
+P 4500 4850
+F 0 "R2" V 4293 4850 50  0000 C CNN
+F 1 "100ohm" V 4384 4850 50  0000 C CNN
+F 2 "" V 4430 4850 50  0001 C CNN
+F 3 "~" H 4500 4850 50  0001 C CNN
+	1    4500 4850
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2100 2350 2500 2350
+Wire Wire Line
+	2500 2350 2500 3450
+Wire Wire Line
+	2500 3450 3000 3450
+Wire Wire Line
+	2100 2450 2450 2450
+Wire Wire Line
+	2450 3550 3000 3550
+Wire Wire Line
+	2450 2450 2450 3550
+Wire Wire Line
+	2100 2550 2400 2550
+Wire Wire Line
+	2400 2550 2400 3650
+Wire Wire Line
+	2400 3650 3000 3650
+Wire Wire Line
+	2100 2650 2700 2650
+Wire Wire Line
+	2700 2650 2700 3250
+Wire Wire Line
+	2700 3250 3000 3250
+$Comp
+L RF:NRF24L01_Breakout U1
+U 1 1 60BCC42A
+P 1600 2650
+F 0 "U1" H 1979 2696 50  0000 L CNN
+F 1 "NRF24L01_Breakout" H 1979 2605 50  0000 L CNN
+F 2 "RF_Module:nRF24L01_Breakout" H 1750 3250 50  0001 L CIN
+F 3 "http://www.nordicsemi.com/eng/content/download/2730/34105/file/nRF24L01_Product_Specification_v2_0.pdf" H 1600 2550 50  0001 C CNN
+	1    1600 2650
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	2100 2850 2800 2850
+Wire Wire Line
+	2800 2850 2800 3150
+Wire Wire Line
+	2800 3150 3000 3150
+$Comp
+L Connector:Conn_01x04_Male power1
+U 1 1 60BD3C8E
+P 7350 3950
+F 0 "power1" H 7458 4231 50  0000 C CNN
+F 1 "Conn_01x04_Male" H 7458 4140 50  0000 C CNN
+F 2 "" H 7350 3950 50  0001 C CNN
+F 3 "~" H 7350 3950 50  0001 C CNN
+	1    7350 3950
+	-1   0    0    -1  
+$EndComp
+Text GLabel 7650 3850 2    50   Input ~ 0
++48V
+Text GLabel 7650 3950 2    50   Input ~ 0
++5V
+Text GLabel 7650 4050 2    50   Input ~ 0
++3.3V
+Text GLabel 7650 4150 2    50   Input ~ 0
+GND
+Wire Wire Line
+	7150 4150 5650 4150
+Wire Wire Line
+	1600 4150 1600 3250
+Wire Wire Line
+	3600 3950 3600 4150
+Connection ~ 3600 4150
+Wire Wire Line
+	3600 4150 1600 4150
+Wire Wire Line
+	950  4050 950  1900
+Wire Wire Line
+	950  1900 1600 1900
+$Comp
+L Connector:Conn_01x06_Male PCA9685
+U 1 1 60BE0DF4
+P 3600 5550
+F 0 "PCA9685" H 3708 5931 50  0000 C CNN
+F 1 "Conn_01x06_Male" H 3708 5840 50  0000 C CNN
+F 2 "" H 3600 5550 50  0001 C CNN
+F 3 "~" H 3600 5550 50  0001 C CNN
+	1    3600 5550
+	1    0    0    -1  
+$EndComp
+Text GLabel 3450 5350 0    50   Input ~ 0
+GND
+Wire Wire Line
+	1600 1900 1600 2050
+Wire Wire Line
+	950  4050 4050 4050
+Text GLabel 3450 5450 0    50   Input ~ 0
+OE
+Text GLabel 3450 5550 0    50   Input ~ 0
+SCL
+Text GLabel 3450 5650 0    50   Input ~ 0
+SDA
+Text GLabel 3450 5750 0    50   Input ~ 0
+VCC
+Text GLabel 3450 5850 0    50   Input ~ 0
+V++
+Wire Wire Line
+	3800 5750 4050 5750
+Wire Wire Line
+	4050 5750 4050 4050
+Connection ~ 4050 4050
+Wire Wire Line
+	4050 4050 7150 4050
+Wire Wire Line
+	3800 5850 4100 5850
+Wire Wire Line
+	4100 5850 4100 3950
+Wire Wire Line
+	4100 3950 5700 3950
+Wire Wire Line
+	3800 5350 4000 5350
+Wire Wire Line
+	4000 5350 4000 4150
+Connection ~ 4000 4150
+Wire Wire Line
+	4000 4150 3600 4150
+Wire Wire Line
+	3800 5650 4250 5650
+Wire Wire Line
+	4250 5650 4250 3350
+Wire Wire Line
+	4250 3350 4000 3350
+Wire Wire Line
+	3800 5550 4200 5550
+Wire Wire Line
+	4200 5550 4200 3450
+Wire Wire Line
+	4200 3450 4000 3450
+$Comp
+L Transistor_FET:IRLZ34N Q1
+U 1 1 60BBF673
+P 4850 4850
+F 0 "Q1" H 5054 4896 50  0000 L CNN
+F 1 "IRLZ34N" H 5054 4805 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-220-3_Vertical" H 5100 4775 50  0001 L CIN
+F 3 "http://www.infineon.com/dgdl/irlz34npbf.pdf?fileId=5546d462533600a40153567206892720" H 4850 4850 50  0001 L CNN
+	1    4850 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5050 5850 5050 5800
+Wire Wire Line
+	4950 4600 4950 4650
+Wire Wire Line
+	4350 4850 4350 4900
+Wire Wire Line
+	4950 5200 4950 5050
+$Comp
+L Device:R R3
+U 1 1 60BC55CC
+P 5450 5350
+F 0 "R3" H 5520 5396 50  0000 L CNN
+F 1 "10K" H 5520 5305 50  0000 L CNN
+F 2 "" V 5380 5350 50  0001 C CNN
+F 3 "~" H 5450 5350 50  0001 C CNN
+	1    5450 5350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5050 4600 4950 4600
+$Comp
+L Connector:Conn_01x02_Male J1
+U 1 1 60BD2766
+P 5150 6050
+F 0 "J1" V 5304 6094 50  0000 L CNN
+F 1 "Magneet1" V 5213 6094 50  0000 L CNN
+F 2 "" H 5150 6050 50  0001 C CNN
+F 3 "~" H 5150 6050 50  0001 C CNN
+	1    5150 6050
+	0    1    -1   0   
+$EndComp
+$Comp
+L Device:LED D2
+U 1 1 60C2252E
+P 6900 5650
+F 0 "D2" H 6893 5867 50  0000 C CNN
+F 1 "LED" H 6893 5776 50  0000 C CNN
+F 2 "" H 6900 5650 50  0001 C CNN
+F 3 "~" H 6900 5650 50  0001 C CNN
+	1    6900 5650
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R R4
+U 1 1 60C22534
+P 6200 5000
+F 0 "R4" H 6270 5046 50  0000 L CNN
+F 1 "10K" H 6270 4955 50  0000 L CNN
+F 2 "" V 6130 5000 50  0001 C CNN
+F 3 "~" H 6200 5000 50  0001 C CNN
+	1    6200 5000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R5
+U 1 1 60C2253A
+P 5950 4850
+F 0 "R5" V 5743 4850 50  0000 C CNN
+F 1 "100ohm" V 5834 4850 50  0000 C CNN
+F 2 "" V 5880 4850 50  0001 C CNN
+F 3 "~" H 5950 4850 50  0001 C CNN
+	1    5950 4850
+	0    1    1    0   
+$EndComp
+$Comp
+L Transistor_FET:IRLZ34N Q2
+U 1 1 60C22540
+P 6300 4850
+F 0 "Q2" H 6504 4896 50  0000 L CNN
+F 1 "IRLZ34N" H 6504 4805 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-220-3_Vertical" H 6550 4775 50  0001 L CIN
+F 3 "http://www.infineon.com/dgdl/irlz34npbf.pdf?fileId=5546d462533600a40153567206892720" H 6300 4850 50  0001 L CNN
+	1    6300 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6500 5850 6500 5800
+Wire Wire Line
+	6400 4600 6400 4650
+Wire Wire Line
+	5800 4850 5800 4900
+Wire Wire Line
+	6400 5200 6400 5050
+$Comp
+L Device:R R6
+U 1 1 60C2254A
+P 6900 5350
+F 0 "R6" H 6970 5396 50  0000 L CNN
+F 1 "10K" H 6970 5305 50  0000 L CNN
+F 2 "" V 6830 5350 50  0001 C CNN
+F 3 "~" H 6900 5350 50  0001 C CNN
+	1    6900 5350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6500 4600 6400 4600
+$Comp
+L Connector:Conn_01x02_Male J2
+U 1 1 60C22552
+P 6600 6050
+F 0 "J2" V 6754 6094 50  0000 L CNN
+F 1 "Magneet2" V 6663 6094 50  0000 L CNN
+F 2 "" H 6600 6050 50  0001 C CNN
+F 3 "~" H 6600 6050 50  0001 C CNN
+	1    6600 6050
+	0    1    -1   0   
+$EndComp
+Wire Wire Line
+	5150 5850 5150 5200
+Wire Wire Line
+	5150 3850 6600 3850
+Wire Wire Line
+	6600 5850 6600 5200
+Connection ~ 6600 3850
+Wire Wire Line
+	6600 3850 7150 3850
+Wire Wire Line
+	5450 5800 5050 5800
+Connection ~ 5050 5800
+Wire Wire Line
+	5050 5800 5050 4600
+Wire Wire Line
+	5150 5200 5450 5200
+Connection ~ 5150 5200
+Wire Wire Line
+	5150 5200 5150 3850
+Wire Wire Line
+	6900 5800 6500 5800
+Connection ~ 6500 5800
+Wire Wire Line
+	6500 5800 6500 4600
+Wire Wire Line
+	6900 5200 6600 5200
+Connection ~ 6600 5200
+Wire Wire Line
+	6600 5200 6600 3850
+Wire Wire Line
+	4350 4850 4350 1750
+Wire Wire Line
+	4350 1750 2900 1750
+Wire Wire Line
+	2900 1750 2900 2550
+Wire Wire Line
+	2900 2550 3000 2550
+Connection ~ 4350 4850
+Wire Wire Line
+	5800 4850 5800 1700
+Wire Wire Line
+	5800 1700 2850 1700
+Wire Wire Line
+	2850 1700 2850 2650
+Wire Wire Line
+	2850 2650 3000 2650
+Connection ~ 5800 4850
+Wire Wire Line
+	3700 1950 3700 1800
+Wire Wire Line
+	3700 1800 5700 1800
+Wire Wire Line
+	5700 1800 5700 3950
+Connection ~ 5700 3950
+Wire Wire Line
+	5700 3950 7150 3950
+Wire Wire Line
+	4700 5150 4700 5200
+Wire Wire Line
+	6200 5150 6200 5200
+Wire Wire Line
+	4700 5200 4800 5200
+Wire Wire Line
+	6200 5200 6300 5200
+Connection ~ 4800 5200
+Wire Wire Line
+	4800 5200 4950 5200
+Connection ~ 6300 5200
+Wire Wire Line
+	6300 5200 6400 5200
+Wire Wire Line
+	4800 6250 5650 6250
+Wire Wire Line
+	4800 5200 4800 6250
+Wire Wire Line
+	6300 5200 6300 6250
+Wire Wire Line
+	5650 6250 5650 4150
+Connection ~ 5650 6250
+Wire Wire Line
+	5650 6250 6300 6250
+Connection ~ 5650 4150
+Wire Wire Line
+	5650 4150 4000 4150
+$EndSCHEMATC

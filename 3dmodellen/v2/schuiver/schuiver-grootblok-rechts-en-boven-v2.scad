@@ -2,6 +2,7 @@
 difference(){
 	union(){
 
+
         // omrand voor bout midden
         translate([0,-19,-0.5]){
             rotate([90,0,0]){

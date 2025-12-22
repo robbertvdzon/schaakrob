@@ -3,7 +3,7 @@ difference(){
 	union(){
         translate([0,0,0]){
             rotate([0,0,0]){
-                cylinder(h=8, r=6, $fn=100, center=false);
+                cylinder(h=5, r=6, $fn=100, center=false);
             }
         }
     }        

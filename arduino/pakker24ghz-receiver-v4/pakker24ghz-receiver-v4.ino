@@ -1,19 +1,15 @@
 #include <Arduino.h>
-
-#include <Adafruit_PWMServoDriver.h>
 #include <WiFi.h>
 #include <WebServer.h>
-#define buzzerpin 4
-#define switchpin 5
+#define buzzerpin 7//5
+#define switchpin 6//4
+#define pull1 4//7
+#define pull2 2
+#define magnet1 5//6
+#define magnet2 3
 
 
 const byte address[6] = "00002";
-
-const int SERVOMIN = 120; // this is the 'minimum' pulse length count (out of 4096)
-const int SERVOMAX = 620; // this is the 'maximum' pulse length count (out of 4096)
-const int SERVO_MIDDLE = (SERVOMAX-SERVOMIN)/2+SERVOMIN;
-const int PULSES_DOWN_ARM1 = 220;
-const int PULSES_DOWN_ARM2 = 185;
 const int TIMEOUT_MAGNET = 20000;
 
 const int MAGNET_OFF = 0;
@@ -30,9 +26,6 @@ IPAddress subnet(255, 255, 255, 0);
 WebServer server(80);
 volatile bool isBusy = false;
 int moveCount = 0;   // houdt aantal uitgevoerde moves bij
-
-
-Adafruit_PWMServoDriver pwm= Adafruit_PWMServoDriver(0x40);
 
 // Forward declarations for action functions so we can reference them in server handlers
 void pak1();
@@ -59,31 +52,29 @@ void handleAction(void (*action)()) {
 void setup() {
   Serial.begin(9600);
 
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
-  pinMode(4, OUTPUT);
-
+  pinMode(pull1, OUTPUT);
+  pinMode(pull2, OUTPUT);
+  pinMode(magnet1, OUTPUT);
+  pinMode(magnet2, OUTPUT);
   pinMode(buzzerpin , OUTPUT);
   pinMode(switchpin , INPUT_PULLUP);
 
-  analogWrite(2, MAGNET_OFF);
-  analogWrite(3, MAGNET_OFF);
+  startBeep();
+
+//alles uit
+  analogWrite(magnet1, MAGNET_OFF);
+  analogWrite(magnet2, MAGNET_OFF);
+  digitalWrite(pull1, LOW);
+  digitalWrite(pull2, LOW);
+  digitalWrite(buzzerpin, LOW);
+
+
+
 
 
   // TCCR2B = TCCR2B & B11111000 | B00000001; // for PWM frequency of 31372.55 Hz, avoind zooming of the magnet
 
-  pwm.begin();
-  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz updates
-  pwm.setPWM(0, 0, SERVO_MIDDLE );
-  pwm.setPWM(1, 0, SERVO_MIDDLE );
-  pwm.setPWM(2, 0, SERVO_MIDDLE );
-  pwm.setPWM(3, 0, SERVO_MIDDLE );
-
-  analogWrite(2, MAGNET_OFF);
-  Serial.println("START");
-
-  startBeep();
-  Serial.println("START (WiFi REST: /pak1 /pak2 /zet1 /zet2 /connected /status)");
+  Serial.println("Start wifi");
 
   // Connect to WiFi with static IP
   WiFi.mode(WIFI_STA);
@@ -103,8 +94,12 @@ void setup() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.print("WiFi connected. IP: ");
     Serial.println(WiFi.localIP());
+    beepLong();
   } else {
     Serial.println("WiFi NOT connected yet; continuing and web server will start anyway.");
+    beepLong();
+    beepLong();
+    beepLong();
   }
 
   // REST endpoints
@@ -151,99 +146,102 @@ void loop() {
   oldButtonState = buttonState;
 
   currentTime = millis();
-  if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>TIMEOUT_MAGNET){
+/*
+ if (lastGrapTime1!=-1 && (currentTime-lastGrapTime1)>TIMEOUT_MAGNET){
     // drop piece
-    analogWrite(2, MAGNET_OFF);
+    analogWrite(magnet1, MAGNET_OFF);
+    analogWrite(pull1, MAGNET_OFF);
     lastGrapTime1 = -1;
   }
   if (lastGrapTime2!=-1 && (currentTime-lastGrapTime2)>TIMEOUT_MAGNET){
     // drop piece
-    analogWrite(3, MAGNET_OFF);
+    analogWrite(magnet2, MAGNET_OFF);
+    analogWrite(pull2, MAGNET_OFF);
     lastGrapTime2 = -1;
   }
+  */
 }
 
 
 void pak1(){
-//        analogWrite(2, MAGNET_ON);// arm 2
+       digitalWrite(pull1, HIGH);// arm 2
+       analogWrite(magnet1, MAGNET_ON);// magneet 2
        shortDelay(100);
-//        analogWrite(3, MAGNET_ON);// magneet 2
-//        analogWrite(2, MAGNET_OFF);
-//        shortDelay(100);
-//        analogWrite(3, MAGNET_HOLD);
-       lastGrapTime1 = millis();
+       digitalWrite(pull1, LOW);
+       shortDelay(100);
+       analogWrite(magnet1, MAGNET_HOLD);
+       lastGrapTime2 = millis();
 }
 
 void pak2(){
-       analogWrite(2, MAGNET_ON);// arm 2
+       digitalWrite(pull2, HIGH);// arm 2
+       analogWrite(magnet2, MAGNET_ON);// magneet 2
        shortDelay(100);
-       analogWrite(3, MAGNET_ON);// magneet 2
-       analogWrite(2, MAGNET_OFF);
+       digitalWrite(pull2, LOW);
        shortDelay(100);
-       analogWrite(3, MAGNET_HOLD);
+       analogWrite(magnet2, MAGNET_HOLD);
        lastGrapTime2 = millis();
 }
 
 void zet1(){
-//        analogWrite(2, MAGNET_ON);// arm 2
+       digitalWrite(pull1, HIGH);// arm 2
+       shortDelay(30);
+       analogWrite(magnet1, MAGNET_OFF);
        shortDelay(100);
-//        analogWrite(3, MAGNET_ON);// magneet 2
-//        analogWrite(2, MAGNET_OFF);
-//        shortDelay(100);
-//        analogWrite(3, MAGNET_HOLD);
-       lastGrapTime1 = millis();
+       digitalWrite(pull1, LOW);
+       lastGrapTime2 = -1;
 }
 
 void zet2(){
-       analogWrite(3, MAGNET_OFF);
-       analogWrite(2, MAGNET_ON);// arm 2
+       digitalWrite(pull2, HIGH);// arm 2
+       shortDelay(30);
+       analogWrite(magnet2, MAGNET_OFF);
        shortDelay(100);
-       analogWrite(2, MAGNET_OFF);
+       digitalWrite(pull2, LOW);
        lastGrapTime2 = -1;
 }
 
 
 void testloop(){
   Serial.println("testloop start");
-  pak2();
-  shortDelay(1000);
-  zet2();
-  shortDelay(300);
   pak1();
   shortDelay(1000);
   zet1();
-  shortDelay(300);
+  shortDelay(1000);
+  pak2();
+  shortDelay(1000);
+  zet2();
+  shortDelay(1000);
+  Serial.println("testloop stop");
 
 }
 
 
 void beep(){
-    analogWrite(buzzerpin , 0);
-    shortDelay(200);
-    analogWrite(buzzerpin , 255);
+    digitalWrite(buzzerpin , HIGH);
+    shortDelay(50);
+    digitalWrite(buzzerpin , LOW);
     shortDelay(50);
 }
 
+void beepLong(){
+    digitalWrite(buzzerpin , HIGH);
+    shortDelay(500);
+    digitalWrite(buzzerpin , LOW);
+    shortDelay(500);
+}
+
 void connectedBeep(){
-  beepTime(5,500);
-  shortDelay(50);
-  beepTime(5,100);
-  shortDelay(50);
-  beepTime(5,100);
+  beep();
+  beep();
 }
 
 void startBeep() {
   beep();
   beep();
   beep();
+  beep();
+  beep();
+  beep();
 }
 
-
-void beepTime(int delayTime, int totalTime) {
-  int beepCount = totalTime / delayTime;
-  for (int i = 0; i < beepCount; i++) {
-    analogWrite(buzzerpin, (i % 2 == 0) ? 255 : 0);
-    shortDelay(delayTime);
-  }
-  analogWrite(buzzerpin, 255);
-}
