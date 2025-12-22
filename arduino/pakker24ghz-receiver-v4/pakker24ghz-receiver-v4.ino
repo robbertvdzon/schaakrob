@@ -46,7 +46,10 @@ void handleAction(void (*action)(), uint8_t num) {
   action();
   moveCount++;
   isBusy = false;
-  ws.sendTXT(num, String(moveCount));
+  // WebSocketsServer::sendTXT in sommige versies verwacht een niet-const String&,
+  // dus we vermijden het doorgeven van een tijdelijke String.
+  String payload = String(moveCount);
+  ws.sendTXT(num, payload);
 }
 
 void setup() {
