@@ -81,6 +81,8 @@ void setup() {
 
   // Connect to WiFi with static IP
   WiFi.mode(WIFI_STA);
+  // Reduce latency by disabling WiFi modem sleep (avoids 100–300ms wake delays)
+  WiFi.setSleep(false);
   if (!WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("WiFi config failed");
   }
@@ -107,6 +109,8 @@ void setup() {
 
   // WebSocket server starten
   ws.begin();
+  // Minimize TCP latency (disable Nagle) if supported by the library version
+  ws.setNoDelay(true);
   ws.onEvent([](uint8_t num, WStype_t type, uint8_t * payload, size_t length){
     if (type == WStype_TEXT) {
       String cmd = String((char*)payload).substring(0, length);
