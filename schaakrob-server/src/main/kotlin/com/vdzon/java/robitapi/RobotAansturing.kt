@@ -1,6 +1,7 @@
 package com.vdzon.java.robitapi
 
 interface RobotAansturing {
+    fun movetoRight()
     fun movetoVlak(vlak: String, arm: Int)
     fun moveto(x: Int, y: Int)
     fun home()

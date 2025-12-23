@@ -12,6 +12,10 @@ class RestEndpoints {
     fun initRestEndpoints(app: Javalin?, robotAansturing: RobotAansturing, schaakspel: Schaakspel) {
         this.robotAansturing = robotAansturing
         app!!.post("/api/move") { ctx: Context -> move(ctx.body()) }
+        app.post("/api/movetoRight") { ctx: Context ->
+            val (vlak, arm) = ctx.body().split(" ")
+            robotAansturing.movetoRight()
+        }
         app.post("/api/movevlak") { ctx: Context ->
             val (vlak, arm) = ctx.body().split(" ")
             robotAansturing.movetoVlak(vlak, arm.toInt())

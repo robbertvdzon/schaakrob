@@ -228,6 +228,11 @@ class RobotAansturingImpl() : RobotAansturing {
 
     }
 
+    override fun movetoRight() {
+        moveto(10,10)
+    }
+
+
     override fun movetoVlak(vlak: String, arm: Int) {
         updateLastMovement()
         log.info("start: move to " + vlak)

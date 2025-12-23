@@ -98,7 +98,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 while (!isGameDone() && currentLoopThread != null && autoPlayStepCount < MAX_AUTO_RUN_MOVES) {
                     computermove()
                     autoPlayStepCount++
-                    if (autoPlayStepCount%5==0){
+                    if (autoPlayStepCount%30==0){
                         robotAansturing.home()
                     }
                 }
@@ -479,6 +479,8 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.movetoVlak(storeSquare.pos, 1)
                 robotAansturing.release2()
 
+                robotAansturing.movetoRight()
+
                 currentPos = storeSquare.pos
             } else {
                 val storeSquare: StoreSquare = whiteStoreSquares.filter { it.piece == Piece.NONE.name }.first()
@@ -494,6 +496,9 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
                 robotAansturing.movetoVlak(storeSquare.pos, 0)
                 robotAansturing.release1()
+
+                robotAansturing.movetoRight()
+
                 currentPos = storeSquare.pos
             }
         } else {
@@ -546,12 +551,14 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.clamp2()
                 robotAansturing.movetoVlak(to, 1)
                 robotAansturing.release2()
+                robotAansturing.movetoRight()
                 currentPos = to
             } else {
                 robotAansturing.movetoVlak(van, 0)
                 robotAansturing.clamp1()
                 robotAansturing.movetoVlak(to, 0)
                 robotAansturing.release1()
+                robotAansturing.movetoRight()
                 currentPos = to
             }
             // als hij van buiten bord komt, dan vlak leegmaken
