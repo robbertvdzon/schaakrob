@@ -79,12 +79,11 @@ bool error = 0;
 
 int SLAVE_ADDRESS = 6;
 
-// onderstaande 3 consts in gegenereerd in java
-  static const int delayList[] =  { 900,700,500,400,400,300,300,200,200,100,100,100,40,40,40,15};
-//  static const int delayList[] =  { 900,700,400,300,210,180,166,156,147,140,133,128,123,118,114,111,107,104,102,99,97,94,92,90,89,87,85,84,82,81,80,78,77,76,75,74,73,72,71,70,69,68,68,67,66,65,65,64,63,63,62,61,61,60,60,59,59,58,58,57,57,56,56,55,55,54,54,54,53,53,52,52,52,51,51,51,50,50,50,49,49,49,49,48,48,48,47,47,47,47,46,46,46,46,45,45,45,45,44,44,44,44,44,43,43,43,43,42,42,42,42,42,42,41,41,41,41,41,40,40,40,40,40,40};
-// static const int delayList[] = { 412,302,250,218,196,179,166,156,147,140,133,128,123,118,114,111,107,104,102,99,97,94,92,90,89,87,85,84,82,81,80,78,77,76,75,74,73,72,71,70,69,68,68,67,66,65,65,64,63,63,62,61,61,60,60,59,59,58,58,57,57,56,56,55,55,54,54,54,53,53,52,52,52,51,51,51,50,50,50,49,49,49,49,48,48,48,47,47,47,47,46,46,46,46,45,45,45,45,44,44,44,44,44,43,43,43,43,42,42,42,42,42,42,41,41,41,41,41,40,40,40,40,40,40};
-static const int delayArraySize = 16;
-static const int indexSteps = 60;
+// Parameters voor versnelling
+float minDelay = 1000.0; // Start/stop vertraging (traag)
+float maxDelay = 100.0;  // Minimale vertraging op topsnelheid (snel)
+float accel = 2.0;       // Hoeveel microseconden er per stap van de delay afgaat
+
 void setup() {
 
   pinMode(stepPin, OUTPUT);
@@ -391,17 +390,13 @@ void moveDown(int reqPos){
 }
 
 bool moveNrSteps(int totalSteps, int direction){
-  long halfway = totalSteps/2;
-  int delayIndex = 0;
-  int remainingDelayIndex = 0;
-  int remainingSteps;
+  float currentDelay = minDelay; 
+  int halfway = totalSteps / 2;
   int pulsesCounted1 = 0;
   int pulsesCounted2 = 0;
   int diffBetweenPulses = 0;
   bool lastEncodeSensorState1 = false;
   bool lastEncodeSensorState2 = false;
-  double delay = 0;
-  double calculatedDelay = 0;
 
   for (int i = 0; i < totalSteps; i++) {
     bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
@@ -426,18 +421,28 @@ bool moveNrSteps(int totalSteps, int direction){
          return false;// error status 
     }
     
-    remainingSteps = totalSteps - i;
-    delayIndex = i/indexSteps;
-    remainingDelayIndex = remainingSteps/indexSteps;
-    if (i==0 || i%indexSteps==0){
-      if (i<halfway && delayIndex<delayArraySize) delay = delayList[delayIndex];
-      if (i>halfway && remainingDelayIndex<delayArraySize) delay = delayList[remainingDelayIndex];
-      float tmp = delay;
-      tmp = tmp * vertraginsfactor;
-      tmp = tmp / 100;
-      calculatedDelay = (int) tmp;
+    // 1. Bereken de delay voor de volgende stap
+    if (i < halfway) {
+      // Versnellen: verlaag de delay tot maxDelay bereikt is
+      if (currentDelay > maxDelay) {
+        currentDelay -= accel;
+      }
+    } else {
+      // Vertragen: verhoog de delay weer richting minDelay
+      if (currentDelay < minDelay) {
+        currentDelay += accel;
+      }
     }
-    pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
+
+    // 2. Beperk de delay binnen de grenzen
+    if (currentDelay < maxDelay) currentDelay = maxDelay;
+    if (currentDelay > minDelay) currentDelay = minDelay;
+
+    // 3. Pas de vertragingsfactor toe
+    long finalDelay = (long)((currentDelay * vertraginsfactor) / 100);
+
+    // 4. Geef de puls
+    pulse(stepPin, stepPin2, finalDelay);
     currentPos+=direction;
   }
   Serial.println("Move finished");
@@ -499,20 +504,17 @@ void sleeping() {
   Serial.println("\t move fast down until high");
   digitalWrite(dirPin, LOW);
 
-  int delayIndex = 0;
-  double delay = 0;
-  double calculatedDelay = 0;
+  float currentDelay = minDelay;
   int i = 0;
   while (!digitalRead(arm1SensorPin)==0){
-    delayIndex = i/indexSteps;
-    if (i==0 || i%indexSteps==0){
-      if (delayIndex<delayArraySize) delay = delayList[delayIndex];
-      float tmp = delay;
-      tmp = tmp * vertraginsfactor;
-      tmp = tmp / 100;
-      calculatedDelay = (int) tmp;
+    // Versnellen: verlaag de delay tot maxDelay bereikt is
+    if (currentDelay > maxDelay) {
+      currentDelay -= accel;
     }
-    pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
+    if (currentDelay < maxDelay) currentDelay = maxDelay;
+
+    long finalDelay = (long)((currentDelay * vertraginsfactor) / 100);
+    pulse(stepPin, stepPin2, finalDelay); // verreken vertraging!
     i++;
   }
 
