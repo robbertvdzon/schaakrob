@@ -62,6 +62,11 @@ void setup() {
   pinMode(buzzerpin , OUTPUT);
   pinMode(switchpin , INPUT_PULLUP);
 
+  // Configureer PWM frequentie voor de magneten (Nano ESP32 specifiek)
+  // Dit voorkomt het piepende geluid door de frequentie boven het hoorbare gebied te zetten.
+  ledcAttach(magnet1, 25000, 8); // 25 kHz, 8-bit resolutie
+  ledcAttach(magnet2, 25000, 8);
+
   startBeep();
 
 //alles uit
