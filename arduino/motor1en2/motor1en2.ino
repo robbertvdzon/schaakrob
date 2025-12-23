@@ -80,8 +80,8 @@ bool error = 0;
 int SLAVE_ADDRESS = 6;
 
 // Parameters voor versnelling
-float minDelay = 1000.0; // Start/stop vertraging (traag)
-float maxDelay = 100.0;  // Minimale vertraging op topsnelheid (snel)
+float minDelay = 800.0; // Start/stop vertraging (traag)
+float maxDelay = 20.0;  // Minimale vertraging op topsnelheid (snel)
 float accel = 2.0;       // Hoeveel microseconden er per stap van de delay afgaat
 
 void setup() {
