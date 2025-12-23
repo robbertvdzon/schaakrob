@@ -391,7 +391,7 @@ void moveDown(int reqPos){
 
 bool moveNrSteps(int totalSteps, int direction){
   float currentDelay = minDelay; 
-  int halfway = totalSteps / 2;
+  int stepsAccelerated = 0; // Houdt bij hoeveel stappen we daadwerkelijk hebben versneld
   int pulsesCounted1 = 0;
   int pulsesCounted2 = 0;
   int diffBetweenPulses = 0;
@@ -421,14 +421,19 @@ bool moveNrSteps(int totalSteps, int direction){
          return false;// error status 
     }
     
+    // Bereken het aantal resterende stappen
+    int stepsRemaining = totalSteps - i;
+
     // 1. Bereken de delay voor de volgende stap
-    if (i < halfway) {
-      // Versnellen: verlaag de delay tot maxDelay bereikt is
+    if (stepsRemaining > stepsAccelerated) {
+      // FASE 1 & 2: Versnellen of op topsnelheid blijven
       if (currentDelay > maxDelay) {
         currentDelay -= accel;
+        stepsAccelerated++; // We tellen hoeveel stappen nodig waren om op snelheid te komen
       }
     } else {
-      // Vertragen: verhoog de delay weer richting minDelay
+      // FASE 3: Vertragen
+      // We hebben nu precies evenveel stappen over als we nodig hadden om te versnellen
       if (currentDelay < minDelay) {
         currentDelay += accel;
       }
