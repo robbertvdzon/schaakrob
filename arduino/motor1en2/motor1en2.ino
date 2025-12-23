@@ -425,7 +425,7 @@ bool moveNrSteps(int totalSteps, int direction){
     int stepsRemaining = totalSteps - i;
 
     // 1. Bereken de delay voor de volgende stap
-    if (stepsRemaining > stepsAccelerated) {
+    if (stepsRemaining > stepsAccelerated / 2) {
       // FASE 1 & 2: Versnellen of op topsnelheid blijven
       if (currentDelay > maxDelay) {
         currentDelay -= accel;
@@ -433,9 +433,9 @@ bool moveNrSteps(int totalSteps, int direction){
       }
     } else {
       // FASE 3: Vertragen
-      // We hebben nu precies evenveel stappen over als we nodig hadden om te versnellen
+      // We vertragen 2x zo snel, dus we hebben maar de helft van de stappen nodig
       if (currentDelay < minDelay) {
-        currentDelay += accel;
+        currentDelay += (accel * 2);
       }
     }
 
