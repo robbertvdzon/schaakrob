@@ -15,8 +15,8 @@ object BerekenVersnelling {
    */
     private val log = LoggerFactory.getLogger(BerekenVersnelling::class.java)
     const val MAX_SNELHEID = 1000000 / 40 // pulsen per sec
-            .toDouble()
-    const val VERSNELLINGSTIJD = 200000.0 // in microsec
+    const val START_SNELHEID = 1000.0 // pulsen per sec
+    const val VERSNELLINGSTIJD = 400000.0 // in microsec
     const val INDEX_STEPS = 20
     private const val CALCULATION_PROCESSOR_TIME = 45
 
@@ -29,10 +29,10 @@ object BerekenVersnelling {
         log.info("10000:" + berekenTijd(10000))
         log.info("20000:" + berekenTijd(20000))
         val delays = calcDelays(10000, 20000)
-        log.info("delay 2=" + delays.delay2)
-        log.info("delay 3=" + delays.delay3)
-        log.info("10000:" + berekenTijd(10000, delays.delay2, CALCULATION_PROCESSOR_TIME))
-        log.info("20000:" + berekenTijd(20000, delays.delay3, CALCULATION_PROCESSOR_TIME))
+        log.info("delay 2=" + delays.delay1)
+        log.info("delay 3=" + delays.delay2)
+        log.info("10000:" + berekenTijd(10000, delays.delay1, CALCULATION_PROCESSOR_TIME))
+        log.info("20000:" + berekenTijd(20000, delays.delay2, CALCULATION_PROCESSOR_TIME))
     }
 
     fun calcDelays(pulses1: Int, pulses2: Int): Delays {
@@ -85,13 +85,13 @@ object BerekenVersnelling {
     fun getSnelheidList(): List<Int> {
         val result: MutableList<Int> = ArrayList()
         var count = 0
+        var currentSnelheid = START_SNELHEID
+        val versnelling = (MAX_SNELHEID - START_SNELHEID) / (VERSNELLINGSTIJD / 1000000.0) // stappen/sec^2
         var finished = false
-        var tijd = 0.001
         while (!finished) {
-            val delay = VERSNELLINGSTIJD / (MAX_SNELHEID * tijd)
-            val snelheid = 1000000 / delay
-            finished = snelheid > MAX_SNELHEID
-            tijd += delay / 1000000
+            val delay = 1000000.0 / currentSnelheid
+            finished = currentSnelheid >= MAX_SNELHEID
+            currentSnelheid += versnelling * (delay / 1000000.0)
             count++
             if (count % INDEX_STEPS == 0) {
                 result.add(delay.toInt())
