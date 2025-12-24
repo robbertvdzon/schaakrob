@@ -79,11 +79,10 @@ bool error = 0;
 
 int SLAVE_ADDRESS = 6;
 
-// Parameters voor versnelling
-float minSpeed = 1000.0;  // Stappen per seconde (komt overeen met delay 500us)
-float maxSpeed = 25000.0; // Stappen per seconde (komt overeen met delay 20us)
-float accel = 20.0;       // Versnelling in stappen per seconde per stap
-
+// onderstaande 3 consts in gegenereerd in java
+static const int delayList[] = {412,302,250,218,196,179,166,156,147,140,133,128,123,118,114,111,107,104,102,99,97,94,92,90,89,87,85,84,82,81,80,78,77,76,75,74,73,72,71,70,69,68,68,67,66,65,65,64,63,63,62,61,61,60,60,59,59,58,58,57,57,56,56,55,55,54,54,54,53,53,52,52,52,51,51,51,50,50,50,49,49,49,49,48,48,48,47,47,47,47,46,46,46,46,45,45,45,45,44,44,44,44,44,43,43,43,43,42,42,42,42,42,42,41,41,41,41,41,40,40,40,40,40,40};
+static const int delayArraySize = 124;
+static const int indexSteps = 20;
 void setup() {
 
   pinMode(stepPin, OUTPUT);
@@ -93,7 +92,7 @@ void setup() {
   pinMode(errorPin, OUTPUT);
 
   pinMode(arm1SensorPin, INPUT);
-  pinMode(arm2SensorPin, INPUT);  
+  pinMode(arm2SensorPin, INPUT);
   pinMode(fanPin, OUTPUT);
 
   pinMode(adressPin1, INPUT);
@@ -102,7 +101,7 @@ void setup() {
   pinMode(encoderPin1, INPUT);
   pinMode(encoderPin2, INPUT);
 
-  
+
   digitalWrite(arm1SensorPin, HIGH); // turn on pull-up
   digitalWrite(arm2SensorPin, HIGH); // turn on pull-up
   digitalWrite(encoderPin1, HIGH); // turn on pull-up
@@ -137,7 +136,7 @@ void setup() {
   digitalWrite(fanPin, LOW);
 
 // test home
-//  home1(HOME_SPEED);  
+//  home1(HOME_SPEED);
    // testAll();
 
 
@@ -390,17 +389,21 @@ void moveDown(int reqPos){
 }
 
 bool moveNrSteps(int totalSteps, int direction){
-  float currentSpeed = minSpeed; 
-  int stepsAccelerated = 0; 
+  long halfway = totalSteps/2;
+  int delayIndex = 0;
+  int remainingDelayIndex = 0;
+  int remainingSteps;
   int pulsesCounted1 = 0;
   int pulsesCounted2 = 0;
   int diffBetweenPulses = 0;
   bool lastEncodeSensorState1 = false;
   bool lastEncodeSensorState2 = false;
+  double delay = 0;
+  double calculatedDelay = 0;
 
   for (int i = 0; i < totalSteps; i++) {
-    bool currentEncodeSensorState1 = digitalRead(encoderPin1); 
-    bool currentEncodeSensorState2 = digitalRead(encoderPin2); 
+    bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
+    bool currentEncodeSensorState2 = digitalRead(encoderPin2); // altijd sensor lezen (om de motor soepeler te laten lopen)
     if (i%30==0){
       if (currentEncodeSensorState1!=lastEncodeSensorState1){
         pulsesCounted1++;
@@ -418,31 +421,21 @@ bool moveNrSteps(int totalSteps, int direction){
          Serial.print(pulsesCounted1);
          Serial.print("/");
          Serial.println(pulsesCounted2);
-         return false;
-    }
-    
-    int stepsRemaining = totalSteps - i;
-
-    if (stepsRemaining > stepsAccelerated) {
-      if (currentSpeed < maxSpeed) {
-        currentSpeed += accel;
-        stepsAccelerated++; 
-      }
-    } else {
-      if (currentSpeed > minSpeed) {
-        currentSpeed -= accel;
-      }
+         return false;// error status
     }
 
-    if (currentSpeed < minSpeed) currentSpeed = minSpeed;
-    if (currentSpeed > maxSpeed) currentSpeed = maxSpeed;
-
-    float currentDelay = 1000000.0 / (2.0 * currentSpeed);
-    if (currentDelay > 16383) currentDelay = 16383; // delayMicroseconds limiet
-    long finalDelay = (long)((currentDelay * vertraginsfactor) / 100);
-    if (finalDelay > 16383) finalDelay = 16383; // delayMicroseconds limiet
-
-    pulse(stepPin, stepPin2, finalDelay);
+    remainingSteps = totalSteps - i;
+    delayIndex = i/indexSteps;
+    remainingDelayIndex = remainingSteps/indexSteps;
+    if (i==0 || i%indexSteps==0){
+      if (i<halfway && delayIndex<delayArraySize) delay = delayList[delayIndex];
+      if (i>halfway && remainingDelayIndex<delayArraySize) delay = delayList[remainingDelayIndex];
+      float tmp = delay;
+      tmp = tmp * vertraginsfactor;
+      tmp = tmp / 100;
+      calculatedDelay = (int) tmp;
+    }
+    pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     currentPos+=direction;
   }
   Serial.println("Move finished");
@@ -450,7 +443,7 @@ bool moveNrSteps(int totalSteps, int direction){
   Serial.println(pulsesCounted1);
   Serial.print("Count2:");
   Serial.println(pulsesCounted2);
-  analogWrite(errorPin, 0);          
+  analogWrite(errorPin, 0);
   return true;
 }
 
@@ -504,20 +497,20 @@ void sleeping() {
   Serial.println("\t move fast down until high");
   digitalWrite(dirPin, LOW);
 
-  float currentSpeed = minSpeed;
+  int delayIndex = 0;
+  double delay = 0;
+  double calculatedDelay = 0;
   int i = 0;
   while (!digitalRead(arm1SensorPin)==0){
-    // Versnellen: verhoog de snelheid tot maxSpeed bereikt is
-    if (currentSpeed < maxSpeed) {
-      currentSpeed += accel;
+    delayIndex = i/indexSteps;
+    if (i==0 || i%indexSteps==0){
+      if (delayIndex<delayArraySize) delay = delayList[delayIndex];
+      float tmp = delay;
+      tmp = tmp * vertraginsfactor;
+      tmp = tmp / 100;
+      calculatedDelay = (int) tmp;
     }
-    if (currentSpeed > maxSpeed) currentSpeed = maxSpeed;
-
-    float currentDelay = 1000000.0 / (2.0 * currentSpeed);
-    if (currentDelay > 16383) currentDelay = 16383; // delayMicroseconds limiet
-    long finalDelay = (long)((currentDelay * vertraginsfactor) / 100);
-    if (finalDelay > 16383) finalDelay = 16383; // delayMicroseconds limiet
-    pulse(stepPin, stepPin2, finalDelay); // verreken vertraging!
+    pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     i++;
   }
 
