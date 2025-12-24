@@ -10,7 +10,7 @@ difference(){
             cube([20,21,38+10], center=false);
         }         
         translate([-10+7,1,-19-5]){
-            cube([20,5,38+10], center=false);
+        //    cube([14,5,38+10], center=false);
         }         
 
 
@@ -56,23 +56,23 @@ difference(){
         // gaten voor riemhouders
         translate([-6.5,8.5,-19]){
             rotate([90,0,0]){
-                cylinder(h=125, r=3.2/2, $fn=100, center=false);
+                cylinder(h=125, r=2, $fn=100, center=false);
             }
         }         
         translate([6.5,8.5,-19]){
             rotate([90,0,0]){
-                cylinder(h=125, r=3.2/2, $fn=100, center=false);
+                cylinder(h=125, r=2, $fn=100, center=false);
             }
         }         
 
         translate([-6.5,8.5,19]){
             rotate([90,0,0]){
-                cylinder(h=125, r=3.2/2, $fn=100, center=false);
+                cylinder(h=125, r=2, $fn=100, center=false);
             }
         }         
         translate([6.5,8.5,19]){
             rotate([90,0,0]){
-                cylinder(h=125, r=3.2/2, $fn=100, center=false);
+                cylinder(h=125, r=2, $fn=100, center=false);
             }
         }             
 

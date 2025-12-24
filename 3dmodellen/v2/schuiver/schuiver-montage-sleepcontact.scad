@@ -2,9 +2,9 @@
 difference(){
 	union(){
 
-        translate([3,-26,-24]){
+        translate([3-5,-26,-24]){
             rotate([0,-90,0]){
-                linear_extrude(height = 20)
+                linear_extrude(height = 14-5)
                     polygon(points=[
                         [0,0],
                         [48,0],
