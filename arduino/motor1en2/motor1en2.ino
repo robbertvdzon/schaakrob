@@ -80,9 +80,9 @@ bool error = 0;
 int SLAVE_ADDRESS = 6;
 
 // Parameters voor versnelling
-float minDelay = 500.0; // Start/stop vertraging (traag)
-float maxDelay = 20;  // Minimale vertraging op topsnelheid (snel)
-float accel = 0.7;       // Hoeveel microseconden er per stap van de delay afgaat
+float minSpeed = 1000.0;  // Stappen per seconde (komt overeen met delay 500us)
+float maxSpeed = 25000.0; // Stappen per seconde (komt overeen met delay 20us)
+float accel = 20.0;       // Versnelling in stappen per seconde per stap
 
 void setup() {
 
@@ -390,8 +390,8 @@ void moveDown(int reqPos){
 }
 
 bool moveNrSteps(int totalSteps, int direction){
-  float currentDelay = minDelay; 
-  int stepsAccelerated = 0; // Houdt bij hoeveel stappen we daadwerkelijk hebben versneld
+  float currentSpeed = minSpeed; 
+  int stepsAccelerated = 0; 
   int pulsesCounted1 = 0;
   int pulsesCounted2 = 0;
   int diffBetweenPulses = 0;
@@ -399,8 +399,8 @@ bool moveNrSteps(int totalSteps, int direction){
   bool lastEncodeSensorState2 = false;
 
   for (int i = 0; i < totalSteps; i++) {
-    bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
-    bool currentEncodeSensorState2 = digitalRead(encoderPin2); // altijd sensor lezen (om de motor soepeler te laten lopen)
+    bool currentEncodeSensorState1 = digitalRead(encoderPin1); 
+    bool currentEncodeSensorState2 = digitalRead(encoderPin2); 
     if (i%30==0){
       if (currentEncodeSensorState1!=lastEncodeSensorState1){
         pulsesCounted1++;
@@ -418,35 +418,30 @@ bool moveNrSteps(int totalSteps, int direction){
          Serial.print(pulsesCounted1);
          Serial.print("/");
          Serial.println(pulsesCounted2);
-         return false;// error status 
+         return false;
     }
     
-    // Bereken het aantal resterende stappen
     int stepsRemaining = totalSteps - i;
 
-    // 1. Bereken de delay voor de volgende stap
-    if (stepsRemaining > stepsAccelerated / 2) {
-      // FASE 1 & 2: Versnellen of op topsnelheid blijven
-      if (currentDelay > maxDelay) {
-        currentDelay -= accel;
-        stepsAccelerated++; // We tellen hoeveel stappen nodig waren om op snelheid te komen
+    if (stepsRemaining > stepsAccelerated) {
+      if (currentSpeed < maxSpeed) {
+        currentSpeed += accel;
+        stepsAccelerated++; 
       }
     } else {
-      // FASE 3: Vertragen
-      // We vertragen 2x zo snel, dus we hebben maar de helft van de stappen nodig
-      if (currentDelay < minDelay) {
-        currentDelay += (accel * 2);
+      if (currentSpeed > minSpeed) {
+        currentSpeed -= accel;
       }
     }
 
-    // 2. Beperk de delay binnen de grenzen
-    if (currentDelay < maxDelay) currentDelay = maxDelay;
-    if (currentDelay > minDelay) currentDelay = minDelay;
+    if (currentSpeed < minSpeed) currentSpeed = minSpeed;
+    if (currentSpeed > maxSpeed) currentSpeed = maxSpeed;
 
-    // 3. Pas de vertragingsfactor toe
+    float currentDelay = 1000000.0 / (2.0 * currentSpeed);
+    if (currentDelay > 16383) currentDelay = 16383; // delayMicroseconds limiet
     long finalDelay = (long)((currentDelay * vertraginsfactor) / 100);
+    if (finalDelay > 16383) finalDelay = 16383; // delayMicroseconds limiet
 
-    // 4. Geef de puls
     pulse(stepPin, stepPin2, finalDelay);
     currentPos+=direction;
   }
@@ -509,16 +504,19 @@ void sleeping() {
   Serial.println("\t move fast down until high");
   digitalWrite(dirPin, LOW);
 
-  float currentDelay = minDelay;
+  float currentSpeed = minSpeed;
   int i = 0;
   while (!digitalRead(arm1SensorPin)==0){
-    // Versnellen: verlaag de delay tot maxDelay bereikt is
-    if (currentDelay > maxDelay) {
-      currentDelay -= accel;
+    // Versnellen: verhoog de snelheid tot maxSpeed bereikt is
+    if (currentSpeed < maxSpeed) {
+      currentSpeed += accel;
     }
-    if (currentDelay < maxDelay) currentDelay = maxDelay;
+    if (currentSpeed > maxSpeed) currentSpeed = maxSpeed;
 
+    float currentDelay = 1000000.0 / (2.0 * currentSpeed);
+    if (currentDelay > 16383) currentDelay = 16383; // delayMicroseconds limiet
     long finalDelay = (long)((currentDelay * vertraginsfactor) / 100);
+    if (finalDelay > 16383) finalDelay = 16383; // delayMicroseconds limiet
     pulse(stepPin, stepPin2, finalDelay); // verreken vertraging!
     i++;
   }
