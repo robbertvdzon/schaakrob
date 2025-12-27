@@ -77,7 +77,12 @@ object BerekenVersnelling {
             var tmpDelay = delay.toDouble()
             tmpDelay *= vertraging / 100
             val tmpDelayInt = tmpDelay.toInt()
-            time += tmpDelayInt * 2 + calculationProcessorTime.toLong()
+            val totalStepTime = tmpDelayInt * 2
+            if (totalStepTime < calculationProcessorTime) {
+                time += calculationProcessorTime.toLong()
+            } else {
+                time += totalStepTime.toLong()
+            }
         }
         return (time / 1000).toDouble()
     }
