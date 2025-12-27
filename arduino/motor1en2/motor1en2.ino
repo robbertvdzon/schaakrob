@@ -402,6 +402,10 @@ bool moveNrSteps(int totalSteps, int direction){
   double calculatedDelay = 0;
 
   for (int i = 0; i < totalSteps; i++) {
+    long stepStart = micros();
+    checkError();
+    if (error) return false;
+
     bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
     bool currentEncodeSensorState2 = digitalRead(encoderPin2); // altijd sensor lezen (om de motor soepeler te laten lopen)
     if (i%30==0){
@@ -437,6 +441,12 @@ bool moveNrSteps(int totalSteps, int direction){
     }
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     currentPos+=direction;
+
+    long elapsed = micros() - stepStart;
+    long remaining = (calculatedDelay * 2) - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
   Serial.println("Move finished");
   Serial.print("Count1:");
@@ -461,19 +471,30 @@ void home(int homeSpeed) {
   int p1 = -1;
   int p2 = -1;
   while (digitalRead(arm1SensorPin)==0 || digitalRead(arm2SensorPin)==0){
+    long stepStart = micros();
     if (digitalRead(arm1SensorPin)==0) p1 = stepPin; else p1 = -1;
     if (digitalRead(arm2SensorPin)==0) p2 = stepPin2; else p2 = -1;
     pulse(p1, p2, homeSpeed);
-
+    long elapsed = micros() - stepStart;
+    long remaining = (homeSpeed * 2) - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
 
 // omlaag tot beide schakelaars uit zijn
   Serial.println("\t move slow down until high");
   digitalWrite(dirPin, LOW);
   while ((!digitalRead(arm1SensorPin)==0) || (!digitalRead(arm2SensorPin)==0)){
+    long stepStart = micros();
     if (!digitalRead(arm1SensorPin)==0) p1 = stepPin; else p1 = -1;
     if (!digitalRead(arm2SensorPin)==0) p2 = stepPin2; else p2 = -1;
     pulse(p1, p2, homeSpeed);
+    long elapsed = micros() - stepStart;
+    long remaining = (homeSpeed * 2) - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
 
   Serial.println("\t homing finished");
@@ -502,6 +523,7 @@ void sleeping() {
   double calculatedDelay = 0;
   int i = 0;
   while (!digitalRead(arm1SensorPin)==0){
+    long stepStart = micros();
     delayIndex = i/indexSteps;
     if (i==0 || i%indexSteps==0){
       if (delayIndex<delayArraySize) delay = delayList[delayIndex];
@@ -512,6 +534,11 @@ void sleeping() {
     }
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     i++;
+    long elapsed = micros() - stepStart;
+    long remaining = (calculatedDelay * 2) - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
 
   currentPos = 00;
@@ -550,13 +577,9 @@ void beep(){
 
 
 void pulse(int pin1, int pin2, long delaytime){
-    checkError();
-    if (!error){
-      if (pin1>0) digitalWrite(pin1, HIGH);
-      if (pin2>0) digitalWrite(pin2, HIGH);
-      delayMicroseconds(delaytime);
-      if (pin1>0) digitalWrite(pin1, LOW);
-      if (pin2>0) digitalWrite(pin2, LOW);
-      delayMicroseconds(delaytime);
-    }
+    if (pin1>0) digitalWrite(pin1, HIGH);
+    if (pin2>0) digitalWrite(pin2, HIGH);
+    delayMicroseconds(delaytime);
+    if (pin1>0) digitalWrite(pin1, LOW);
+    if (pin2>0) digitalWrite(pin2, LOW);
 }
