@@ -44,6 +44,8 @@ send: state + pos
 #define SLEEPING 6
 #define FATAL_ERROR 7
 
+#define MIN_STEP_TIME 30
+
 #define HOME_SPEED 120
 #define HOME_SPEED_SLOW 240 //500
 
@@ -409,19 +411,21 @@ bool moveNrSteps(int totalSteps, int direction){
   long moveStart = micros();
   for (int i = 0; i < totalSteps; i++) {
     long stepStart = micros();
-    checkError();
-    if (error) return false;
+    if (i % 30 == 0) {
+      checkError();
+      if (error) return false;
+    }
 
-    bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
-    bool currentEncodeSensorState2 = digitalRead(encoderPin2); // altijd sensor lezen (om de motor soepeler te laten lopen)
-    if (i%30==0){
-      if (currentEncodeSensorState1!=lastEncodeSensorState1){
+    if (i % 30 == 0) {
+      bool currentEncodeSensorState1 = digitalRead(encoderPin1);
+      bool currentEncodeSensorState2 = digitalRead(encoderPin2);
+      if (currentEncodeSensorState1 != lastEncodeSensorState1) {
         pulsesCounted1++;
-        lastEncodeSensorState1=currentEncodeSensorState1;
+        lastEncodeSensorState1 = currentEncodeSensorState1;
       }
-      if (currentEncodeSensorState2!=lastEncodeSensorState2){
+      if (currentEncodeSensorState2 != lastEncodeSensorState2) {
         pulsesCounted2++;
-        lastEncodeSensorState2=currentEncodeSensorState2;
+        lastEncodeSensorState2 = currentEncodeSensorState2;
       }
     }
     diffBetweenPulses = pulsesCounted1 - pulsesCounted2;
@@ -434,16 +438,16 @@ bool moveNrSteps(int totalSteps, int direction){
          return false;// error status
     }
 
-    remainingSteps = totalSteps - i;
-    delayIndex = i/indexSteps;
-    remainingDelayIndex = remainingSteps/indexSteps;
-    if (i==0 || i%indexSteps==0){
-      if (i<halfway && delayIndex<delayArraySize) delay = delayList[delayIndex];
-      if (i>halfway && remainingDelayIndex<delayArraySize) delay = delayList[remainingDelayIndex];
+    if (i % indexSteps == 0) {
+      remainingSteps = totalSteps - i;
+      delayIndex = i / indexSteps;
+      remainingDelayIndex = remainingSteps / indexSteps;
+      if (i < halfway && delayIndex < delayArraySize) delay = delayList[delayIndex];
+      if (i > halfway && remainingDelayIndex < delayArraySize) delay = delayList[remainingDelayIndex];
       float tmp = delay;
       tmp = tmp * vertraginsfactor;
       tmp = tmp / 100;
-      calculatedDelay = (int) tmp;
+      calculatedDelay = (int)tmp;
     }
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     currentPos+=direction;
@@ -459,6 +463,7 @@ bool moveNrSteps(int totalSteps, int direction){
     if (calculatedDelay < minCalcDelay) minCalcDelay = (int)calculatedDelay;
 
     long remaining = (calculatedDelay * 2) - elapsed;
+    if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
     if (remaining > 0) {
       delayMicroseconds(remaining);
     }
@@ -500,6 +505,7 @@ void home(int homeSpeed) {
     pulse(p1, p2, homeSpeed);
     long elapsed = micros() - stepStart;
     long remaining = (homeSpeed * 2) - elapsed;
+    if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
     if (remaining > 0) {
       delayMicroseconds(remaining);
     }
@@ -515,6 +521,7 @@ void home(int homeSpeed) {
     pulse(p1, p2, homeSpeed);
     long elapsed = micros() - stepStart;
     long remaining = (homeSpeed * 2) - elapsed;
+    if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
     if (remaining > 0) {
       delayMicroseconds(remaining);
     }
@@ -545,20 +552,25 @@ void sleeping() {
   double delay = 0;
   double calculatedDelay = 0;
   int i = 0;
-  while (!digitalRead(arm1SensorPin)==0){
+  bool sleepingFinished = false;
+  while (!sleepingFinished) {
     long stepStart = micros();
-    delayIndex = i/indexSteps;
-    if (i==0 || i%indexSteps==0){
-      if (delayIndex<delayArraySize) delay = delayList[delayIndex];
+    if (i % 10 == 0) {
+      sleepingFinished = digitalRead(arm1SensorPin) == 0;
+    }
+    if (i % indexSteps == 0) {
+      delayIndex = i / indexSteps;
+      if (delayIndex < delayArraySize) delay = delayList[delayIndex];
       float tmp = delay;
       tmp = tmp * vertraginsfactor;
       tmp = tmp / 100;
-      calculatedDelay = (int) tmp;
+      calculatedDelay = (int)tmp;
     }
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     i++;
     long elapsed = micros() - stepStart;
     long remaining = (calculatedDelay * 2) - elapsed;
+    if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
     if (remaining > 0) {
       delayMicroseconds(remaining);
     }
