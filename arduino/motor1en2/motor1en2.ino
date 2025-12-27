@@ -44,7 +44,7 @@ send: state + pos
 #define SLEEPING 6
 #define FATAL_ERROR 7
 
-#define MIN_STEP_TIME 30
+#define MIN_STEP_TIME 40
 
 #define HOME_SPEED 120
 #define HOME_SPEED_SLOW 240 //500
@@ -393,30 +393,32 @@ void moveDown(int reqPos){
 bool moveNrSteps(int totalSteps, int direction){
   long halfway = totalSteps/2;
   int delayIndex = 0;
-  int remainingDelayIndex = 0;
+  int remainingDelayIndex = totalSteps / indexSteps;
   int remainingSteps;
   int pulsesCounted1 = 0;
   int pulsesCounted2 = 0;
   int diffBetweenPulses = 0;
   bool lastEncodeSensorState1 = false;
   bool lastEncodeSensorState2 = false;
-  double delay = 0;
-  double calculatedDelay = 0;
+  int delay = 0;
+  int calculatedDelay = 0;
 
   long minOverhead = 1000000;
   long maxOverhead = 0;
   long totalOverhead = 0;
   int minCalcDelay = 10000;
 
+  int checkCounter = 0;
+  int indexCounter = 0;
+
   long moveStart = micros();
   for (int i = 0; i < totalSteps; i++) {
     long stepStart = micros();
-    if (i % 30 == 0) {
+    
+    if (checkCounter == 0) {
       checkError();
       if (error) return false;
-    }
 
-    if (i % 30 == 0) {
       bool currentEncodeSensorState1 = digitalRead(encoderPin1);
       bool currentEncodeSensorState2 = digitalRead(encoderPin2);
       if (currentEncodeSensorState1 != lastEncodeSensorState1) {
@@ -427,35 +429,43 @@ bool moveNrSteps(int totalSteps, int direction){
         pulsesCounted2++;
         lastEncodeSensorState2 = currentEncodeSensorState2;
       }
+      
+      diffBetweenPulses = pulsesCounted1 - pulsesCounted2;
+      if (diffBetweenPulses<-3 || diffBetweenPulses>3) {
+           Serial.print("ERROR, too much difference: ");
+           Serial.print(pulsesCounted1);
+           Serial.print("/");
+           Serial.println(pulsesCounted2);
+           return false;// error status
+      }
+      checkCounter = 30;
     }
-    diffBetweenPulses = pulsesCounted1 - pulsesCounted2;
+    checkCounter--;
 
-    if (diffBetweenPulses<-3 || diffBetweenPulses>3) {
-         Serial.print("ERROR, too much difference: ");
-         Serial.print(pulsesCounted1);
-         Serial.print("/");
-         Serial.println(pulsesCounted2);
-         return false;// error status
-    }
-
-    if (i % indexSteps == 0) {
+    if (indexCounter == 0) {
       remainingSteps = totalSteps - i;
-      delayIndex = i / indexSteps;
-      remainingDelayIndex = remainingSteps / indexSteps;
-      if (i < halfway && delayIndex < delayArraySize) delay = delayList[delayIndex];
-      if (i > halfway && remainingDelayIndex < delayArraySize) delay = delayList[remainingDelayIndex];
-      float tmp = delay;
-      tmp = tmp * vertraginsfactor;
-      tmp = tmp / 100;
-      calculatedDelay = (int)tmp;
+      if (i < halfway) {
+        if (delayIndex < delayArraySize) delay = delayList[delayIndex];
+        delayIndex++;
+      } else {
+        // Bereken remainingDelayIndex zonder deling
+        // Omdat we om de indexSteps stappen hier komen, kunnen we aftellen
+        if (remainingDelayIndex < delayArraySize) delay = delayList[remainingDelayIndex];
+        remainingDelayIndex--;
+      }
+      
+      // Integer berekening in plaats van float
+      long tmp = (long)delay * vertraginsfactor;
+      calculatedDelay = (int)(tmp / 100);
+      indexCounter = indexSteps;
     }
-    pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
+    indexCounter--;
+
+    pulse(stepPin, stepPin2, calculatedDelay); 
     currentPos+=direction;
 
     long elapsed = micros() - stepStart;
     
-    // De overhead is de tijd die we nodig hadden voor berekeningen + de pulse functie 
-    // minus de tijd die de pulse functie zelf wachtte (calculatedDelay).
     long overhead = elapsed - (long)calculatedDelay;
     if (overhead < minOverhead) minOverhead = overhead;
     if (overhead > maxOverhead) maxOverhead = overhead;
@@ -549,8 +559,9 @@ void sleeping() {
   digitalWrite(dirPin, LOW);
 
   int delayIndex = 0;
-  double delay = 0;
-  double calculatedDelay = 0;
+  int indexCounter = 0;
+  int delay = 0;
+  int calculatedDelay = 0;
   int i = 0;
   bool sleepingFinished = false;
   while (!sleepingFinished) {
@@ -558,14 +569,14 @@ void sleeping() {
     if (i % 10 == 0) {
       sleepingFinished = digitalRead(arm1SensorPin) == 0;
     }
-    if (i % indexSteps == 0) {
-      delayIndex = i / indexSteps;
+    if (indexCounter == 0) {
       if (delayIndex < delayArraySize) delay = delayList[delayIndex];
-      float tmp = delay;
-      tmp = tmp * vertraginsfactor;
-      tmp = tmp / 100;
-      calculatedDelay = (int)tmp;
+      delayIndex++;
+      long tmp = (long)delay * vertraginsfactor;
+      calculatedDelay = (int)(tmp / 100);
+      indexCounter = indexSteps;
     }
+    indexCounter--;
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     i++;
     long elapsed = micros() - stepStart;
