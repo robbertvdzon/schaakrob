@@ -18,7 +18,7 @@ object BerekenVersnelling {
     const val START_SNELHEID = 1000.0 // pulsen per sec
     const val VERSNELLINGSTIJD = 400000.0 // in microsec
     const val INDEX_STEPS = 20
-    private const val CALCULATION_PROCESSOR_TIME = 30
+    private const val CALCULATION_PROCESSOR_TIME = 40
 
     @JvmStatic
     fun main(args: Array<String>) {
