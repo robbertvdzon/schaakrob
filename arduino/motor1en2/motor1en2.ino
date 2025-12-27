@@ -401,6 +401,12 @@ bool moveNrSteps(int totalSteps, int direction){
   double delay = 0;
   double calculatedDelay = 0;
 
+  long minOverhead = 1000000;
+  long maxOverhead = 0;
+  long totalOverhead = 0;
+  int minCalcDelay = 10000;
+
+  long moveStart = micros();
   for (int i = 0; i < totalSteps; i++) {
     long stepStart = micros();
     checkError();
@@ -443,16 +449,33 @@ bool moveNrSteps(int totalSteps, int direction){
     currentPos+=direction;
 
     long elapsed = micros() - stepStart;
+    
+    // De overhead is de tijd die we nodig hadden voor berekeningen + de pulse functie 
+    // minus de tijd die de pulse functie zelf wachtte (calculatedDelay).
+    long overhead = elapsed - (long)calculatedDelay;
+    if (overhead < minOverhead) minOverhead = overhead;
+    if (overhead > maxOverhead) maxOverhead = overhead;
+    totalOverhead += overhead;
+    if (calculatedDelay < minCalcDelay) minCalcDelay = (int)calculatedDelay;
+
     long remaining = (calculatedDelay * 2) - elapsed;
     if (remaining > 0) {
       delayMicroseconds(remaining);
     }
   }
   Serial.println("Move finished");
+  long totalTime = micros() - moveStart;
+  Serial.print("Total pulses: "); Serial.println(totalSteps);
+  Serial.print("Total time (ms): "); Serial.println(totalTime / 1000);
   Serial.print("Count1:");
   Serial.println(pulsesCounted1);
   Serial.print("Count2:");
   Serial.println(pulsesCounted2);
+  Serial.print("Min overhead: "); Serial.println(minOverhead);
+  Serial.print("Max overhead: "); Serial.println(maxOverhead);
+  Serial.print("Avg overhead: "); Serial.println(totalOverhead / totalSteps);
+  Serial.print("Min delay: "); Serial.println(minCalcDelay);
+  
   analogWrite(errorPin, 0);
   return true;
 }
