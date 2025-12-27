@@ -18,7 +18,7 @@ object BerekenVersnelling {
     const val START_SNELHEID = 1000.0 // pulsen per sec
     const val VERSNELLINGSTIJD = 400000.0 // in microsec
     const val INDEX_STEPS = 20
-    private const val CALCULATION_PROCESSOR_TIME = 40
+    private const val CALCULATION_PROCESSOR_TIME = 45
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -77,12 +77,7 @@ object BerekenVersnelling {
             var tmpDelay = delay.toDouble()
             tmpDelay *= vertraging / 100
             val tmpDelayInt = tmpDelay.toInt()
-            val totalStepTime = tmpDelayInt * 2
-            if (totalStepTime < calculationProcessorTime) {
-                time += calculationProcessorTime.toLong()
-            } else {
-                time += totalStepTime.toLong()
-            }
+            time += tmpDelayInt * 2 + calculationProcessorTime.toLong()
         }
         return (time / 1000).toDouble()
     }
