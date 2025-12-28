@@ -421,7 +421,6 @@ Vue.component("play", {
       fetch(`/api/game/computermove`)
           .then(res => res.text())
           .then(text => this.updateBoard(JSON.parse(text)))
-          .then(text => this.home())
           .catch(() => alert("Error"));
     },
     computerSingleMove: function (event) {

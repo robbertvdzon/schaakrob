@@ -98,7 +98,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 while (!isGameDone() && currentLoopThread != null && autoPlayStepCount < MAX_AUTO_RUN_MOVES) {
                     computermove()
                     autoPlayStepCount++
-                    if (autoPlayStepCount%30==0){
+                    if (autoPlayStepCount % 30 == 0) {
                         robotAansturing.home()
                     }
                 }
@@ -111,7 +111,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 }
                 if (GlobalState.errorDetected && GlobalState.failOnResetDetected) {
                     // stop the autoplay thread when an error is detected
-                    currentLoopThread=null
+                    currentLoopThread = null
                 }
 
                 if (currentLoopThread != null) {
@@ -180,6 +180,15 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
     fun moveExtraWhenCastle(move: Move) {
+        val extraMove = getCastleExtraMove(move)
+        if (extraMove != null) {
+            robotMove(extraMove.first, extraMove.second, true)
+        }
+    }
+
+    fun isCastleMove(move: Move) = getCastleExtraMove(move)!=null
+
+    fun getCastleExtraMove(move: Move): Pair<String, String>? {
         val side = board.getPiece(move.from).pieceSide
         val isKingSideCastle = board.context.isKingSideCastle(move)
         val isQueenSideCastle = board.context.isQueenSideCastle(move)
@@ -191,20 +200,22 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             side == Side.BLACK && isQueenSideCastle -> Pair("A8", "D8")
             else -> null
         }
-        if (extraMove != null) {
-            println("EXTRA MOVE:" + extraMove)
-            robotMove(extraMove.first, extraMove.second)
-        }
+        return extraMove
 
     }
 
     fun computermove(): ChessBoard {
-        println("Coputer move")
         if (board.isDraw || board.isMated) return toBoard()
         val move = ComputerPlayer.getMove(board.getFen())
 
-        robotMove(move.from.value(), move.to.value())
-        moveExtraWhenCastle(move)
+        val isCatleMove = isCastleMove(move)
+        if (isCatleMove){
+            robotMove(move.from.value(), move.to.value(), false)
+            moveExtraWhenCastle(move)
+        }
+        else{
+            robotMove(move.from.value(), move.to.value(), true)
+        }
 
         board.doMove(move)
         saveBoard()
@@ -246,7 +257,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
 
         if (move != null) {
             val (van, naar) = move
-            ownmove(van, naar)
+            ownmove(van, naar, false)
             return false
         }
         return true
@@ -415,14 +426,14 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
 
-    fun ownmove(van: String, naar: String): ChessBoard {
+    fun ownmove(van: String, naar: String, moveToCornerAfterwards: Boolean = true): ChessBoard {
 //        println("--------------------------------------- MOVE: " + van + " ->" + naar)
 
         if (positieBuitenBord(van)) {
             if (getPiece(naar) != Piece.NONE) throw RuntimeException("Zet van buitenbord kan alleen naar lege plek")
             val naarValue = Square.fromValue(naar)
             val pieceToMove: Piece = getPiece(van)
-            robotMove(van, naar)
+            robotMove(van, naar, moveToCornerAfterwards)
             println("board.setPiece: " + pieceToMove + " ->" + naarValue)
             board.setPiece(pieceToMove, naarValue)
             saveBoard()
@@ -430,15 +441,22 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
         } else {
             if (positieBuitenBord(naar)) {
                 val fromValue: Square = Square.fromValue(van)
-                robotMove(van, naar)
+                robotMove(van, naar, moveToCornerAfterwards)
                 println("board.setPiece: " + fromValue + " ->" + Piece.NONE)
                 board.unsetPiece(board.getPiece(fromValue), fromValue)
                 saveBoard()
             } else {
                 val fromValue: Square = Square.fromValue(van)
                 val naarValue = Square.fromValue(naar)
-                robotMove(van, naar)
-                moveExtraWhenCastle(Move(fromValue, naarValue))
+
+                val isCatleMove = isCastleMove(Move(fromValue, naarValue))
+                if (isCatleMove){
+                    robotMove(van, naar, false)
+                    moveExtraWhenCastle(Move(fromValue, naarValue))
+                }
+                else{
+                    robotMove(van, naar, moveToCornerAfterwards)
+                }
                 if (!board.doMove(Move(fromValue, naarValue))) {
                     // not valid
                     // do it anyway
@@ -457,7 +475,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
     }
 
 
-    private fun robotMove(van: String, to: String) {
+    private fun robotMove(van: String, to: String, moveToCornerAfterwards: Boolean) {
         println("robot from:$van to:$to")
 
         val toPiece = if (positieBuitenBord(to)) Piece.NONE else board.getPiece(Square.fromValue(to))
@@ -479,7 +497,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.movetoVlak(storeSquare.pos, 1)
                 robotAansturing.release2()
 
-                robotAansturing.movetoRight()
+                if (moveToCornerAfterwards) robotAansturing.movetoRight()
 
                 currentPos = storeSquare.pos
             } else {
@@ -497,7 +515,7 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.movetoVlak(storeSquare.pos, 0)
                 robotAansturing.release1()
 
-                robotAansturing.movetoRight()
+                if (moveToCornerAfterwards) robotAansturing.movetoRight()
 
                 currentPos = storeSquare.pos
             }
@@ -512,38 +530,134 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
             }
 
             val piece = when (van) {
-                "A21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "B21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "C21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "D21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "E21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "F21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "G21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "H21" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "A20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "B20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "C20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "D20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "E20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "F20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "G20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "H20" -> Piece.valueOf(blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "A10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "B10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "C10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "D10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "E10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "F10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "G10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "H10" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "A11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "B11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "C11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "D11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "E11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "F11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "G11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
-                "H11" -> Piece.valueOf(whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name)
+                "A21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "B21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "C21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "D21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "E21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "F21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "G21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "H21" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "A20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "B20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "C20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "D20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "E20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "F20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "G20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "H20" -> Piece.valueOf(
+                    blackStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "A10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "B10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "C10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "D10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "E10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "F10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "G10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "H10" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "A11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "B11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "C11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "D11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "E11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "F11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "G11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
+                "H11" -> Piece.valueOf(
+                    whiteStoreSquares.filter { it.pos == van }.firstOrNull()?.piece ?: Piece.NONE.name
+                )
+
                 else -> board.getPiece(Square.fromValue(van))// enum fout
             }
             if (piece.pieceSide == Side.BLACK) {// bovenste magneet
@@ -551,14 +665,14 @@ class Schaakspel(private val robotAansturing: RobotAansturing) {
                 robotAansturing.clamp2()
                 robotAansturing.movetoVlak(to, 1)
                 robotAansturing.release2()
-                robotAansturing.movetoRight()
+                if (moveToCornerAfterwards) robotAansturing.movetoRight()
                 currentPos = to
             } else {
                 robotAansturing.movetoVlak(van, 0)
                 robotAansturing.clamp1()
                 robotAansturing.movetoVlak(to, 0)
                 robotAansturing.release1()
-                robotAansturing.movetoRight()
+                if (moveToCornerAfterwards) robotAansturing.movetoRight()
                 currentPos = to
             }
             // als hij van buiten bord komt, dan vlak leegmaken
