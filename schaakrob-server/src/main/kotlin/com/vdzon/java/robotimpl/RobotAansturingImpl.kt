@@ -229,8 +229,8 @@ class RobotAansturingImpl() : RobotAansturing {
     }
 
     override fun movetoRight() {
-        var newX = if (lastPos1<(19000/2)) 10 else 19000
-        var newY = if (lastPos2<(14000/2)) 10 else 14000
+        var newX = if (lastPos1<(19000/2)) 100 else 19000
+        var newY = if (lastPos2<(14000/2)) 100 else 14000
         moveto(newX,newY)
     }
 
