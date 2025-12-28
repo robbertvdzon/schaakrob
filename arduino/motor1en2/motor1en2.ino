@@ -44,11 +44,13 @@ send: state + pos
 #define SLEEPING 6
 #define FATAL_ERROR 7
 
+// #define MIN_STEP_TIME 30
+
 #define HOME_SPEED 120
 #define HOME_SPEED_SLOW 240 //500
 
 #define dirPin 3
-#define stepPin 4 
+#define stepPin 4
 #define stepPin2 5
 #define stepsPerRevolution 2000
 #define arm1SensorPin 6
@@ -64,7 +66,7 @@ send: state + pos
 
 char command;
 int requestedPos;
-int vertraginsfactor; 
+int vertraginsfactor;
 
 char number[50];
 int state = HOMING_NEEDED;
@@ -401,17 +403,29 @@ bool moveNrSteps(int totalSteps, int direction){
   double delay = 0;
   double calculatedDelay = 0;
 
+  long minOverhead = 1000000;
+  long maxOverhead = 0;
+  long totalOverhead = 0;
+  int minCalcDelay = 10000;
+
+  long moveStart = micros();
   for (int i = 0; i < totalSteps; i++) {
-    bool currentEncodeSensorState1 = digitalRead(encoderPin1); // altijd sensor lezen (om de motor soepeler te laten lopen)
-    bool currentEncodeSensorState2 = digitalRead(encoderPin2); // altijd sensor lezen (om de motor soepeler te laten lopen)
-    if (i%30==0){
-      if (currentEncodeSensorState1!=lastEncodeSensorState1){
+    long stepStart = micros();
+    if (i % 30 == 0) {
+      checkError();
+      if (error) return false;
+    }
+
+    if (i % 30 == 0) {
+      bool currentEncodeSensorState1 = digitalRead(encoderPin1);
+      bool currentEncodeSensorState2 = digitalRead(encoderPin2);
+      if (currentEncodeSensorState1 != lastEncodeSensorState1) {
         pulsesCounted1++;
-        lastEncodeSensorState1=currentEncodeSensorState1;
+        lastEncodeSensorState1 = currentEncodeSensorState1;
       }
-      if (currentEncodeSensorState2!=lastEncodeSensorState2){
+      if (currentEncodeSensorState2 != lastEncodeSensorState2) {
         pulsesCounted2++;
-        lastEncodeSensorState2=currentEncodeSensorState2;
+        lastEncodeSensorState2 = currentEncodeSensorState2;
       }
     }
     diffBetweenPulses = pulsesCounted1 - pulsesCounted2;
@@ -424,25 +438,49 @@ bool moveNrSteps(int totalSteps, int direction){
          return false;// error status
     }
 
-    remainingSteps = totalSteps - i;
-    delayIndex = i/indexSteps;
-    remainingDelayIndex = remainingSteps/indexSteps;
-    if (i==0 || i%indexSteps==0){
-      if (i<halfway && delayIndex<delayArraySize) delay = delayList[delayIndex];
-      if (i>halfway && remainingDelayIndex<delayArraySize) delay = delayList[remainingDelayIndex];
+    if (i % indexSteps == 0) {
+      remainingSteps = totalSteps - i;
+      delayIndex = i / indexSteps;
+      remainingDelayIndex = remainingSteps / indexSteps;
+      if (i < halfway && delayIndex < delayArraySize) delay = delayList[delayIndex];
+      if (i > halfway && remainingDelayIndex < delayArraySize) delay = delayList[remainingDelayIndex];
       float tmp = delay;
       tmp = tmp * vertraginsfactor;
       tmp = tmp / 100;
-      calculatedDelay = (int) tmp;
+      calculatedDelay = (int)tmp;
     }
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     currentPos+=direction;
+
+    long elapsed = micros() - stepStart;
+
+    // De overhead is de tijd die we nodig hadden voor berekeningen + de pulse functie
+    // minus de tijd die de pulse functie zelf wachtte (calculatedDelay).
+//     long overhead = elapsed - (long)calculatedDelay;
+//     if (overhead < minOverhead) minOverhead = overhead;
+//     if (overhead > maxOverhead) maxOverhead = overhead;
+    totalOverhead += overhead;
+//     if (calculatedDelay < minCalcDelay) minCalcDelay = (int)calculatedDelay;
+
+    long remaining = (calculatedDelay * 2) - elapsed;
+//     if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
   Serial.println("Move finished");
+  long totalTime = micros() - moveStart;
+  Serial.print("Total pulses: "); Serial.println(totalSteps);
+  Serial.print("Total time (ms): "); Serial.println(totalTime / 1000);
   Serial.print("Count1:");
   Serial.println(pulsesCounted1);
   Serial.print("Count2:");
   Serial.println(pulsesCounted2);
+  Serial.print("Min overhead: "); Serial.println(minOverhead);
+  Serial.print("Max overhead: "); Serial.println(maxOverhead);
+  Serial.print("Avg overhead: "); Serial.println(totalOverhead / totalSteps);
+  Serial.print("Min delay: "); Serial.println(minCalcDelay);
+
   analogWrite(errorPin, 0);
   return true;
 }
@@ -461,19 +499,32 @@ void home(int homeSpeed) {
   int p1 = -1;
   int p2 = -1;
   while (digitalRead(arm1SensorPin)==0 || digitalRead(arm2SensorPin)==0){
+    long stepStart = micros();
     if (digitalRead(arm1SensorPin)==0) p1 = stepPin; else p1 = -1;
     if (digitalRead(arm2SensorPin)==0) p2 = stepPin2; else p2 = -1;
     pulse(p1, p2, homeSpeed);
-
+    long elapsed = micros() - stepStart;
+    long remaining = (homeSpeed * 2) - elapsed;
+//     if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
 
 // omlaag tot beide schakelaars uit zijn
   Serial.println("\t move slow down until high");
   digitalWrite(dirPin, LOW);
   while ((!digitalRead(arm1SensorPin)==0) || (!digitalRead(arm2SensorPin)==0)){
+    long stepStart = micros();
     if (!digitalRead(arm1SensorPin)==0) p1 = stepPin; else p1 = -1;
     if (!digitalRead(arm2SensorPin)==0) p2 = stepPin2; else p2 = -1;
     pulse(p1, p2, homeSpeed);
+    long elapsed = micros() - stepStart;
+    long remaining = (homeSpeed * 2) - elapsed;
+//     if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
 
   Serial.println("\t homing finished");
@@ -501,29 +552,40 @@ void sleeping() {
   double delay = 0;
   double calculatedDelay = 0;
   int i = 0;
-  while (!digitalRead(arm1SensorPin)==0){
-    delayIndex = i/indexSteps;
-    if (i==0 || i%indexSteps==0){
-      if (delayIndex<delayArraySize) delay = delayList[delayIndex];
+  bool sleepingFinished = false;
+  while (!sleepingFinished) {
+    long stepStart = micros();
+    if (i % 10 == 0) {
+      sleepingFinished = digitalRead(arm1SensorPin) == 0;
+    }
+    if (i % indexSteps == 0) {
+      delayIndex = i / indexSteps;
+      if (delayIndex < delayArraySize) delay = delayList[delayIndex];
       float tmp = delay;
       tmp = tmp * vertraginsfactor;
       tmp = tmp / 100;
-      calculatedDelay = (int) tmp;
+      calculatedDelay = (int)tmp;
     }
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     i++;
+    long elapsed = micros() - stepStart;
+    long remaining = (calculatedDelay * 2) - elapsed;
+//     if (remaining < MIN_STEP_TIME - elapsed) remaining = MIN_STEP_TIME - elapsed;
+    if (remaining > 0) {
+      delayMicroseconds(remaining);
+    }
   }
 
   currentPos = 00;
   digitalWrite(enableMotorPin, HIGH);
   state = SLEEPING;
-  command = '-';  
+  command = '-';
 }
 
 void bootsound(){
     beepLong();
     beepLong();
-    command = '-';  
+    command = '-';
 }
 
 void bootSeq(){
@@ -550,13 +612,10 @@ void beep(){
 
 
 void pulse(int pin1, int pin2, long delaytime){
-    checkError();
-    if (!error){
-      if (pin1>0) digitalWrite(pin1, HIGH);
-      if (pin2>0) digitalWrite(pin2, HIGH);
-      delayMicroseconds(delaytime);
-      if (pin1>0) digitalWrite(pin1, LOW);
-      if (pin2>0) digitalWrite(pin2, LOW);
-      delayMicroseconds(delaytime);
-    }
+    if (pin1>0) digitalWrite(pin1, LOW);
+    if (pin2>0) digitalWrite(pin2, LOW);
+//     delayMicroseconds(delaytime);
+    delayMicroseconds(3); // een puls van 2 micro seconde is genoeg voor de stappenmotor driver
+    if (pin1>0) digitalWrite(pin1, HIGH);
+    if (pin2>0) digitalWrite(pin2, HIGH);
 }
