@@ -459,7 +459,7 @@ bool moveNrSteps(int totalSteps, int direction){
 //     long overhead = elapsed - (long)calculatedDelay;
 //     if (overhead < minOverhead) minOverhead = overhead;
 //     if (overhead > maxOverhead) maxOverhead = overhead;
-    totalOverhead += overhead;
+//    totalOverhead += overhead;
 //     if (calculatedDelay < minCalcDelay) minCalcDelay = (int)calculatedDelay;
 
     long remaining = (calculatedDelay * 2) - elapsed;
