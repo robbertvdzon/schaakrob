@@ -14,10 +14,10 @@ object BerekenVersnelling {
   15.000 2201
    */
     private val log = LoggerFactory.getLogger(BerekenVersnelling::class.java)
-    const val MAX_SNELHEID = 1000000 / 40 // pulsen per sec
-    const val START_SNELHEID = 1000.0 // pulsen per sec
-    const val VERSNELLINGSTIJD = 400000.0 // in microsec
-    const val INDEX_STEPS = 20
+    const val MAX_SNELHEID = 25000.0 // pulsen per sec (25000.0)
+    const val START_SNELHEID = 50.0 // pulsen per sec
+    const val VERSNELLINGSTIJD = 1500*1000.0 // in microsec
+    const val INDEX_STEPS = 100
     private const val CALCULATION_PROCESSOR_TIME = 80
 
     @JvmStatic

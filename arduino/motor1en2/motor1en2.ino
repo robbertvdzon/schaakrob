@@ -46,8 +46,8 @@ send: state + pos
 
 // #define MIN_STEP_TIME 30
 
-#define HOME_SPEED 120
-#define HOME_SPEED_SLOW 240 //500
+#define HOME_SPEED 250
+#define HOME_SPEED_SLOW 500 //500
 
 #define dirPin 3
 #define stepPin 4
@@ -82,9 +82,9 @@ bool error = 0;
 int SLAVE_ADDRESS = 6;
 
 // onderstaande 3 consts in gegenereerd in java
-static const int delayList[] = {549,417,350,307,277,255,237,222,210,200,191,183,176,170,164,159,154,150,146,142,139,136,133,130,128,125,123,121,119,117,115,113,111,110,108,106,105,104,102,101,100,99,97,96,95,94,93,92,91,90,90,89,88,87,86,85,85,84,83,83,82,81,81,80,79,79,78,78,77,76,76,75,75,74,74,73,73,72,72,71,71,71,70,70,69,69,69,68,68,67,67,67,66,66,66,65,65,65,64,64,64,63,63,63,62,62,62,61,61,61,61,60,60,60,60,59,59,59,59,58,58,58,58,57,57,57,57,56,56,56,56,56,55,55,55,55,55,54,54,54,54,54,53,53,53,53,53,52,52,52,52,52,52,51,51,51,51,51,51,50,50,50,50,50,50,50,49,49,49,49,49,49,49,48,48,48,48,48,48,48,47,47,47,47,47,47,47,47,46,46,46,46,46,46,46,46,45,45,45,45,45,45,45,45,45,44,44,44,44,44,44,44,44,44,43,43,43,43,43,43,43,43,43,43,42,42,42,42,42,42,42,42,42,42,42,41,41,41,41,41,41,41,41,41,41,41,41,40,40,40,40,40,40,40,40,40,40,40,40,39};
-static const int delayArraySize = 260;
-static const int indexSteps = 20;
+static const int delayList[] = {539,384,314,272,244,223,206,193,182,173,165,158,151,146,141,136,132,129,125,122,119,116,114,111,109,107,105,103,101,100,98,96,95,93,92,91,90,88,87,86,85,84,83,82,81,80,79,79,78,77,76,76,75,74,73,73,72,71,71,70,70,69,69,68,67,67,66,66,65,65,65,64,64,63,63,62,62,62,61,61,60,60,60,59,59,59,58,58,58,57,57,57,56,56,56,55,55,55,55,54,54,54,54,53,53,53,52,52,52,52,52,51,51,51,51,50,50,50,50,50,49,49,49,49,49,48,48,48,48,48,47,47,47,47,47,47,46,46,46,46,46,46,45,45,45,45,45,45,44,44,44,44,44,44,44,43,43,43,43,43,43,43,42,42,42,42,42,42,42,42,41,41,41,41,41,41,41,41,40,40,40,40,40,40,40,40,40};
+static const int delayArraySize = 187;
+static const int indexSteps = 100;
 void setup() {
 
   pinMode(stepPin, OUTPUT);
@@ -550,7 +550,7 @@ void sleeping() {
 
   int delayIndex = 0;
   double delay = 0;
-  double calculatedDelay = 0;
+  double calculatedDelay = HOME_SPEED_SLOW;
   int i = 0;
   bool sleepingFinished = false;
   while (!sleepingFinished) {
@@ -558,14 +558,7 @@ void sleeping() {
     if (i % 10 == 0) {
       sleepingFinished = digitalRead(arm1SensorPin) == 0;
     }
-    if (i % indexSteps == 0) {
-      delayIndex = i / indexSteps;
-      if (delayIndex < delayArraySize) delay = delayList[delayIndex];
-      float tmp = delay;
-      tmp = tmp * vertraginsfactor;
-      tmp = tmp / 100;
-      calculatedDelay = (int)tmp;
-    }
+
     pulse(stepPin, stepPin2, calculatedDelay); // verreken vertraging!
     i++;
     long elapsed = micros() - stepStart;

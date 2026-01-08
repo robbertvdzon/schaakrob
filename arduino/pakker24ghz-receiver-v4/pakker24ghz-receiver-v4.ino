@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebSocketsServer.h>
-#define buzzerpin 7//5
-#define switchpin 6//4
-#define pull1 4//7
-#define pull2 2
-#define magnet1 5//6
-#define magnet2 3
+#define buzzerpin 2
+#define switchpin 6
+#define pull1 3//4
+#define pull2 7
+#define magnet1 5//3
+#define magnet2 4
 
 
 const byte address[6] = "00002";

@@ -1,0 +1,18 @@
+** Drc report for oppakkerV5.kicad_pcb **
+** Created on 2026-01-04T16:50:52+0100 **
+
+** Found 2 DRC violations **
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; warning
+    @(27.0000 mm, 21.0000 mm): Rectangle on Edge.Cuts
+    @(26.5900 mm, 42.6700 mm): Reference field of SW1
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; warning
+    @(27.0000 mm, 21.0000 mm): Rectangle on Edge.Cuts
+    @(90.0000 mm, 43.8000 mm): Circle of BZ1 on F.Silkscreen
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **
